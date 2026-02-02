@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:my="http://www.comsquare.co.kr/example" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:: 납품등록 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<NAPDATE/>
+					<formData>
+						<search>
+							<FDATE/>
+							<LDATE/>
+							<ORDKEY/>
+							<SABUN/>
+							<ITEMNM/>
+							<ORDERGB/>
+						</search>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<ORHKEY/>
+								<ORDKEY/>
+								<SAORDKEY/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<ORDERNM/>
+								<ORQTY/>
+								<MQTY/>
+								<STDQTY/>
+								<NAPQTY/>
+								<SUMQTY/>
+								<ETCYN/>
+								<PRDDATE/>
+								<NAPPLANDATE/>
+								<ORDATE/>
+								<NAPDATE/>
+								<CUSTCD/>
+								<CUSTNM/>
+								<REMARK/>
+								<USEQTY/>
+							</item>
+						</grid1>
+					</gridData>
+					<initGridData/>
+					<ComboData>
+						<Combo1>
+							<item>
+								<Label/>
+								<Value/>
+							</item>
+						</Combo1>
+						<Combo2>
+							<item>
+								<Label>ALL</Label>
+								<Value/>
+							</item>
+						</Combo2>
+					</ComboData>
+					<addord>0</addord>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" src="excel.js"/>
+		<script type="javascript">
+			<![CDATA[
+						
+			var sCustCD = "";
+			var isADDYN = "N";
+			function mateInit() { // 초기 로딩
+						
+				//머지
+				datagrid1.mergeCells = "bycol";
+				datagrid1.mergeCol(1) = true;
+				for(var i=1;i<datagrid1.cols;i++)
+				{
+					if (i != 1)
+					{
+						datagrid1.mergeCol(i) = false;
+					}
+				}
+				datagrid1.merge();
+					
+				//거래처
+				sendBuffInit();
+				
+				sendBuffAdd("USERID", getUserID());
+				submit("sp_SCM_OrderManager", "Get_Cust");
+				
+				sCustCD = model.getValue("/root/msgBuff/data/item/CUSTCD");
+								
+				input6.value = getDate("yyyymmdd");
+				input2.value = getDate("yyyymmdd");
+				input1.value = prevMonth(getDate("yyyymmdd"));
+								
+				//발주구분
+				sendBuffInit();
+				
+				sendBuffAdd("CODHCD", "M002");
+				submit("sp_ComCode", "GetCodeList");
+				
+				model.copyNode("/root/ComboData/Combo1", "/root/msgBuff/data");
+				model.duplicate("/root/ComboData/Combo1", "/root/ComboData/Combo2/item");
+				combo2.refresh();	
+				
+				mateSearch();	
+			}
+						
+			function matetimer() {
+				
+				sendBuffInit();
+				
+				sendBuffAdd("FDATE", model.getValue("/root/formData/search/FDATE"));
+				sendBuffAdd("LDATE", model.getValue("/root/formData/search/LDATE"));
+				sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+				sendBuffAdd("ORDKEY", model.getValue("/root/formData/search/ORDKEY"));
+				sendBuffAdd("ORDERGB", model.getValue("/root/formData/search/ORDERGB"));
+				sendBuffAdd("USERID", getUserID());
+				submit("sp_SCM_OrderManager", "GetOrdList");
+												
+				var obj = instance1.selectNodes("/root/msgBuff/data/item");
+				var addord = parseInt(model.getValue("/root/addord"));
+				if (addord != 0 && isADDYN == "N" )
+				{
+					if (addord < obj.length)
+					{
+						isADDYN = "Y";
+						parent.window.javascript.TimeEnd();
+						var isSch = yesAlert("추가발주가 존재합니다. 조회하시겠습니까? ");
+						if (isSch == 0) return;
+						
+						mateSearch();
+					}					
+				}
+				else 
+				{
+					if (isADDYN == "Y")
+						parent.window.javascript.TimeStart();
+					isADDYN = "N";				
+				}
+			}
+			// 공통 함수 선언
+			function mateSearch() {  // 조회 버튼 눌렀을 때...
+
+				// Submit으로 보낼 값들을 셋팅한다.
+				sendBuffInit();
+				
+				sendBuffAdd("FDATE", model.getValue("/root/formData/search/FDATE"));
+				sendBuffAdd("LDATE", model.getValue("/root/formData/search/LDATE"));
+				sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+				sendBuffAdd("ORDKEY", model.getValue("/root/formData/search/ORDKEY"));
+				sendBuffAdd("ORDERGB", model.getValue("/root/formData/search/ORDERGB"));
+				sendBuffAdd("USERID", getUserID());
+				submit("sp_SCM_OrderManager", "GetOrdList");												
+				model.copyNode("/root/gridData/grid1", "/root/gridData/grid1");
+				datagrid1.refresh();
+				
+				model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+				model.copyNode("/root/initGridData","/root/gridData/grid1");
+				datagrid1.refresh();
+				datagrid1.clearStatus();
+				
+				var my_array = new Array();
+				for (var i=1; i<datagrid1.rows; i++)
+				{
+					var a = datagrid1.mergeArea(i, 1);
+					my_array = a.split(",");
+					
+					datagrid1.mergeByFree(my_array[0], 2, my_array[2], 2);		//품번
+					datagrid1.mergeByFree(my_array[0], 3, my_array[2], 3);		//품명
+					datagrid1.mergeByFree(my_array[0], 10, my_array[2], 10);	//표준수량
+					datagrid1.mergeByFree(my_array[0], 12, my_array[2], 12);	//합계수량
+					datagrid1.mergeByFree(my_array[0], 13, my_array[2], 13);	//자투리여부
+					datagrid1.mergeByFree(my_array[0], 14, my_array[2], 14);	//생산일자
+				}
+				model.setValue("/root/addord", datagrid1.rows-1);	
+				model.refresh();
+			}
+			function mateAdd() { // 추가 버튼 눌렀을 때...
+			}
+			function mateSave() { // 저장 버튼 눌렀을 때...
+				var gadate = model.getValue("/root/NAPDATE");	//납품일자
+
+				if (gadate.length != 8)
+				{
+					model.alert("납품일자를 확인하세요.");
+					model.setFocus("input6");
+					return;
+				}
+													
+				for (var i=1; i<=datagrid1.rows ; i++)
+				{					
+					var my_array = new Array();
+					var a = datagrid1.mergeArea(i, 1);
+					my_array = a.split(",");	
+					
+					var dNaptQty = 0;
+					var sJaturi = "N";
+					var dJaturi = 0;
+					var dBoxQty = 0;
+					var dEqty = 0;
+					
+					var sSabun = "";
+					var sOrhkey = "";
+					var sOrdkey = "";
+					var dNapQty = 0;
+					var sPrdDate = "";
+						
+					var sLotNo = "";
+					var sLotQty = "";
+					var sLotOrKey = "";
+					var sOrdKey1 = "";	
+					var dQty = 0;	
+					
+					var sGongCD = "";
+					var dChngut = 0;
+					var sWareGB = "";
+					var sGumGB = "";	
+					var sGumYN = "N";
+					var dHapQty = 0;	
+ 				        var sSuHapYN="N";
+					
+					var saordkey = "";
+					var napQty = "";
+					dNaptQty = parseInt(model.getValue("/root/gridData/grid1/item["+ i +"]/SUMQTY"));
+					if (dNaptQty > 0)
+					{
+						dStdQty = parseInt(model.getValue("/root/gridData/grid1/item["+ i + "]/STDQTY"));
+						sJaturi = model.getValue("/root/gridData/grid1/item["+ i +"]/ETCYN");
+						sPrdDate = model.getValue("/root/gridData/grid1/item["+ i +"]/PRDDATE");
+						
+						for (var j=parseInt(my_array[0]); j<=parseInt(my_array[2]); j++)		
+						{	
+							dNapQty = parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/NAPQTY"));		
+							if (dNapQty > 0)
+							{
+								dBoxQty = parseInt(dNapQty / dStdQty);
+								dJaturi =  dNapQty % dStdQty;
+								
+								if (dNapQty > (dStdQty * dBoxQty ) && dBoxQty != 0)
+								{
+									if (sJaturi == "Y")
+									{
+										dBoxQty = dBoxQty + 1;
+										dEqty = dJaturi;
+									}
+									else
+									{
+										dEqty = dJaturi + dStdQty;
+									}
+								}
+								else if (dBoxQty == 0)
+								{
+									dEqty = dNapQty;
+									dBoxQty = 1
+								}
+								else
+								{
+									dEqty = dStdQty;
+								}
+						
+								sOrdkey = model.getValue("/root/gridData/grid1/item["+ j +"]/ORDKEY");
+								sSabun = model.getValue("/root/gridData/grid1/item["+ j +"]/SABUN");
+								sOrhkey = model.getValue("/root/gridData/grid1/item["+ j +"]/ORHKEY");
+								
+								sGongCD = model.getValue("/root/gridData/grid1/item["+ j +"]/GONGCD");
+								dChngut = parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/CHNGUT"));
+								sWareGB = model.getValue("/root/gridData/grid1/item["+ j +"]/WAREGB");
+								sGumGB = model.getValue("/root/gridData/grid1/item["+ j +"]/GUMGB");
+								
+								if (sGumGB != 1)
+								{
+									sGumYN = "Y";
+									dHapQty = dNapQty;
+									sSuHapYN = "Y";
+								}
+						
+								saordkey = saordkey + model.getValue("/root/gridData/grid1/item["+ j +"]/SAORDKEY") + "_/";
+								napQty = napQty + model.getValue("/root/gridData/grid1/item["+ j +"]/NAPQTY") + "_/";
+								
+								for (var k=1; k<=dBoxQty; k++)
+								{
+									if (k == dBoxQty)
+									{
+										dQty = dEqty;
+									}
+									else
+									{
+										dQty = dStdQty;
+									}
+									
+									sLotNo =  sLotNo + k + "_/";
+									sLotQty = sLotQty + dQty + "_/";
+									sLotOrKey = sLotOrKey + model.getValue("/root/gridData/grid1/item["+ j +"]/SAORDKEY") + "_/";
+									sOrdKey1 = sOrdKey1 + model.getValue("/root/gridData/grid1/item["+ j +"]/ORDKEY") + "_/";								
+								}
+											
+								sendBuffInit();
+									    
+								 sendBuffAdd("FACTGB", "1");    
+								 sendBuffAdd("GADATE", gadate);    
+								 sendBuffAdd("CUSTCD", sCustCD);    
+								 sendBuffAdd("ORHKEY", sOrhkey);    
+								 sendBuffAdd("ORDKEY", sOrdkey);    
+								 sendBuffAdd("SAORDKEY", saordkey);  
+								 sendBuffAdd("SABUN", sSabun);     
+								 sendBuffAdd("GONGCD", sGongCD);    
+								 sendBuffAdd("GAQTY", dNapQty);     
+								 sendBuffAdd("CHNGUT", dChngut);    
+								 sendBuffAdd("SUGUMGB", sGumGB);   
+								 sendBuffAdd("SUGUMYN", sGumYN);   
+								 sendBuffAdd("SUHAPQTY", dHapQty);  
+								 sendBuffAdd("LOTSIZE", dStdQty);      
+								 sendBuffAdd("BOXQTY", dBoxQty);       
+								 sendBuffAdd("EBOXQTY", dEqty);      
+								 sendBuffAdd("JATUYN", sJaturi);       
+								 sendBuffAdd("IPGOYN",  "N");       
+								 sendBuffAdd("GAIPCFYN",   "N");     
+								 sendBuffAdd("CONFYN",   "N");       
+								 sendBuffAdd("SUHAPYN",   sSuHapYN);      
+								 sendBuffAdd("GAIPDT", gadate);       
+								 sendBuffAdd("WAREGB", sWareGB);       
+								 sendBuffAdd("PRDDATE", sPrdDate);      
+								 sendBuffAdd("PUREMP", getUserID());       
+								 sendBuffAdd("PURDEP", "");       
+								 sendBuffAdd("LOT_SAORKEY", sLotOrKey);  
+								 sendBuffAdd("LOT_LOTNO", sLotNo);    
+								 sendBuffAdd("LOT_QTY", sLotQty);      
+								 sendBuffAdd("LOT_ORDKEY", sOrdKey1);
+								
+								sendBuffAdd("FUSER", getUserID());
+								sendBuffAdd("FFORM", getFormID());
+		
+								submit("sp_VBSCMGAIPGO_INQ", "INSERT");				
+		
+								var chk = model.getValue("/root/msgBuff/data/item/CHK");
+								var errmsg = model.getValue("/root/msgBuff/data/item/ERRMSG");			
+								if (chk == "X")
+								{
+									alertBox("납품 등록 실패!! \n" + errmsg);
+									return;
+								}							
+							}
+						}
+				
+/*						
+						sOrdkey = model.getValue("/root/gridData/grid1/item["+ i +"]/ORDKEY");
+						sSabun = model.getValue("/root/gridData/grid1/item["+ i +"]/SABUN");
+						sOrhkey = model.getValue("/root/gridData/grid1/item["+ i +"]/ORHKEY");
+						
+						sGongCD = model.getValue("/root/gridData/grid1/item["+ i +"]/GONGCD");
+						dChngut = parseInt(model.getValue("/root/gridData/grid1/item["+ i +"]/CHNGUT"));
+						sWareGB = model.getValue("/root/gridData/grid1/item["+ i +"]/WAREGB");
+						sGumGB = model.getValue("/root/gridData/grid1/item["+ i +"]/GUMGB");
+
+						if (sGumGB != 1)
+						{
+							sGumYN = "Y";
+							dHapQty = dNaptQty;
+							sSuHapYN = "Y";
+						}
+						
+						for (var j=my_array[0]; j<=my_array[2]; j++)		
+						{	
+							dNapQty = parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/NAPQTY"));														
+							if (dNapQty > 0)
+							{
+								saordkey = saordkey + model.getValue("/root/gridData/grid1/item["+ j +"]/SAORDKEY") + "_/";
+								napQty = napQty + model.getValue("/root/gridData/grid1/item["+ j +"]/NAPQTY") + "_/";
+							}
+						}
+						
+						for (var k=1; k<=dBoxQty; k++)
+						{
+							if (k == dBoxQty)
+							{
+								dQty = dEqty;
+							}
+							else
+							{
+								dQty = dStdQty;
+							}
+							
+							for (var j=my_array[0]; j<=my_array[2]; j++)		
+							{	
+								dNapQty = parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/NAPQTY"));	
+								dRemainQty = dNapQty - parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/USEQTY"));	
+								if (dRemainQty > 0)
+								{
+									if (dQty - dRemainQty <= 0)
+									{
+										model.setValue("/root/gridData/grid1/item["+j+"]/USEQTY", parseInt(model.getValue("/root/gridData/grid1/item["+ j +"]/USEQTY")) + dQty);
+								
+										sLotNo =  sLotNo + k + "_/";
+										sLotQty = sLotQty + dQty + "_/";
+										sLotOrKey = sLotOrKey + model.getValue("/root/gridData/grid1/item["+ j +"]/SAORDKEY") + "_/";
+										sOrdKey1 = sOrdKey1 + model.getValue("/root/gridData/grid1/item["+ j +"]/ORDKEY") + "_/";
+
+										j = my_array[2]+1;
+									}
+									else
+									{
+										dQty = dQty - dRemainQty;
+										
+										model.setValue("/root/gridData/grid1/item["+j+"]/USEQTY", dNapQty);
+								
+										sLotNo =  sLotNo + k + "_/";
+										sLotQty = sLotQty + dRemainQty + "_/";
+										sLotOrKey = sLotOrKey + model.getValue("/root/gridData/grid1/item["+ j +"]/SAORDKEY") + "_/";
+										sOrdKey1 = sOrdKey1 + model.getValue("/root/gridData/grid1/item["+ j +"]/ORDKEY") + "_/";										
+									}
+								}
+							}
+						}
+											
+						sendBuffInit();
+							    
+						 sendBuffAdd("FACTGB", "1");    
+						 sendBuffAdd("GADATE", gadate);    
+						 sendBuffAdd("CUSTCD", sCustCD);    
+						 sendBuffAdd("ORHKEY", sOrhkey);    
+						 sendBuffAdd("ORDKEY", sOrdkey);    
+						 sendBuffAdd("SAORDKEY", saordkey);  
+						 sendBuffAdd("SABUN", sSabun);     
+						 sendBuffAdd("GONGCD", sGongCD);    
+						 sendBuffAdd("GAQTY", dNaptQty);     
+						 sendBuffAdd("CHNGUT", dChngut);    
+						 sendBuffAdd("SUGUMGB", sGumGB);   
+						 sendBuffAdd("SUGUMYN", sGumYN);   
+						 sendBuffAdd("SUHAPQTY", dHapQty);  
+						 sendBuffAdd("LOTSIZE", dStdQty);      
+						 sendBuffAdd("BOXQTY", dBoxQty);       
+						 sendBuffAdd("EBOXQTY", dEqty);      
+						 sendBuffAdd("JATUYN", sJaturi);       
+						 sendBuffAdd("IPGOYN",  "N");       
+						 sendBuffAdd("GAIPCFYN",   "N");     
+						 sendBuffAdd("CONFYN",   "N");       
+						 sendBuffAdd("SUHAPYN",   sSuHapYN);      
+						 sendBuffAdd("GAIPDT", gadate);       
+						 sendBuffAdd("WAREGB", sWareGB);       
+						 sendBuffAdd("PRDDATE", sPrdDate);      
+						 sendBuffAdd("PUREMP", getUserID());       
+						 sendBuffAdd("PURDEP", "");       
+						 sendBuffAdd("LOT_SAORKEY", sLotOrKey);  
+						 sendBuffAdd("LOT_LOTNO", sLotNo);    
+						 sendBuffAdd("LOT_QTY", sLotQty);      
+						 sendBuffAdd("LOT_ORDKEY", sOrdKey1);
+						
+						sendBuffAdd("FUSER", getUserID());
+						sendBuffAdd("FFORM", getFormID());
+
+						submit("sp_VBSCMGAIPGO_INQ", "INSERT");				
+
+						var chk = model.getValue("/root/msgBuff/data/item/CHK");
+						var errmsg = model.getValue("/root/msgBuff/data/item/ERRMSG");			
+						if (chk == "X")
+						{
+							alertBox("납품 등록 실패!! \n" + errmsg);
+							return;
+						}			
+*/									
+					}
+					i = i + parseInt(my_array[2])-parseInt(my_array[0]);
+				}	
+				alertBox("납품 등록 성공!!");
+				mateSearch(); 
+			}
+			function mateDel() { // 삭제 버튼 눌렀을 때...
+			}
+			function matePrint() { // 출력 버튼 눌렀을 때...
+			}
+			function mateClose() { // 닫기 버튼 눌렀을 때...
+			}
+			//엑셀클릭시
+			function mateExcel() {
+				openExcel("datagrid1", "true");
+			}
+			function pageResize() { // 그리드 페이지에 맞게 확장
+				controlResize("datagrid1");
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" backcoloralternate="transparent" caption="품목코드^품번^품명^발주그룹번호^발주번호^수주번호^발주구분^발주수량^미납수량^표준수량^납품수량^합계수량^자투리여부^생산일자^납품예정일자^발주일자^납기일자^CustCD^거래처명^비고^GONGCD^CHNGUT^WAREGB^GUMGB^사용수량" colsep="▤" colwidth="104, 91, 128, 100, 127, 100, 60, 80, 80, 80, 80, 80, 75, 100, 100, 80, 80, 60, 104, 138, 100, 100, 100, 100, 100" frozencols="6" mergecellsfixedrows="bycolrec" rowheader="update" rowsep="▥" style="left:0px; top:55px; width:800px; height:70px; ">
+			<col editable="false" ref="SABUN"/>
+			<col editable="false" ref="PARTNO"/>
+			<col editable="false" ref="ITEMNM"/>
+			<col editable="false" ref="ORHKEY"/>
+			<col editable="false" ref="ORDKEY"/>
+			<col editable="false" ref="SAORDKEY"/>
+			<col editable="false" ref="ORDERNM"/>
+			<col disabled="true" ref="ORQTY" format="#,###.0" style="text-align:right; "/>
+			<col disabled="true" ref="MQTY" format="#,###.0" style="text-align:right; "/>
+			<col ref="STDQTY" type="input" format="#,###.0" style="text-align:right; background-color:#ccffcc; "/>
+			<col ref="NAPQTY" type="input" format="#,##0.0" style="text-align:right; background-color:#ccffcc; "/>
+			<col ref="SUMQTY" format="#,##0.0" style="text-align:right; background-color:#ccffcc; "/>
+			<col checkvalue="Y,N" ref="ETCYN" type="checkbox" style="text-align:right; background-color:#ccffcc; "/>
+			<col ref="PRDDATE" type="inputdate" format="yyyy-mm-dd" style="text-align:right; background-color:#ccffcc; "/>
+			<col disabled="true" ref="NAPPLANDATE" format="yyyy-mm-dd"/>
+			<col disabled="true" ref="ORDATE" format="yyyy-mm-dd"/>
+			<col disabled="true" ref="NAPDATE" format="yyyy-mm-dd"/>
+			<col editable="false" ref="CUSTCD" visibility="hidden"/>
+			<col editable="false" ref="CUSTNM"/>
+			<col editable="false" ref="REMARK" style="text-align:left; "/>
+			<col disabled="false" ref="GONGCD" visibility="hidden"/>
+			<col disabled="false" ref="CHNGUT" visibility="hidden"/>
+			<col disabled="false" ref="WAREGB" visibility="hidden"/>
+			<col disabled="false" ref="GUMGB" visibility="hidden"/>
+			<col disabled="false" ref="USEQTY"/>
+			<script type="javascript" ev:event="onendedit">
+				<![CDATA[
+					var row = datagrid1.row;
+					var col = datagrid1.col;
+					var colref = datagrid1.colAttribute(col,"ref");
+					
+					var my_array = new Array();
+					var a = datagrid1.mergeArea(row, 1);
+					my_array = a.split(",");
+					
+					if(colref == "NAPQTY") { // 납품 수량을 입력했을때						
+					
+						var Minap = model.getValue("/root/initGridData/item["+row+"]/MQTY");				//미납수량(DB)
+						var MinapQty = parseInt(Minap);											//미납수량
+						var NapQty = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/NAPQTY"));	//납품수량
+															
+						model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",MinapQty);
+									
+						if(MinapQty < NapQty){ 	// 납품수량이 미납수량보다 많을경우 메시지창을 띄운다.
+							alertBox("미납수량보다 납품수량이 많습니다. \n\n다시 입력해주십시요.");
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY",0);
+						} else { 				//납품수량과 박스수량을 체크해서 그 내용을 셋팅한다.
+
+							model.setValue("/root/gridData/grid1/item["+row+"]/ETCYN", "N");		
+							model.setValue("/root/gridData/grid1/item["+row+"]/MQTY", MinapQty-NapQty);							
+						}
+													
+						NapQty = 0;
+						for (var j=parseInt(my_array[0]); j<=parseInt(my_array[2]); j++)
+						{
+							NapQty = NapQty + parseInt(model.getValue("/root/gridData/grid1/item["+j+"]/NAPQTY"));
+						}
+						model.setValue("/root/gridData/grid1/item["+my_array[0]+"]/SUMQTY", NapQty);
+						
+					} 
+					else if (colref == "STDQTY")
+					{
+						var StdQty = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/STDQTY"));	//표준수량
+						if (StdQty == 0) 
+						{
+							for (var i=my_array[0]; i<=my_array[2]; i++)
+							{
+								model.setValue("/root/gridData/grid1/item["+i+"]/STDQTY", StdQty);						
+							}
+						}	
+					}
+					datagrid1.refresh();
+				]]>
+			</script>
+		</datagrid>
+		<group id="group1" ref="/root/gridData/grid1/item" style="left:0px; top:0px; width:800px; height:55px; ">
+			<input id="input4" ref="/root/formData/search/ITEMNM" editable="false" style="left:149px; top:30px; width:136px; height:20px; background-color:#fefec3; "/>
+			<caption id="caption1" style="left:5px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주일자</caption>
+			<caption id="caption2" style="left:5px; top:30px; width:55px; height:20px; text-align:left; vertical-align:middle; ">품목코드</caption>
+			<caption id="caption4" style="left:465px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주번호</caption>
+			<input id="input1" ref="/root/formData/search/FDATE" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:65px; top:5px; width:100px; height:20px; "/>
+			<input id="input2" ref="/root/formData/search/LDATE" navindex="2" inputtype="date" format="yyyy-mm-dd" style="left:185px; top:5px; width:100px; height:20px; "/>
+			<caption id="caption5" style="left:170px; top:5px; width:30px; height:20px; vertical-align:middle; ">~</caption>
+			<input id="input3" ref="/root/formData/search/SABUN" navindex="4" style="left:65px; top:30px; width:85px; height:20px; ">
+				<script type="javascript" ev:event="onmousedown">
+					<![CDATA[
+						if (event.button == 3) {
+							document.all(event.target).dispatch("ondblclick");
+						}
+					]]>
+				</script>
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						if(event.keyCode == 13) { // 엔터키를 눌렀을때 ondblclick이벤트를 발생한다.
+							document.all(event.target).dispatch("ondblclick");
+						}		
+					]]>
+				</script>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					
+						try {		  								
+							setHelpPop("gridCaption", "품목코드, 품명");
+							setHelpPop("colWidth", "100,100");
+							setHelpPop("cmdHelp", "help_Itcst");
+							setHelpPop("winHeight", "380");
+							setHelpPop("xPath1", "/root/formData/search/SABUN");
+							setHelpPop("xPath2", "/root/formData/search/ITEMNM");
+							setHelpPop("xPath3", sCustCD);
+							
+							helpPop("/root/cmdTemp");  //Help 창을 띄운다.
+							
+							group1.refresh();
+							
+						}catch(e) {}	
+							
+					]]>
+				</script>
+			</input>
+			<input id="input5" ref="/root/formData/search/ORDKEY" navindex="5" style="left:525px; top:5px; width:115px; height:20px; "/>
+			<caption id="caption3" style="left:295px; top:30px; width:55px; height:20px; text-align:right; vertical-align:middle; ">납품일자</caption>
+			<caption id="caption6" style="left:295px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주구분</caption>
+			<select1 id="combo2" ref="/root/formData/search/ORDERGB" appearance="minimal" style="left:355px; top:5px; width:100px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/ComboData/Combo1/item">
+						<label ref="Label"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<input id="input6" ref="/root/NAPDATE" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:355px; top:30px; width:100px; height:20px; "/>
+			<input id="addord" ref="/root/addord" visibility="hidden" style="left:465px; top:30px; width:100px; height:20px; "/>
+		</group>
+	</xhtml:body>
+</xhtml:html>

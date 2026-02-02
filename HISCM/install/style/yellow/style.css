@@ -1,0 +1,331 @@
+﻿/* body */
+* {
+	color:#333333;
+	font-size:10pt;
+}
+body {  
+	background-color:#ffffff;
+	text-align:left; 
+	vertical-align:middle;
+}
+/* group */
+group {
+	background-color:transparent;
+	border-style:none;
+}
+group#groupPrevPage {
+	gradient:linear(0,0,100%,100%,#999966,#cccc99,1); 
+}
+/* input */
+input {  
+	height:20px!important;
+	background-color:#ffffe0;
+	padding-right:5px; 
+	border-style:solid; 
+	border-color:#999966;
+	disable.color:#cccccc; 
+	disable.border-color:#cccccc; 
+	disable.background-color:#eeeeee; 
+}
+/* input date */
+input[inputtype="date"] > inputbutton {
+	border-style:solid;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	border-right-width:0px;
+	border-color:#999966;
+	background-color:#999966;
+	background-image:../images/css/calBtn.gif; 
+}			
+input[inputtype="button"] > inputbutton {
+	border-style:solid;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	border-right-width:0px;
+	border-color:#999966;
+	background-image:../images/input/yBtn.jpg;
+}
+secret {  
+	height:20px!important;
+	border-style:solid; 
+	border-color:#999966; 
+	background-color:#ffffe0;
+}
+
+/* output */
+output { 
+	height:20px!important;
+	font-size:14px; 
+	background-color:#ffffe0; 
+	border-style:solid; 
+	font-weight:none; 
+	border-color:#999966; 
+}
+/* textarea */ 
+textarea {
+	border-style:solid;
+	border-color:#999966;
+	background-color:#ffffff;
+	padding-left:2px;
+}		
+/* list box */
+select[appearance="compact"] {
+	border-style:solid;
+	background-color:#ffffff;
+	padding-left:2px;
+}
+/* button */
+button { 
+	height:20px;
+	text-align:center; 	
+	border-style:solid;
+	background-color:#ffffcc;
+}
+/* button switch toggle */
+button[group="btnPrevPage"] {
+	height:25px;
+	background-color:#cccc99;
+	select.background-color:#ffffcc;
+}
+/* select box */
+select1[appearance="minimal"] {
+	height:20px!important;
+	border-color:#999966;
+	border-style:solid;
+	background-color:#ffffe0;
+}
+select1 combobutton {
+	width:18px;
+	height:18px;
+	border-style:solid;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	border-right-width:0px;
+	border-color:#999966;
+	background-color:#cccc99;
+	background-image:../images/css/comboBtn.gif;
+}
+
+/* radio */
+select1[appearance="full"] { 
+	height:20px!important;
+	border-style:none;
+	background-color:transparent;
+}
+
+/* switch */
+switch {
+	background-color:transparent;
+	border-style:none;
+}
+
+/* datagrid */
+datagrid {  
+	text-align:center; 
+	extendlastcol:scroll; 
+	rowheight:22px!important; 
+	dataheight:20px!important; 
+	border-style:solid; 
+	border-top-width:3px; 
+	border-top-color:#990000; 
+	border-left-color:#999966; 
+	border-right-color:#999966; 
+	border-bottom-color:#999966; 
+	background-color:transparent; 
+	explorerbar:sortshowmove; 
+	backcoloralternate:#f0f0f0; 
+	backcolorfrozen:#f0f0f0; 
+	focus-rect:visible; 
+	selectionmode:free; 
+	focuscolor:#ffffcc; 
+}
+datagrid:fixed {
+	border-style:solid ;
+    border-top-style:none ;
+	border-left-style:none ;
+	border-right-color:#999966 ;
+	border-bottom-color:#999966 ;
+	background-color:#cccc99;
+	font-weight:bold; 
+	word-wrap:hard;
+	color:#000000;
+} 
+datagrid:data{
+	border-style:solid!important;
+	border-color:#cccccc!important;
+	border-left-style:none!important;
+	border-top-style:none!important;
+	font-size:14px;
+}
+datagrid > rowhead {
+	width:30px;
+}
+
+/* multiline grid */
+multilinegrid{
+	text-align:center;
+    extendlastcol:scroll;
+	rowheight:22px!important; 
+	dataheight:20px!important;
+	border-style:solid ;
+	border-top-width:3px;
+	border-top-color:#999966;
+	border-left-color:#999966;
+	border-right-color:#999966 ;
+	border-bottom-color:#999966 ;
+	background-color:#transparent;
+	explorerbar:sortshowmove ;
+	backcoloralternate:#f0f0f0;
+	focus-rect:visible ;
+	selectionmode:free;
+	focuscolor:#ffffcc;
+}
+multilinegrid:fixed{
+	border-style:solid ;
+    border-top-style:none ;
+	border-left-style:none ;
+	border-right-color:#999966 ;
+	border-bottom-color:#999966 ;
+	background-color:#cccc99;
+	font-weight:bold; 
+	word-wrap:hard;
+	color:#000000;
+}
+multilinegrid:data{
+	border-style:solid!important;
+	border-color:#eeeeee!important;
+	border-left-style:none!important;
+	border-top-style:none!important;
+}
+
+/* scroll bar */
+* #vscroll { 
+	border-color:#999966;
+	border-style:solid;
+	border-right-width:0px;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	background-color:#ffffff;
+}
+* #hscroll { 
+	border-color:#999966;
+	border-style:solid;
+	border-bottom-width:0px;
+	border-left-width:0px;
+	border-right-width:0px;
+	background-color:#ffffff;
+}
+* #dummy { /* Common area */ 
+	border-color:#999966;
+	border-style:solid;
+	border-right-width:0px;
+	border-bottom-width:0px;
+	background-color:#ffffe0;
+}
+scrollbar > #thumb {
+	border-style:none;
+	background-color:#cccc99;
+}
+scrollbar > #top  {
+	border-color:#999966;
+	border-style:solid;
+	border-top-width:0px;
+	border-left-width:0px;
+	border-right-width:0px;
+	background-color:#cccc99;
+	background-image:../images/css/scrollTop.gif;
+}
+scrollbar > #bottom 	 {
+	border-color:#999966;
+	border-style:solid;
+	border-right-width:0px;
+	border-left-width:0px;
+	border-bottom-width:0px;
+	background-color:#cccc99;
+	background-image:../images/css/scrollBottom.gif;
+}
+scrollbar > #left {
+	border-color:#999966;
+	border-style:solid;
+	border-left-width:0px;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	background-color:#cccc99;
+	background-image:../images/css/scrollLeft.gif;
+} 
+scrollbar > #right {	
+	border-color:#999966;
+	border-style:solid;
+	border-right-width:0px;
+	border-top-width:0px;
+	border-bottom-width:0px;
+	background-color:#cccc99;
+	background-image:../images/css/scrollRight.gif;
+}
+
+/* calendar */
+calendar {
+	height:150px;
+	width:200px;
+	border-color:#999966;
+	background-color:#ffffe0;
+}
+calendar > #item {
+	select.background-color:#3399cc;
+}
+calendar > #header {
+	height:25px;
+    color:#ffffff;
+	font-weight:bold;
+	padding:0px;
+	background-color:#660000;
+}
+calendar > #prevyear  {
+	width:20px;
+	height:15px;
+	border-style:none; 
+	background-color:#660000;
+	background-image:../images/css/prevYear.gif;
+}
+calendar > #prevmonth  {
+	width:20px;
+	height:15px;
+	border-style:none; 
+	background-color:#660000;
+	background-image:../images/css/prevMonth.gif;
+}
+calendar > #nextyear  {
+	width:20px;
+	height:15px;
+	border-style:none; 
+	background-color:#660000;
+	background-image:../images/css/nextYear.gif;
+} 
+calendar > #nextmonth  {
+	width:20px;
+	height:15px;
+	border-style:none; 
+	background-color:#660000;
+	background-image:../images/css/nextMonth.gif;
+} 
+
+/* user define color */
+.color1 {
+	background-color:#999966;
+}
+
+.color2 {
+	background-color:#cccc99;
+}
+
+.color3 {
+	background-color:#ffffcc;
+}
+
+.color4 {
+	background-color:#ffffe0;
+}
+
+.color5 {
+	background-color:#660000;
+}

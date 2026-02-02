@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="../install/style/yellow/style.css" type="text/css" ?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: instance ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<sendBuff/>
+					<msgBuff/>
+					<cmdUpload>
+						<tableName/>
+						<type/>
+						<fileUID/>
+						<upload>N</upload>
+						<userName/>
+					</cmdUpload>
+					<cmdExcelFlag>0</cmdExcelFlag>
+					<cmdPageGridList/>
+					<cmdPagePermit/>
+					<cmdMdbUserInfo>
+						<dbServer/>
+						<dbPort/>
+						<dbName/>
+						<dbUser/>
+						<dbPass/>
+						<styleType/>
+						<pageLang/>
+					</cmdMdbUserInfo>
+					<cmdMousePopup>
+						<menu>
+							<item>
+								<name>합계</name>
+								<func>gridSum</func>
+							</item>
+							<item>
+								<name>평균값</name>
+								<func>gridEve</func>
+							</item>
+							<item>
+								<name>최소값</name>
+								<func>gridMin</func>
+							</item>
+							<item>
+								<name>최대값</name>
+								<func>gridMax</func>
+							</item>
+						</menu>
+						<subtotal>
+							<item>
+								<name>오름차순소계</name>
+								<func>ascSubtotal</func>
+							</item>
+							<item>
+								<name>내림차순소계</name>
+								<func>descSubtotal</func>
+							</item>
+							<item>
+								<name>소계항목추가</name>
+								<func>addSubtotal</func>
+							</item>
+							<item>
+								<name>소계항목삭제</name>
+								<func>delSubtotal</func>
+							</item>
+							<!--
+			<item>
+				<name>다중정렬설정</name>
+				<func>userSort</func>
+			</item>
+			<item>
+				<name>그리드숨김설정</name>
+				<func>gridHidden</func>
+			</item>
+			-->
+						</subtotal>
+					</cmdMousePopup>
+					<cmdSendLang>
+						<pageLang/>
+						<capStr/>
+						<gridStr/>
+						<btnStr/>
+						<comboStr/>
+						<alertStr/>
+					</cmdSendLang>
+					<cmdHelpPopData>
+						<searchData/>
+						<colWidth>100,100,100</colWidth>
+						<winHeight>300</winHeight>
+						<gridCaption>a,b,c</gridCaption>
+						<cmdHelp>aaa</cmdHelp>
+						<xPath1/>
+						<xPath2/>
+						<xPath3/>
+						<xPath4/>
+						<xPath5/>
+						<popData/>
+					</cmdHelpPopData>
+					<cmdSortPopData>
+						<gridCaption/>
+						<colIndex/>
+						<gridSort/>
+						<isAsc/>
+					</cmdSortPopData>
+					<cmdHiddenPopData>
+						<gridCaption/>
+						<colIndex/>
+						<isHidden/>
+						<colWidth/>
+					</cmdHiddenPopData>
+					<setValue>
+						<docTitle>::: 한일정밀 웹발주시스템 :::</docTitle>
+						<styleType>yellow</styleType>
+						<pageLang>LANGKS</pageLang>
+						<mdbDir>C:\\ComMate\\HISCM\\mate.mdb</mdbDir>
+						<copyright>Copyright (c) 2010 By 한일정밀 All Rights Reserved.</copyright>
+						<viewSource>Y</viewSource>
+						<autoLoginUserID/>
+						<autoLoginUserPass/>
+						<uploadFileSize>20mb</uploadFileSize>
+						<uploadFileCount>5</uploadFileCount>
+						<uploadFileExt>all</uploadFileExt>
+						<viewerVer>4.069</viewerVer>
+					</setValue>
+					<cmdSubtotalColList/>
+					<cmdTemp/>
+				</root>
+			</instance>
+			<submission id="submit"/>
+		</model>
+	</xhtml:head>
+	<xhtml:body idprefix="instance_"/>
+</xhtml:html>

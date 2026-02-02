@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: NOTICE LIST PAGE :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<gridData>
+						<grid1>
+							<item>
+								<subject/>
+								<writer/>
+								<date/>
+								<file/>
+								<edit/>
+								<del/>
+							</item>
+						</grid1>
+					</gridData>
+					<formData>
+						<send1>
+							<QueryKind/>
+							<formID/>
+							<sessionid/>
+							<isAdmin/>
+						</send1>
+					</formData>
+					<popData>
+						<uid/>
+						<subject/>
+						<userid/>
+						<writer/>
+						<content/>
+						<fileuid/>
+						<date/>
+						<isAdmin/>
+						<formID/>
+						<sessionid/>
+						<QueryKind/>
+					</popData>
+					<search>
+						<searchKind>subject</searchKind>
+						<searchStr/>
+					</search>
+					<temp/>
+					<comboData>
+						<combo1>
+							<item>
+								<label>제목</label>
+								<value>subject</value>
+							</item>
+							<item>
+								<label>제목+내용</label>
+								<value>subCon</value>
+							</item>
+							<item>
+								<label>이름</label>
+								<value>writer</value>
+							</item>
+						</combo1>
+					</comboData>
+					<sendFiles/>
+					<boardInfo>
+						<formID/>
+						<isMainBoard/>
+					</boardInfo>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				function mateInit() {		
+																				
+					// 관리자인지 체크 ( 사용자 권한 설정 메뉴가 보이면 관리자로 간주 )
+					var isAdmin = "N" ; // 기본 값 'N' 일반 사용자
+//					var uid1 = parent.model.getValue("/root/comboData/TreeView/item[PageURL = '/xrwSys/sysA005.xrw']/PageURL");
+//					var uid2 = parent.model.getValue("/root/comboData/TreeView/item[PageURL = '/xrwSys/sysA006.xrw']/PageURL");
+//					if (uid1 != "" && uid1 != null && uid2 != "" && uid2 != null) {
+//						isAdmin = "Y" ;
+//					}			
+					isAdmin = parent.model.getValue("/root/formData/sendLogin/isAdmin");
+						
+					var userID = getUserID();
+					if (userID == "mateadmin") isAdmin = "Y";  // mateadmin 은 관리자로 간주
+
+					var formID = model.getValue("/root/boardInfo/formID");
+										
+					model.setValue("/root/formData/send1/isAdmin", isAdmin);
+					model.setValue("/root/formData/send1/sessionid", userID);
+					model.setValue("/root/formData/send1/formID", formID);
+
+					sendMsg();
+
+				}			
+				function mateSearch() { //조회 버튼		
+					var serach = model.getValue("/root/search/searchStr");
+					if (serach != ""){
+						search.dispatch("onclick");				
+					} else {
+						sendMsg();									
+					}
+				}
+				function mateAdd() { //추가 버튼			
+					model.setValue("/root/popData/uid", "");
+					model.setValue("/root/popData/QueryKind", "add");
+					model.setValue("/root/popData/sessionid", model.getValue("/root/formData/send1/sessionid"));
+					model.setValue("/root/popData/writer", getUserName());
+					model.setValue("/root/popData/formID", model.getValue("/root/formData/send1/formID"));
+					
+					window.load("noticeA001_Write.xrw", "modal" ,"WriteFrm","left:200px; top:100px;width:550;height:550;resize:false; sysmenu:hidden", "/root/popData", "/root/popData");					
+				}				
+				function mateSave() { // 저장 버튼
+				}				
+				function mateDel() { // 삭제 버튼
+				}
+				function matePrint() {  // 출력 버튼
+				}
+				function mateExcel() {  // 엑셀 버튼
+				}
+				function mateClose() { // 닫기 버튼				
+				}				
+				function pageResize() {  // 페이지 리사이징
+					controlResize("datagrid1");
+				}
+				function sendMsg() {  // 게시판 목록 가져오기
+				
+					sendBuffInit();
+					sendBuffAdd("formID", model.getValue("/root/formData/send1/formID"));
+					submit("sp_SCM_TrustNotice", "GetList");
+										
+					model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");  
+					datagrid1.refresh();					
+					imgSetting();
+				}				
+				function imgSetting(){
+					var ins = instance1.selectNodes("/root/gridData/grid1/item");
+					var editPermit = model.getValue("/root/cmdPagePermit/XGINYN");
+					var delPermit = model.getValue("/root/cmdPagePermit/XGDEYN");
+					var fileCol = datagrid1.colRef("file");
+					var editCol = datagrid1.colRef("edit"); 					
+					var delCol = datagrid1.colRef("del");	
+					
+					datagrid1.rebuildStyle(); //그리드 셀의 스타일을 초기화
+					
+					for(var i=1 ; i<=ins.length ; i++) {
+						if (model.getValue("/root/gridData/grid1/item[" + i + "]/fileuid") != "0")
+							datagrid1.cellStyle( "background-image",i,fileCol)="../images/css/fileSave.gif"; //파일이미지
+						else
+							datagrid1.cellStyle( "background-image",i,fileCol)=""; //파일이미지
+						
+						if (model.getValue("/root/gridData/grid1/item[" + i + "]/userid") == model.getValue("/root/formData/send1/sessionid") || 
+						    model.getValue("/root/formData/send1/isAdmin") == "Y") {
+							if(editPermit=="Y") 					
+								datagrid1.cellStyle( "background-image",i,editCol)="../images/css/fileMod.gif"; //수정이미지
+							if(delPermit=="Y") 
+								datagrid1.cellStyle( "background-image",i,delCol)="../images/css/fileDel.gif";	//삭제이미지		
+					    	}	
+					}				
+					var isMain = model.getValue("/root/boardInfo/isMainBoard"); 
+					if (isMain == "Y") { //메인공지사항일때 datagrid에 수정, 삭제 칼럼 보이지 않게
+						datagrid1.colHidden(editCol) = true;	
+						datagrid1.colHidden(delCol) = true;	
+					}
+					datagrid1.refresh();			
+				}
+							
+		]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; color:#000000; "/>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" scroll="auto" caption="제목^작성자^작성일^파일^수정^삭제" colsep="^" colwidth="384, 135, 145, 38, 38, 38, 100, 100, 100, 100, 100, 100, 100, 100, 100,5" mergecellsfixedrows="bycolrec" rowheader="seq" rowsep="|" selectionmode="byrow" data.focus-rect="hidden" style="left:0px; top:30px; width:800px; height:400px; color:#000000; ">
+			<col ref="subject"/>
+			<col ref="writer"/>
+			<col ref="date"/>
+			<col ref="file" style="background-position:center; "/>
+			<col ref="edit" style="background-position:center; "/>
+			<col ref="del" style="background-position:center; "/>
+			<col ref="content" visibility="hidden"/>
+			<col ref="userid" visibility="hidden"/>
+			<col ref="fileuid" visibility="hidden"/>
+			<col ref="uid" visibility="hidden"/>
+			<col ref="formID" visibility="hidden"/>
+			<col ref="sessionid" visibility="hidden"/>
+			<col ref="QueryKind" visibility="hidden"/>
+			<col ref="gridsize"/>
+			<script type="javascript" ev:event="ondblclick">
+				<![CDATA[				
+					try {
+						var row = datagrid1.mouseRow;
+						model.setValue("/root/gridData/grid1/item[" + row + "]/sessionid" , model.getValue("/root/formData/send1/sessionid"));
+						model.setValue("/root/gridData/grid1/item[" + row + "]/isAdmin" , model.getValue("/root/formData/send1/isAdmin"));
+	  			       		window.load("noticeA001_View.xrw", "modal" ,"ViewFrm", "left:200px; top:100px;width:550;height:550;resize:false; sysmenu:hidden", "/root/gridData/grid1/item[" + row + "]", "/root/output");											  					
+					}catch (e) {}
+	  				
+				]]>
+			</script>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					try {			
+						var row = datagrid1.mouseRow;
+						var col = datagrid1.mouseCol;
+						var editCol = datagrid1.colRef("edit"); 
+						var delCol = datagrid1.colRef("del");					
+				
+						 if (col == editCol) {	
+						 	if (datagrid1.cellStyle( "background-image",datagrid1.row,editCol) != "") {						
+				  				model.setValue("/root/gridData/grid1/item[" + row + "]/sessionid" , model.getValue("/root/formData/send1/sessionid"));
+								model.setValue("/root/gridData/grid1/item[" + row + "]/QueryKind", "mod");
+				  				
+				  				window.load("noticeA001_Write.xrw", "modal" ,"EditFrm","left:200px; top:100px;width:550;height:550;resize:false; sysmenu:hidden", "/root/gridData/grid1/item[" + row + "]", "/root/popData");
+				  				
+				  				model.setValue("/root/gridData/grid1/item[" + row + "]/QueryKind", "");
+						 	}
+						}else if(col == delCol) {
+							if (datagrid1.cellStyle( "background-image",datagrid1.row,delCol) != "") {										
+								var YorN =  yesAlert("삭제하시겠습니까?");								
+								if(YorN == 1) {																						
+									model.makeValue("/root/formData/send1/uid", model.getValue("/root/gridData/grid1/item[" + row + "]/uid"));
+									model.setValue("/root/formData/send1/QueryKind", "del");
+									model.copyNode("/root/sendBuff", "/root/formData/send1");
+									
+									sendBuffInit();
+									sendBuffAdd("uid", model.getValue("/root/formData/send1/uid"));
+									submit("sp_SCM_TrustNotice", "Delete");
+																	
+									var fileUid = model.getValue("/root/gridData/grid1/item[" + row + "]/fileuid");
+									if (fileUid != "0") {
+										upload("TrustNotice", "del", fileUid);
+									}									
+									datagrid1.deleteRow(row);
+									model.removenode("/root/msgBuff/data/item[" + row + "]");
+								}
+							}
+						}
+					}catch(e) {}
+				
+				]]>
+			</script>
+		</datagrid>
+		<group id="group2" style="left:0px; top:0px; width:800px; height:30px; ">
+			<group id="group1" style="left:10px; top:5px; width:340px; height:20px; ">
+				<button id="search" navindex="2" style="left:220px; top:0px; width:55px; height:20px; ">
+					<caption>찾기</caption>
+					<script type="javascript" ev:event="onclick">
+						<![CDATA[
+							var search = model.getValue("/root/search/searchKind") ; 
+							var searchStr = model.getValue("/root/search/searchStr") ;
+						
+							var obj = instance1.selectNodes("/root/msgBuff/data/item");
+							model.copyNode("/root/gridData/grid1", "/root/temp");
+							
+							for (var i=1; i<=obj.length; i++) {
+								if (search == "subject"){
+									if ( (model.getValue("/root/msgBuff/data/item["+ i +"]/subject").search(searchStr) != -1))
+										model.duplicate("/root/gridData/grid1", "/root/msgBuff/data/item["+ i + "]");
+								}else if(search == "subCon") {
+									if ( (model.getValue("/root/msgBuff/data/item["+ i +"]/subject").search(searchStr) != -1) || 
+									     (model.getValue("/root/msgBuff/data/item["+ i +"]/content").search(searchStr) != -1) )
+										model.duplicate("/root/gridData/grid1", "/root/msgBuff/data/item["+ i + "]");
+								}else {
+									if ( (model.getValue("/root/msgBuff/data/item["+ i +"]/writer").search(searchStr) != -1))
+										model.duplicate("/root/gridData/grid1", "/root/msgBuff/data/item["+ i + "]");
+								}
+							}										
+							
+							datagrid1.refresh();								
+							imgSetting();			
+						]]>
+					</script>
+				</button>
+				<button id="button3" navindex="4" style="left:285px; top:0px; width:55px; height:20px; ">
+					<caption>목록</caption>
+					<script type="javascript" ev:event="onclick">
+						<![CDATA[
+							
+							model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");     						
+							datagrid1.refresh();							
+							imgSetting();
+							
+							model.setValue("/root/search/searchStr", "") ;
+							model.setValue("/root/search/searchKind", "subject");
+							searchStr.refresh() ; 
+							searchKind.refresh();
+						]]>
+					</script>
+				</button>
+				<select1 id="searchKind" ref="/root/search/searchKind" navindex="3" appearance="minimal" style="left:0px; top:0px; width:100px; height:20px; ">
+					<choices>
+						<itemset nodeset="/root/comboData/combo1/item">
+							<label ref="label"/>
+							<value ref="value"/>
+						</itemset>
+					</choices>
+				</select1>
+				<input id="searchStr" ref="/root/search/searchStr" navindex="1" style="left:110px; top:0px; width:100px; height:20px; ">
+					<script type="javascript" ev:event="onkeypress">
+						<![CDATA[		
+							if (event.keycode == 13) {
+								model.setValue("/root/search/searchStr", input1.currentText);
+								search.dispatch("onclick");		
+							}						
+						]]>
+					</script>
+				</input>
+			</group>
+		</group>
+	</xhtml:body>
+</xhtml:html>

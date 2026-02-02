@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: NOTICE VIEW PAGE :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<output>
+						<subject/>
+						<userid/>
+						<writer/>
+						<content/>
+						<fileuid/>
+						<date/>
+						<uid/>
+						<formID/>
+						<QueryKind/>
+						<filegrid>
+							<item>
+								<filename/>
+							</item>
+						</filegrid>
+						<sessionid/>
+						<isAdmin/>
+					</output>
+					<sendFiles/>
+					<msgFiles/>
+					<printPop>
+						<subject/>
+						<writer/>
+						<content/>
+						<getdate/>
+					</printPop>
+					<doSaveFile>cancel</doSaveFile>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				function mateInit() {
+					var fileUid = model.getValue("/root/output/fileuid");
+					
+					if (fileUid > 0 ) {		
+						upload("TrustNotice","get", fileUid);
+						viewFile("datagrid1");
+						
+						model.makeValue("/root/output/data/savefilelist", model.getValue("/root/msgFiles/savefilelist"));
+						model.makeValue("/root/output/data/orifilelist", model.getValue("/root/msgFiles/orifilelist"));
+						model.makeValue("/root/output/data/address", model.getValue("/root/msgFiles/address"));						
+					}else {
+						model.copyNode("/root/msgFiles", "/root/msgFiles");
+					}
+					datagrid1.refresh();		
+															
+					if (model.getValue("/root/output/userid").toLowerCase( )  == model.getValue("/root/output/sessionid").toLowerCase( )  || 
+					    model.getValue("/root/output/isAdmin") == "Y") {
+					    	var editCol = parent.datagrid1.colRef("edit"); 
+						var delCol = parent.datagrid1.colRef("del");	
+						
+						if (parent.datagrid1.cellStyle( "background-image",parent.datagrid1.row,editCol) != "") 		
+							edit.visible = true;			
+						if (parent.datagrid1.cellStyle( "background-image",parent.datagrid1.row,delCol) != "")
+							del.visible = true;			
+					}	
+				}					
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body scroll="autovscroll" guideline="1,-3;">
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; color:#000000; "/>
+		<group id="view" style="left:20px; top:20px; width:495px; height:490px; color:#000000; border-color:#999999; border-style:solid; ">
+			<output id="output4" ref="/root/output/date" style="left:329px; top:59px; width:150px; height:25px; text-align:left; vertical-align:middle; background-color:transparent; border-style:none; "/>
+			<button id="del" visibility="hidden" style="left:294px; top:459px; width:55px; height:20px; ">
+				<caption>삭제</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						
+						var YorN =  yesAlert("삭제하시겠습니까?");
+						if(YorN == 1) {
+													
+							sendBuffInit();
+							sendBuffAdd("uid", model.getValue("/root/output/uid"));
+							submit("sp_SCM_TrustNotice", "Delete");
+															
+							var fileUid = model.getValue("/root/output/fileuid");
+							if (fileUid != 0) {
+								upload("TrustNotice", "del", fileUid);
+							}
+							
+							parent.datagrid1.deleteRow(parent.datagrid1.mouseRow);
+							parent.model.removenode("/root/msgBuff/GridList/item[" + parent.datagrid1.mouseRow + "]"); 							
+							window.close();
+						}
+					]]>
+				</script>
+			</button>
+			<button id="button2" navindex="1" style="left:424px; top:459px; width:55px; height:20px; ">
+				<caption>닫기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+			<button id="edit" visibility="hidden" style="left:359px; top:459px; width:55px; height:20px; ">
+				<caption>수정</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[			
+					
+						model.setValue("/root/output/QueryKind", "mod");
+						window.load("noticeA001_Write.xrw", "replace" ,"WriteFrm", "left:200px; top:100px;width:550;height:550;resize:false;", "/root/output", "/root/popData");
+																	
+					]]>
+				</script>
+			</button>
+			<line id="line1" style="x1:-1px; y1:54px; x2:493px; y2:54px; border-color:#999999; "/>
+			<line id="line2" style="x1:-1px; y1:449px; x2:493px; y2:449px; border-color:#999999; "/>
+			<textarea id="textarea2" ref="/root/output/content" editable="false" style="left:14px; top:89px; width:465px; height:220px; vertical-align:top; padding:5px; "/>
+			<output id="output1" ref="/root/output/subject" style="left:74px; top:15px; width:405px; height:25px; text-align:left; vertical-align:middle; background-color:#ffffff; border-style:none; "/>
+			<output id="output2" ref="/root/output/writer" style="left:74px; top:59px; width:115px; height:25px; vertical-align:middle; background-color:transparent; border-style:none; "/>
+			<datagrid id="datagrid1" nodeset="/root/output/filegrid/item" caption="File" colsep="^" colwidth="463, 100" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" data.focus-rect="hidden" style="left:14px; top:319px; width:465px; height:122px; ">
+				<col ref="filename"/>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+						
+						var selFile = datagrid1.mouseRow;
+						downFile("datagrid1", selFile);
+						
+//						var selFile = datagrid1.mouseRow;
+//						var savefilelist = model.getValue("/root/msgFiles/savefilelist");
+//						var saveSplit = savefilelist.split("▤");
+//						
+//						if (selFile > 0) { 						
+//							var address = model.getValue("/root/msgFiles/address");
+//							var fileNames = saveSplit[selFile-1];
+//							var savePath = address + fileNames;
+//							//alert(savePath);
+//							
+//							var file = window.fileDialog("save", "", "", model.getValue("/root/output/filegrid/item[" + selFile + "]/filename"));
+//							if (file != "")
+//								model.download(savePath, file, false);	
+//						}
+					]]>
+				</script>
+			</datagrid>
+			<button id="button4" style="left:14px; top:459px; width:55px; height:20px; ">
+				<caption>출력</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var subject = model.getValue("/root/output/subject");
+						var writer = model.getValue("/root/output/writer"); 
+						var content = model.getValue("/root/output/content");
+						var getdate = model.getValue("/root/output/date");
+						
+						model.setValue("/root/printPop/subject", subject);
+						model.setValue("/root/printPop/writer", writer);
+						model.setValue("/root/printPop/content", content);
+						model.setValue("/root/printPop/getdate", getdate);
+						
+						window.load("../xrwReport/boardPop.xrw", "modeless", "", "left:200px; top:0px;width:930;height:740;resize:false;", "/root/printPop", "/root") ;	
+					]]>
+				</script>
+			</button>
+			<caption id="caption1" style="left:19px; top:59px; width:50px; height:20px; font-weight:bold; vertical-align:middle; ">작성자</caption>
+			<caption id="caption2" style="left:269px; top:59px; width:50px; height:20px; font-weight:bold; vertical-align:middle; ">작성일</caption>
+			<caption id="caption3" style="left:19px; top:14px; width:50px; height:20px; font-weight:bold; vertical-align:middle; ">제   목</caption>
+		</group>
+	</xhtml:body>
+</xhtml:html>

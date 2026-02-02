@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<gridData>
+						<grid1>
+							<item>
+								<a/>
+								<b/>
+								<c/>
+								<d/>
+								<e/>
+							</item>
+						</grid1>
+					</gridData>
+					<formData>
+						<search/>
+						<send1>
+							<WORKGB/>
+							<DATA1/>
+						</send1>
+					</formData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			function mateInit() { // 초기 로딩
+			
+				var WORKGB = model.getValue("/root/cmdHelpPopData/cmdHelp");
+			
+				sendBuffInit();					
+				if (WORKGB == "help_Itcst"){
+					sendBuffAdd("CUSTCD", model.getValue("/root/cmdHelpPopData/xPath3"));
+				}
+				submit("sp_SCM_HelpPop", WORKGB);
+				model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+				datagrid1.refresh();
+			
+				var searchData = model.getValue("/root/cmdHelpPopData/searchData");
+				model.setValue("/root/formData/search",searchData);
+				input1.refresh();
+				helpSearch();
+				var windowWidth = window.width;
+				var windowHeight = window.height;
+
+				var gridCaption = model.getValue("/root/cmdHelpPopData/gridCaption");
+				var colWidth = model.getValue("/root/cmdHelpPopData/colWidth");
+				gridCaption = replaceAll(gridCaption,",","^");
+				var colLength = colWidth.split(",");
+				for(var i = colLength.length; i < datagrid1.cols; i++) {
+					datagrid1.colHidden(i) = true;
+				}
+				
+				for(var i = 0; i < colLength.length; i++) {
+					datagrid1.colWidth(i) = colLength[i];
+				}
+				group1.attribute("width") = windowWidth - 15;
+				group1.attribute("height") = windowHeight - 40;
+				datagrid1.attribute("width") = windowWidth - 30;
+				datagrid1.attribute("height") = windowHeight - 90;
+				
+				datagrid1.caption = gridCaption;
+				model.refresh();
+			}
+			function helpSearch() { // 데이터 검색 하기
+				var obj = instance1.selectNodes("/root/msgBuff/data/item");
+				var InputText = input1.currentText;
+				if(InputText == null || InputText == "") {
+					model.copyNode("/root/gridData/grid1","/root/msgBuff/data");
+				} else {
+					model.copyNode("/root/gridData/grid1","/root/temp");
+					for(var i = 1; i <= obj.length; i++)
+					{
+						var a = model.getValue("/root/msgBuff/data/item["+i+"]/a");
+						var b = model.getValue("/root/msgBuff/data/item["+i+"]/b");
+						
+						if(a.search(InputText) != -1 || b.search(InputText) != -1  ){
+							model.duplicate("/root/gridData/grid1","/root/msgBuff/data/item["+i+"]");
+						}
+					}
+				}
+				datagrid1.refresh();
+			}
+			function gridDoubleClick(gridObj) { // 데이터 부모창으로 복사하기
+				try {
+					var row = gridObj.mouseRow;
+					var grid = instance1.selectNodes("/root/gridData/grid1/item");
+
+					var xPath1 = model.getValue("/root/cmdHelpPopData/xPath1");
+					var xPath2 = model.getValue("/root/cmdHelpPopData/xPath2");
+					var xPath3 = model.getValue("/root/cmdHelpPopData/xPath3");
+					var xPath4 = model.getValue("/root/cmdHelpPopData/xPath4");
+					var xPath5 = model.getValue("/root/cmdHelpPopData/xPath5");
+
+					var cmdHelp = model.getValue("/root/cmdHelpPopData/cmdHelp");
+					if(xPath1 != "" && xPath1 != null) {
+						var temp = grid.item(row-1).childnodes.item(0).text;
+						opener.model.setValue(xPath1,temp);
+					}
+					
+					if(xPath2 != "" && xPath2 != null) {
+						var temp = grid.item(row-1).childnodes.item(1).text;
+						opener.model.setValue(xPath2,temp);
+					}
+					
+					if(xPath3 != "" && xPath3 != null) {
+						var temp = grid.item(row-1).childnodes.item(2).text;
+						opener.model.setValue(xPath3,temp);
+					}
+					
+					if(xPath4 != "" && xPath4 != null) {
+						var temp = grid.item(row-1).childnodes.item(3).text;
+						opener.model.setValue(xPath4,temp);
+					}
+					
+					if(xPath5 != "" && xPath5 != null) {
+						var temp = grid.item(row-1).childnodes.item(4).text;
+						opener.model.setValue(xPath5,temp);
+					}
+						
+					model.setValue("/root/formData/search","");
+				} catch(e) {}
+				window.close();
+			}
+			function ondblclick() { // 공통 이벤트
+				try {
+					var gridObj = document.all(event.currentTarget) ;
+					if (gridObj.elementName == "xforms:datagrid") {
+						gridDoubleClick(gridObj);
+					}
+					event.stopPropagation();
+				} catch(e) {}
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<group id="group1" style="left:0px; top:0px; width:270px; height:340px; ">
+			<button id="button1" style="left:150px; top:15px; width:50px; height:25px; ">
+				<caption>조  회</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						helpSearch();
+					]]>
+				</script>
+			</button>
+			<button id="button2" style="left:210px; top:15px; width:45px; height:25px; ">
+				<caption>닫 기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+			<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+			<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" caption="ad^zdwdq^caption1^caption2^caption3" colsep="^" colwidth="113, 100, 100, 100, 100" explorerbar="sortshowmove" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" style="left:10px; top:45px; width:250px; height:285px; ">
+				<col ref="a" style="text-align:left; "/>
+				<col ref="b" style="text-align:left; "/>
+				<col ref="c"/>
+				<col ref="d"/>
+				<col ref="e"/>
+			</datagrid>
+			<input id="input1" ref="/root/formData/search" style="left:10px; top:15px; width:125px; height:20px; ">
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						if (event.keyCode == 13) { // 엔터키 쳤을 경우
+							helpSearch();
+						}
+					]]>
+				</script>
+			</input>
+		</group>
+	</xhtml:body>
+</xhtml:html>

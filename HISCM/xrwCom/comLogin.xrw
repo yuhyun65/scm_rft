@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<loginData>
+						<userID/>
+						<userPass/>
+						<isAdmin/>
+						<userName/>
+						<isLogin>N</isLogin>
+					</loginData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+
+				function mateInit() { // 로딩 초기화  // 문서 타이틀 설정
+					setTitle();
+					
+					loginTitle.value = model.getValue("/root/setValue/docTitle");
+					
+					var copyrightText = model.getValue("/root/setValue/copyright");
+					copyright.text = copyrightText ; 
+					
+					model.setFocus("loginUserID");
+					
+					// changeLang(); // 언어 변환
+
+					//자동로그인 설정
+					var userID = model.getValue("/root/setValue/autoLoginUserID");
+					var userPass = model.getValue("/root/setValue/autoLoginUserPass");
+					model.setValue("/root/loginData/userID", "TR01");
+					model.setValue("/root/loginData/userPass", "1111");
+					
+					model.refresh();
+					
+					if (htmlwindow.GetUserID() != "null" && htmlwindow.GetUserPass() != "")
+					{
+						model.setValue("/root/loginData/userID", htmlwindow.GetUserID());
+						model.setValue("/root/loginData/userPass", htmlwindow.GetUserPass() );
+						
+						loginBtn.dispatch("onclick") ;
+					}
+				}
+				
+				// 공통 함수와 스타일 시트 다운로드 ( vbDownScript )
+//				function downCommon(styleType, styleVer, functionVer, initVer, eventVer) {
+//					var ret = TFStarter.getConfig(rootURL+"/install/initConfig.jsp?styleType="+styleType+"&styleVer="+styleVer+"&functionVer="+functionVer+"&initVer="+initVer+"&eventVer="+eventVer);
+//					if (ret == false) {
+//						alert("공통 함수를 설치하지 못하였습니다. \n\n페이지 오류 발생 시 관리자한테 문의하세요.");
+//					}
+//				}
+				// MDB 에서 불러온 userInfo 정보 인스턴스에 저장 ( vbGetUserInfo 함수에서 호출 )
+				
+				function setUserInfo(dbServer,dbPort,dbName,dbUser,dbPass,styleType,pageLang) {
+					
+					dbServer = deCode(dbServer, 102);
+					dbPort = deCode(dbPort, 102);
+					dbName = deCode(dbName, 102);
+					dbUser = deCode(dbUser, 102);
+					dbPass = deCode(dbPass, 102);
+					styleType = deCode(styleType, 102);
+					pageLang = deCode(pageLang, 102);
+					
+					model.setValue("/root/cmdMdbUserInfo/dbServer",dbServer);
+					model.setValue("/root/cmdMdbUserInfo/dbPort",dbPort);
+					model.setValue("/root/cmdMdbUserInfo/dbName",dbName);
+					model.setValue("/root/cmdMdbUserInfo/dbUser",dbUser);
+					model.setValue("/root/cmdMdbUserInfo/dbPass",dbPass);
+					model.setValue("/root/cmdMdbUserInfo/pageLang", pageLang);
+					model.setValue("/root/cmdMdbUserInfo/styleType", styleType);
+					initUserInfo() ;
+				}
+				// MDB 정보 없을 시 instance.xrw 의 setValue 에 저장된 기본 정보 설정
+				function initUserInfo() {
+					var styleType = model.getValue("/root/cmdMdbUserInfo/styleType") ;
+					var pageLang = model.getValue("/root/cmdMdbUserInfo/pageLang") ;
+					if (styleType == "" || styleType == null) { // 기본 스타일 설정
+						var initStyleType = model.getValue("/root/setValue/styleType");
+						model.setValue("/root/cmdMdbUserInfo/styleType", initStyleType) ;
+					}
+					if (pageLang == "" || pageLang == null) { // 기본 언어 설정
+						var initPageLang = model.getValue("/root/setValue/pageLang");
+						model.setValue("/root/cmdMdbUserInfo/pageLang", initPageLang) ;
+					}
+				}
+			]]>
+		</script>
+		<script>
+			<![CDATA[
+				' 공통 함수와 사용자 스타일 정보 다운로드 ( 로그인 버튼에서 호출 )
+				Function vbDownScript(userID,styleType,mdbDir)
+				
+				     Set DbCon=CreateObject("ADODB.Connection") 'mdb 열기
+				     DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+				     Set DbRec=CreateObject("ADODB.Recordset") 
+				     
+				     ' 사용자 스타일 타입 가져오기 ( 기본 값은 instance.xrw 의 setValue 에 저장된 스타일 정보 )
+				     DbRec.Open "SELECT styleType FROM UserInfo WHERE userID = '"&userID&"'", DbCon
+				     while not DbRec.EOF
+				     		styleType = CStr(DbRec("styleType"))
+					        DbRec.moveNext
+				     wend
+				     DbRec.Close
+				     
+				     ' MDB UserInfo 테이블의 설치 파일의 버전 1씩 증가 ( userID를 common 으로 공통 관리 )
+				     DbRec.Open "UPDATE UserInfo SET styleVer = styleVer + 1, functionVer = functionVer + 1, initVer = initVer + 1, eventVer = eventVer + 1 WHERE userID = 'common'", DbCon
+				     ' 증가된 설치 파일 버전 가져오기
+				     DbRec.Open "SELECT styleVer, functionVer, initVer, eventVer FROM UserInfo WHERE userID = 'common'", DbCon
+				     while not DbRec.EOF
+				     		window.javaScript.downCommon styleType, CStr(DbRec("styleVer")), CStr(DbRec("functionVer")), CStr(DbRec("initVer")), CStr(DbRec("eventVer"))
+					        DbRec.moveNext
+				     wend
+				     DbRec.Close
+				End Function
+
+				'mdb에서 환경설정 정보를 얻는다
+				Function vbGetUserInfo(userID,mdbDir)
+				     Set DbCon=CreateObject("ADODB.Connection") 'mdb를 사용할 때 
+				     DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+				     
+				     Set DbRec=CreateObject("ADODB.Recordset") 
+				     DbRec.CursorType=1
+				     
+				     ' MDB UserInfo 테이블의 사용자 환경 설정 정보 가져오기 ( 서버 정보 - 사용자 아이디별로 존재 )
+				     DbRec.Open "SELECT dbServer, dbPort, dbName, dbUser, dbPass, pageLang, styleType, styleVer FROM UserInfo WHERE userID = '"&userID&"'", DbCon
+				     while not DbRec.EOF
+				     		window.javaScript.setUserInfo CStr(DbRec("dbServer")), CStr(DbRec("dbPort")), CStr(DbRec("dbName")), CStr(DbRec("dbUser")), CStr(DbRec("dbPass")), CStr(DbRec("styleType")), CStr(DbRec("pageLang"))
+					        DbRec.moveNext
+				     wend
+				     DbRec.Close
+				     window.javaScript.initUserInfo ' MDB 값 없을 시 초기값 설정
+				End Function
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<img id="img1" src="../images/login/login_bg.jpg" style="left:0px; top:0px; width:500px; height:300px; background-stretch:stretch; "/>
+		<caption id="copyright" style="left:0px; top:300px; width:500px; height:35px; font-family:굴림; font-size:10pt; font-weight:bold; color:#ffffff; text-align:center; vertical-align:middle; background-color:#333333; ">...</caption>
+		<img id="img2" src="../images/login/loginMonitor.gif" style="left:370px; top:55px; width:125px; height:200px; background-color:transparent; background-stretch:stretch; "/>
+		<caption id="loginTitle" style="left:90px; top:40px; width:325px; height:35px; font-size:14pt; font-weight:bold; text-align:center; vertical-align:middle; background-color:#99ccff; ">*** SCM 시스템</caption>
+		<group id="group1" style="left:110px; top:95px; width:265px; height:65px; background-color:transparent; ">
+			<button id="loginBtn" navindex="3" style="left:190px; top:10px; width:65px; height:45px; background-color:#99ccff; border-style:solid; ">
+				<caption>로그인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+					
+					progress.attribute("top") = "100px;"
+					
+					var userID = model.getValue("/root/loginData/userID");
+					var mdbDir = model.getValue("/root/setValue/mdbDir");
+					
+					userID = enCode(userID, 102);
+					window.vbScript.vbGetUserInfo(userID,mdbDir); // userID 의 MDB 정보 가져오기
+
+					// 로그인 가능 여부
+					sendBuffInit();
+					sendBuffAdd("UserID", model.getValue("/root/loginData/userID"));
+					sendBuffAdd("UserPass", model.getValue("/root/loginData/userPass"));
+					submit("sp_SCM_MemberShip", "Login");
+
+					var userID = model.getValue("/root/msgBuff/data/item/userID");
+					var userName = model.getValue("/root/msgBuff/data/item/userName");
+					
+					if (userID == "NO_USERID") {
+						alertBox("로그인에 실패하였습니다. \n\n존재하지 않는 아이디입니다. ");
+						loginUserID.value = "" ;
+						loginUserPass.value = "";
+						model.setFocus("loginUserID");
+					} else if (userID == "NO_USERPASS") {
+						alertBox("로그인에 실패하였습니다. \n\n비밀번호가 맞지 않습니다. ");
+						loginUserPass.value = "";
+						model.setFocus("loginUserPass");
+					} else { // 로그인 성공 시 공통 스트립트와 사용자 스타일을 다운로드 및 main 화면 진입
+						var styleType = model.getValue("/root/setValue/styleType") ;
+						//window.vbScript.vbDownScript(userID,styleType,mdbDir); // 사용자 스타일 ( 공통 스크립트 옵션 ) 다운로드
+						
+						// 스크린 중심에 main화면 띄우기 ( 실제 크기 아님 )
+						var winWidth = htmlwindow.screen.width;
+						var winHeight = htmlwindow.screen.height;
+						window.minimize();
+						window.load("../xrwCom/comMain.xrw", "modal", "main", "resize:false;left:100px;top:100px;width:"+parseInt(winWidth-200)+"px;height:"+parseInt(winHeight-200)+"px;", "/root/loginData", "/root/formData/sendLogin");
+						window.close(); // 메인 화면 창이 닫길 때 같이 닫음 
+					}
+					]]>
+				</script>
+			</button>
+			<input id="loginUserID" ref="/root/loginData/userID" navindex="1" style="left:80px; top:10px; width:100px; height:20px; border-color:#000000; border-style:solid; "/>
+			<secret id="loginUserPass" ref="/root/loginData/userPass" navindex="2" imemode="disabled" style="left:80px; top:35px; width:100px; height:20px; border-color:#000000; border-style:solid; ">
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						// 비밀번호 입력 후 엔터키 눌렀을 로그인 처리
+						if (event.keyCode == 13) {
+							// 로그인 버튼 강제 클릭
+							model.setFocus("loginBtn");
+							loginBtn.dispatch("onclick") ;
+						}
+					]]>
+				</script>
+			</secret>
+			<caption id="caption1" style="left:5px; top:10px; width:70px; height:20px; font-weight:bold; text-align:right; vertical-align:middle; ">아 이 디</caption>
+			<caption id="caption2" style="left:5px; top:35px; width:70px; height:20px; font-weight:bold; text-align:right; vertical-align:middle; ">비밀번호</caption>
+			<button id="userSetup" navindex="4" visibility="hidden" style="left:190px; top:10px; width:65px; height:20px; background-color:#99ccff; border-style:solid; ">
+				<caption>환경설정</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						// 사용자 환경 설정 ( 입력한 아이디로 MDB 정보 검색 )
+						var userID = model.getValue("/root/loginData/userID");
+						if(userID == "" || userID == null) {
+							alertBox("아이디를 입력하십시요.");
+						} else {
+							var check =  model.alert("사용자 "+userID+" 에 대해 환경설정을 하시겠습니까 ? ", "", 0x20 | 4 );
+							if(check == 6) {
+								window.load("../xrwSys/sysA004.xrw", "modal", "환경설정", "resize:false;left:100px;top:100px;width:560px;height:320px;", "/root/loginData", "/root/loginData");
+							}
+						}
+					]]>
+				</script>
+			</button>
+		</group>
+		<group id="progress" visibility="hidden" style="left:95px; top:165px; width:285px; height:50px; background-color:#eeeeee; border-style:solid; ">
+			<caption id="progresstext" style="left:10px; top:15px; width:260px; height:20px; vertical-align:middle; ">※ 로그인 중입니다. 잠시만 기다려주십시오.</caption>
+		</group>
+	</xhtml:body>
+</xhtml:html>

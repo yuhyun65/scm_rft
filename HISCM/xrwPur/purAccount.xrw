@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:my="http://www.comsquare.co.kr/example" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:: 거래명세서출력 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<sendData>
+						<napDate/>
+						<userID/>
+						<CustCD/>
+						<ORDERGB/>
+					</sendData>
+					<grid>
+						<item>
+							<SEL/>
+							<ORDERNM/>
+							<NUM/>
+							<FACTNM/>
+							<GAHKEY/>
+							<SABUN/>
+							<PARTNO/>
+							<ITEMNM/>
+							<ITSPEC/>
+							<GAQTY/>
+							<GAPRICE/>
+							<GAAMT/>
+						</item>
+					</grid>
+					<popData>
+						<Title>
+							<subname>(공급자용)</subname>
+							<Detail>
+								<item>
+									<NUM/>
+									<GAHKEY/>
+									<SABUN/>
+									<ITEMNM/>
+									<GAQTY/>
+									<GAPRICE/>
+									<GAAMT/>
+									<FACTNM/>
+									<ITSPEC/>
+								</item>
+							</Detail>
+						</Title>
+						<Title>
+							<subname>(공급받는자용)</subname>
+							<Detail>
+								<item>
+									<NUM/>
+									<GAHKEY/>
+									<SABUN/>
+									<ITEMNM/>
+									<GAQTY/>
+									<GAPRICE/>
+									<GAAMT/>
+									<FACTNM/>
+									<ITSPEC/>
+								</item>
+							</Detail>
+						</Title>
+						<custInfo>
+							<SaupNum/>
+							<CustName/>
+							<President/>
+							<Address/>
+							<UpTae/>
+							<JongMok/>
+							<STEMPSRC/>
+						</custInfo>
+						<custInfo2>
+							<SaupNum/>
+							<CustName/>
+							<President/>
+							<Address/>
+							<UpTae/>
+							<JongMok/>
+						</custInfo2>
+						<NapDate/>
+						<Price/>
+						<Tax/>
+						<Total/>
+					</popData>
+					<ComboData>
+						<Combo1>
+							<item>
+								<Label/>
+								<Value/>
+							</item>
+						</Combo1>
+						<Combo2>
+							<item>
+								<Label>ALL</Label>
+								<Value/>
+							</item>
+						</Combo2>
+					</ComboData>
+					<popData1>
+						<Title>
+							<subname>(공급자용)</subname>
+							<Detail>
+								<item>
+									<NUM/>
+									<GAHKEY/>
+									<SABUN/>
+									<ITEMNM/>
+									<GAQTY/>
+									<GAPRICE/>
+									<GAAMT/>
+									<FACTNM/>
+									<ITSPEC/>
+								</item>
+							</Detail>
+						</Title>
+						<Title>
+							<subname>(공급받는자용)</subname>
+							<Detail>
+								<item>
+									<NUM/>
+									<GAHKEY/>
+									<SABUN/>
+									<ITEMNM/>
+									<GAQTY/>
+									<GAPRICE/>
+									<GAAMT/>
+									<FACTNM/>
+									<ITSPEC/>
+								</item>
+							</Detail>
+						</Title>
+						<custInfo>
+							<SaupNum/>
+							<CustName/>
+							<President/>
+							<Address/>
+							<UpTae/>
+							<JongMok/>
+							<STEMPSRC/>
+						</custInfo>
+						<custInfo2>
+							<SaupNum/>
+							<CustName/>
+							<President/>
+							<Address/>
+							<UpTae/>
+							<JongMok/>
+						</custInfo2>
+						<NapDate/>
+						<Price/>
+						<Tax/>
+						<Total/>
+					</popData1>
+					<grid2>
+						<item>
+							<SEL/>
+							<ORDERNM/>
+							<NUM/>
+							<FACTNM/>
+							<GAHKEY/>
+							<SABUN/>
+							<PARTNO/>
+							<ITEMNM/>
+							<ITSPEC/>
+							<GAQTY/>
+							<GAPRICE/>
+							<GAAMT/>
+						</item>
+					</grid2>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" src="excel.js"/>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				
+				var sCustCD = "";
+				function mateInit() {
+					
+					sCustCD = getUserID().substring(1);					
+					model.setValue("/root/sendData/napDate", getDate("yyyymmdd"));
+					model.setValue("/root/sendData/userID", getUserID());
+					model.setValue("/root/sendData/CustCD", sCustCD);
+					
+					sendBuffInit();
+					//sendBuffAdd("CUSTCD", sCustCD);
+					sendBuffAdd("USERID", getUserID());
+					submit("sp_SCM_OrderManager", "GetCustInfo");
+					model.copyNode("/root/popData1/custInfo", "/root/msgBuff/data/item");
+				       var sFileNM = model.getValue("/root/popData1/custInfo/STEMPSRC");
+					model.setValue("/root/popData1/custInfo/STEMPSRC", model.getValue("root/msgBuff/address")+sFileNM);
+				
+					sendBuffInit();
+					sendBuffAdd("CUSTCD", "ADMIN");
+					submit("sp_SCM_OrderManager", "GetCustInfo");
+					model.copyNode("/root/popData1/custInfo2", "/root/msgBuff/data/item");
+					
+					//발주구분
+					sendBuffInit();
+					
+					sendBuffAdd("CODHCD", "M002");
+					submit("sp_ComCode", "GetCodeList");
+					
+					model.copyNode("/root/ComboData/Combo1", "/root/msgBuff/data");
+					model.duplicate("/root/ComboData/Combo1", "/root/ComboData/Combo2/item");
+					combo2.refresh();
+					
+					//그리드 캡션 부분에 체크박스를 설정
+					datagrid1.fixedcellcheckbox(0, 0, false) = true ;	
+					mateSearch();
+				}
+				//조회클릭시
+				function mateSearch() {
+					
+					sendBuffInit();
+					sendBuffAdd("FDATE", model.getValue("/root/sendData/napDate"));
+					//sendBuffAdd("CUSTCD", sCustCD);
+					sendBuffAdd("USERID", getUserID());
+					submit("sp_SCM_OrderManager", "GetAccount");
+					
+					model.copyNode("/root/grid", "/root/msgBuff/data");
+					
+					model.property("colStr") = "Itemnm";
+					ascSubtotal();
+					model.refresh();
+				}
+				//추가클릭시
+				function mateAdd() { 
+				}
+				//저장클릭시
+				function mateSave() { 
+				}
+				//삭제클릭시
+				function mateDel() { 
+				}
+				//출력클릭시
+				function matePrint() { 
+				
+					model.copyNode("/root/popData", "/root/popData1");
+					
+					model.setValue("/root/popData/NapDate", model.getValue("/root/sendData/napDate"));
+					var checkCount = 0;
+					var nodeList = instance1.selectNodes("/root/grid/item") ;
+					var num = 1;
+					var IsOver = false;
+					var iCnt = 1;
+					
+					model.copyNode("/root/popData/Title/Detail", "/root/popData/Title/Detail");	
+					model.copyNode("/root/popData/Title[2]/Detail", "/root/popData/Title[2]/Detail");	
+					model.copyNode("/root/grid2", "/root/grid2");	
+					for (var i=1; i<=nodeList.length; i++)
+					{
+						if (model.getValue("/root/grid/item["+ i +"]/SEL") == "Y")
+						{
+//							if (checkCount < 15)
+//							{
+								checkCount ++;
+								model.setValue("/root/grid/item["+ i +"]/NUM", num);
+								model.duplicate("/root/grid2", "/root/grid/item["+ i +"]");
+							
+								num++;
+//							} else {
+//								model.setValue("/root/grid/item["+ i +"]/SEL", "N");
+//								IsOver = true;
+//							}
+						}
+					}
+					
+					if (checkCount == 0 ) {
+						alertBox("출력할 항목을 체크해주세요.") ;
+					} else {
+//						if (IsOver)
+//						{
+//							alertBox("거래명세서는 최대 15개 항목까지 포함시킬 수 있습니다. ");
+//						}				
+						
+						var nodeList1 = instance1.selectNodes("/root/grid2/item") ;	
+						for (var i=1; i<=nodeList1.length; i++)
+						{	
+							model.duplicate("/root/popData/Title["+(iCnt)+"]/Detail", "/root/grid2/item["+i+"]");
+							model.duplicate("/root/popData/Title["+(iCnt+1)+"]/Detail", "/root/grid2/item["+i+"]");
+							if ( i % 15 == 0 && i != nodeList1.length)
+							{
+								iCnt += 2;
+								model.makeValue("/root/popData/Title["+(iCnt)+"]/subname", "(공급자용)");
+								model.makeValue("/root/popData/Title["+(iCnt+1)+"]/subname", "(공급받는자용)");
+								
+								model.makeNode("/root/popData/Title["+(iCnt)+"]/Detail");
+								model.makeNode("/root/popData/Title["+(iCnt+1)+"]/Detail");
+							}
+						}
+					  	window.load("../xrwReport/accountPop.xrw", "modeless", "", "left:200px; top:0px;width:930;height:740;resize:false;", "/root/popData", "/root") ;
+					}
+					
+				}
+				//엑셀크릭시
+				function mateExcel() {
+					openExcel("datagrid1", "true");
+				}
+				//닫기클릭시
+				function mateClose() { 
+				}
+				function pageResize() {
+					controlResize("datagrid1");
+				}
+				function setSubtotal() {
+					gridSubtotal("datagrid1", "NapQty") ;
+					gridSubtotal("datagrid1", "OrAmt") ;
+				}	
+										
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<datagrid id="datagrid1" nodeset="/root/grid/item" scroll="auto" caption="^발주구분^NUM^납품공장^납품번호^품목코드^품번^품명^규격^납품수량^납품단가^납품금액" colsep="^" colwidth="26, 60, 52, 100, 109, 100, 100, 162, 100, 90, 90, 90, 100" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" data.focus-rect="hidden" style="left:0px; top:30px; width:800px; height:225px; ">
+			<col checkvalue="Y,N" ref="SEL" type="checkbox" style="font-size:8pt; "/>
+			<col ref="ORDERNM"/>
+			<col ref="NUM" visibility="hidden"/>
+			<col ref="FACTNM"/>
+			<col ref="GAHKEY" style="font-size:8pt; text-align:left; padding-left:3; "/>
+			<col ref="SABUN" style="left:78px; top:20px; width:109px; height:20px; font-size:8pt; text-align:center; "/>
+			<col ref="PARTNO"/>
+			<col ref="ITEMNM" style="left:187px; top:20px; width:100px; height:20px; font-size:8pt; text-align:center; "/>
+			<col ref="ITSPEC"/>
+			<col ref="GAQTY" format="#,###.0" style="text-align:right; "/>
+			<col ref="GAPRICE" format="#,###" style="font-size:8pt; text-align:right; padding-left:3; "/>
+			<col ref="GAAMT" format="#,###.0" style="font-size:8pt; text-align:right; "/>
+			<col/>
+		</datagrid>
+		<group id="group1" style="left:0px; top:0px; width:800px; height:30px; ">
+			<caption id="caption1" style="left:5px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">납품일자</caption>
+			<input id="input1" ref="/root/sendData/napDate" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:65px; top:5px; width:100px; height:20px; "/>
+			<select1 id="combo2" ref="/root/sendData/ORDERGB" appearance="minimal" style="left:235px; top:5px; width:100px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/ComboData/Combo1/item">
+						<label ref="Label"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<caption id="caption12" style="left:175px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주구분</caption>
+		</group>
+	</xhtml:body>
+</xhtml:html>

@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:my="http://www.comsquare.co.kr/example" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:: 롯트 출력 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<napum>
+							<FDATE/>
+							<ORDERGB/>
+						</napum>
+						<send1>
+							<gridData/>
+							<QueryKind/>
+							<FDATE/>
+							<lastDate/>
+							<userID/>
+							<formID/>
+						</send1>
+						<send2>
+							<PACKUNIT/>
+							<PACKBOX/>
+							<EBOXYN/>
+						</send2>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<SEL/>
+								<ORDERNM/>
+								<CUSTNM/>
+								<GAHKEY/>
+								<GADATE/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<GAQTY/>
+								<STATENM/>
+								<BOXQTY/>
+								<EBOXQTY/>
+								<STDQTY/>
+							</item>
+						</grid1>
+						<grid2>
+							<item>
+								<SEL/>
+								<LOTNO/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<LOTQTY/>
+								<PRCUSTNM/>
+								<NAPDATE/>
+								<CUSTNM/>
+								<PRDDATE/>
+								<inCount/>
+								<GAHKEY/>
+								<PONO/>
+							</item>
+						</grid2>
+						<grid3>
+							<item>
+								<SEL/>
+								<LOTNO/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<LOTQTY/>
+								<PRCUSTNM/>
+								<NAPDATE/>
+								<CUSTNM/>
+								<PRDDATE/>
+								<inCount/>
+								<PONO/>
+							</item>
+						</grid3>
+						<grid4>
+							<item>
+								<SEL/>
+								<LOTNO/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<LOTQTY/>
+								<PRCUSTNM/>
+								<NAPDATE/>
+								<CUSTNM/>
+								<PRDDATE/>
+								<inCount/>
+								<PONO/>
+							</item>
+						</grid4>
+						<grid5>
+							<item>
+								<SEL/>
+								<LOTNO/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<LOTQTY/>
+								<PRCUSTNM/>
+								<NAPDATE/>
+								<CUSTNM/>
+								<PRDDATE/>
+								<inCount/>
+								<PONO/>
+							</item>
+						</grid5>
+					</gridData>
+					<temp>
+					</temp>
+					<printPop/>
+					<LotNum/>
+					<printTypeSel>2</printTypeSel>
+					<printType>
+						<item>
+							<Lable>전용프린터</Lable>
+							<Value>1</Value>
+						</item>
+						<item>
+							<Lable>일반프린터</Lable>
+							<Value>2</Value>
+						</item>
+						<item>
+							<Lable>바코드프린터</Lable>
+							<Value>3</Value>
+						</item>
+					</printType>
+					<LeftInfo>
+						<txtOrHKey/>
+						<txtSABUN/>
+						<txtNapDate/>
+						<txtNapQty/>
+						<txtBOXQTY/>
+						<txtStdQty/>
+						<txtEBOXQTY/>
+					</LeftInfo>
+					<inCount>1</inCount>
+					<ComboData>
+						<Combo1>
+							<item>
+								<Label/>
+								<Value/>
+							</item>
+						</Combo1>
+						<Combo2>
+							<item>
+								<Label>ALL</Label>
+								<Value/>
+							</item>
+						</Combo2>
+					</ComboData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				var sCustCD = "";
+				function mateInit() { // 초기 로딩
+				
+					sCustCD = getUserID().substring(1);
+					model.setValue("/root/formData/napum/FDATE", getDate("yyyymmdd"));
+					input1.refresh();
+					
+					//DataGrid 헤드 영역에 CheckBox를 만들어 준다.
+					datagrid1.fixedcellcheckbox(0, 0, false) = true ;
+					datagrid2.fixedcellcheckbox(0, 0, false) = true ;
+					
+					//발주구분
+					sendBuffInit();
+					
+					sendBuffAdd("CODHCD", "M002");
+					submit("sp_ComCode", "GetCodeList");
+					
+					model.copyNode("/root/ComboData/Combo1", "/root/msgBuff/data");
+					model.duplicate("/root/ComboData/Combo1", "/root/ComboData/Combo2/item");
+					combo2.refresh();
+											
+					mateSearch();
+				}			
+				function mateSearch() {  // 조회버튼을 눌렀을때....
+				
+					sendBuffInit();
+					sendBuffAdd("FDATE", model.getValue("/root/formData/napum/FDATE"));	
+					sendBuffAdd("ORDERGB", model.getValue("/root/formData/napum/ORDERGB"));	
+					sendBuffAdd("USERID", getUserID());
+					submit("sp_SCM_OrderManager", "GetLotHead");
+					model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+					
+					getLotList(0);
+					model.copyNode("/root/gridData/grid2", "/root/gridData/grid2");
+					model.copyNode("/root/gridData/grid4", "/root/gridData/grid4");
+					model.copyNode("/root/gridData/grid5", "/root/gridData/grid5");
+					
+					model.refresh();
+				}
+				function getLotList(itemIndex)
+				{
+					var txtOrHKey = model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/GAHKEY");
+					var txtSABUN = model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/SABUN");
+					var txtNapQty = model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/GAQTY");
+					var txtNapDate = model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/GADATE");
+					var txtBOXQTY = model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/BOXQTY");
+					var txtStdQty = model.getValue("/root/gridData/grid1/item["+ itemIndex +"]/STDQTY");
+					var txtEBOXQTY = model.getValue("/root/gridData/grid1/item["+ itemIndex +"]/EBOXQTY");
+					
+					model.setValue("/root/LeftInfo/txtOrHKey", txtOrHKey);
+					model.setValue("/root/LeftInfo/txtSABUN", txtSABUN);
+					model.setValue("/root/LeftInfo/txtNapQty", txtNapQty);
+					model.setValue("/root/LeftInfo/txtNapDate", txtNapDate);
+					model.setValue("/root/LeftInfo/txtBOXQTY", txtBOXQTY);
+					model.setValue("/root/LeftInfo/txtStdQty", txtStdQty);
+					model.setValue("/root/LeftInfo/txtEBOXQTY", txtEBOXQTY);
+					
+					sendBuffInit();
+					sendBuffAdd("GAHKEY", model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/GAHKEY"));
+					submit("sp_SCM_OrderManager", "GetSumLotDetail");
+//					model.copyNode("/root/gridData/grid2", "/root/msgBuff/data");					
+//					model.refresh();
+					
+					var nodeList = instance1.selectNodes("/root/msgBuff/data/item");
+					if (nodeList.length > 0)
+					{
+						for (var i=1; i <= nodeList.length; i++)
+						{		
+							model.duplicate("/root/gridData/grid2", "/root/msgBuff/data/item["+i+"]");
+						}
+					}			
+					model.refresh();
+										
+					var nodeList1 = instance1.selectNodes("/root/gridData/grid2/item");
+					model.setValue("/root/formData/send2/PACKUNIT", nodeList1.length);
+					input2.refresh();
+					
+					document.all("input2").dispatch("onkeyup");
+					
+					/*
+					sendBuffAdd("GAHKEY", model.getValue("/root/gridData/grid1/item[" + itemIndex + "]/GAHKEY"));
+					submit("sp_SCM_OrderManager", "GetPackInfo");
+					model.setValue("/root/formData/send2/PACKUNIT", model.getValue( "/root/msgBuff/data/item/PACKUNIT"));
+					model.setValue("/root/formData/send2/PACKBOX", model.getValue("/root/msgBuff/data/item/PACKBOX"));
+					model.setValue("/root/formData/send2/EBOXYN", model.getValue("/root/msgBuff/data/item/EBOXYN"));
+					*/			
+					
+				}				
+				function mateAdd() {
+				}
+				function mateSave() {
+				}
+				function mateDel() {
+				}
+				function matePrint() {  // 인쇄 버튼을 눌렀을 때
+				
+					var checkCount = 0;
+					var nodeList5 = instance1.selectNodes("/root/gridData/grid5/item");
+					if (nodeList5.length > 0)
+					{
+						//전체인쇄
+						model.copyNode("/root/printPop", "/root/printPop");
+						for (var i=1; i <= nodeList5.length; i++)
+						{		
+							checkCount ++;
+							model.duplicate("/root/printPop", "/root/gridData/grid5/item["+i+"]");
+						}
+					}
+					else
+					{							
+						sendBuffInit();
+						sendBuffAdd("PACKUNIT", model.getValue("/root/formData/send2/PACKUNIT"));	
+						sendBuffAdd("GAHKEY", model.getValue("/root/LeftInfo/txtOrHKey"));	
+						submit("sp_SCM_OrderManager", "PackSumCHK");							
+						
+						var chk = model.getValue("/root/msgBuff/data/item/CHK");
+						var errmsg = model.getValue("/root/msgBuff/data/item/ERRMSG");			
+						if (chk == "X")
+						{
+							alertBox(errmsg);
+							getLotList(datagrid1.row);
+							return 0;
+						}
+						
+						var sGAHKEY = "", sLOTNO = "", sLOTQTY = "";						
+						
+						var nodeList2 = instance1.selectNodes("/root/gridData/grid2/item");
+						for (var i=1; i <= nodeList2.length; i++)
+						{					
+							sGAHKEY = sGAHKEY + model.getValue("/root/gridData/grid2/item["+ i +"]/GAHKEY")+"_/";
+							sLOTNO = sLOTNO + model.getValue("/root/gridData/grid2/item["+ i +"]/LOTNO")+"_/";
+							sLOTQTY = sLOTQTY + model.getValue("/root/gridData/grid2/item["+ i +"]/LOTQTY")+"_/";
+						}
+						
+						var nodeList1 = instance1.selectNodes("/root/gridData/grid2/item");															
+						sendBuffInit();
+						sendBuffAdd("FACTGB", "1");	
+						sendBuffAdd("LOTCNT", nodeList1.length);	
+						sendBuffAdd("PACKUNIT", model.getValue("/root/formData/send2/PACKUNIT"));	
+						sendBuffAdd("EBOXYN", model.getValue("/root/formData/send2/EBOXYN"));	
+						sendBuffAdd("GAHKEYSTR", sGAHKEY);
+						sendBuffAdd("LOTNOSTR", sLOTNO);
+						sendBuffAdd("LOTQTYSTR", sLOTQTY);
+						
+						/*alertBox(nodeList1.length);
+						alertBox(model.getValue("/root/formData/send2/PACKUNIT"));
+						alertBox(model.getValue("/root/formData/send2/EBOXYN"));
+						alertBox(sGAHKEY);
+						alertBox(sLOTNO);
+						alertBox(sLOTQTY);*/
+						submit("sp_SCM_OrderManager", "PackSumPart");
+						model.copyNode("/root/gridData/grid4", "/root/msgBuff/data");
+						
+						model.copyNode("/root/printPop", "/root/printPop");
+						
+//						var nodeList = instance1.selectNodes("/root/gridData/grid2/item");
+//						for (var i=1; i <= nodeList.length; i++)
+//						{					
+//							var SEL = model.getValue("/root/gridData/grid2/item["+ i +"]/SEL");
+//							if (SEL == "Y")
+//							{
+//								checkCount ++;
+//								model.duplicate("/root/printPop", "/root/gridData/grid2/item["+ i +"]");
+//							}
+//						}
+						
+						//자재대포장
+						var nodeList1 = instance1.selectNodes("/root/gridData/grid4/item");
+						for (var i=1; i <= nodeList1.length; i++)
+						{					
+							var SEL = model.getValue("/root/gridData/grid4/item["+ i +"]/SEL");
+							if (SEL == "Y")
+							{
+								checkCount ++;
+								model.duplicate("/root/printPop", "/root/gridData/grid4/item["+ i +"]");
+							}
+						}
+					}
+					if (checkCount == 0 ) {  // CheckBox에 Check된 내용이 없을 때
+						alertBox("출력할 항목을 체크해주세요.") ;
+					} else {	
+						var printType = model.getValue("/root/printTypeSel");
+						if (printType == "1")
+						{	
+							window.load("../xrwReport/lotPopIn.xrw", "modal", "", "left:250px; top:100px;width:454px; height:379px;resize:false;", "/root/printPop", "/root/lotInfo") ;
+						} 
+						else if (printType == "2")
+						{
+							window.load("../xrwReport/lotA4.xrw", "modal", "", "left:200px; top:0px;width:880;height:730;resize:false;", "/root/printPop", "/root/lotInfo") ;
+						}
+						else if (printType == "3")
+						{	
+							var Lotins = instance1.selectNodes("/root/printPop/item");
+							var gridData = "";
+							for ( var v =1 ; v<=Lotins.length ; v++ ) {
+								var LOTNO = model.getValue("/root/printPop/item[" + v + "]/LOTNO");
+								var SABUN = model.getValue("/root/printPop/item[" + v + "]/SABUN");
+								var PARTNO = model.getValue("/root/printPop/item[" + v + "]/PARTNO");
+								var ITEMNM = model.getValue("/root/printPop/item[" + v + "]/ITEMNM");
+								var LOTQTY = model.getValue("/root/printPop/item[" + v + "]/LOTQTY");
+								var PRCUSTNM =model.getValue("/root/printPop/item[" + v + "]/PRCUSTNM");
+								var NAPDATE = model.getValue("/root/printPop/item[" + v + "]/NAPDATE");
+								var CUSTNM = model.getValue("/root/printPop/item[" + v + "]/CUSTNM");
+								var PRDDATE = model.getValue("/root/printPop/item[" + v + "]/PRDDATE");								
+								var SUMLOTNO = model.getValue("/root/printPop/item[" + v + "]/SUMLOTNO");
+								var PONO = model.getValue("/root/printPop/item[" + v + "]/PONO");								
+								
+								PARTNO = PARTNO.replace("'","''");
+								ITEMNM = ITEMNM.replace("'","''");
+								gridData += LOTNO +  "♧" + SABUN +  "♧" + PARTNO +  "♧" + ITEMNM +  "♧" + LOTQTY +  "♧" + PRCUSTNM +  "♧" + NAPDATE +  "♧" + CUSTNM +  "♧" + PRDDATE  +  "♧" + SUMLOTNO +  "♧" + PONO + "▥";
+							}
+										
+//							model.alert(gridData);
+							var mdbDir = model.getValue("/root/setValue/mdbDir");
+							window.vbScript.vbmdbLotInfo(Lotins.length, gridData, mdbDir);
+							
+							window.exec("C:\\ComMate\\HISCM\\lotPrint.exe");
+							
+							model.copyNode("/root/printPop", "/root/temp");
+						} 
+					}
+				}
+				function mateExcel() {
+					return 1 ;
+				}
+				function mateClose() {
+				}				
+				function pageResize() {
+					controlResize("datagrid1", "width");
+					controlResize("datagrid2");
+					controlResize("groupSummary", "height");
+				}
+				function delLot(sGAHKEY)
+				{
+					var nodeList = instance1.selectNodes("/root/gridData/grid2/item");
+					var count = 0;
+					if (nodeList.length > 0)
+					{
+						for (var i=nodeList.length; i > 0; i--)
+						{
+//							alertBox(model.getValue("/root/gridData/grid2/item["+i+"]/GAHKEY"));
+							if(model.getValue("/root/gridData/grid2/item["+i+"]/GAHKEY") == sGAHKEY)
+							{
+								model.removenode("/root/gridData/grid2/item["+i+"]");
+								//datagrid2.deleteRow(i,false);
+							}
+						}
+					}
+					model.refresh();
+				}
+				function grid2AddDel(iRow)
+				{															
+					sendBuffInit();
+					sendBuffAdd("GAHKEY", model.getValue("/root/gridData/grid1/item[" + iRow + "]/GAHKEY"));
+					submit("sp_SCM_OrderManager", "GetLotDetail");
+					model.copyNode("/root/gridData/grid3", "/root/msgBuff/data");
+					
+					sendBuffInit();
+					sendBuffAdd("GAHKEY", model.getValue("/root/gridData/grid1/item[" + iRow + "]/GAHKEY"));
+					submit("sp_SCM_OrderManager", "PackSum");					
+					var nodeList0 = instance1.selectNodes("/root/msgBuff/data/item");
+					for (var i=1; i <= nodeList0.length; i++)
+					{					
+						model.duplicate("/root/gridData/grid3", "/root/msgBuff/data/item["+ i +"]");
+					}
+																
+					var nodeListgrid2 = instance1.selectNodes("/root/gridData/grid5/item");	
+					var nodeListgrid3 = instance1.selectNodes("/root/gridData/grid3/item");	
+					var grid2Len = nodeListgrid2.length;	
+					
+					if (model.getValue("/root/gridData/grid1/item[" + iRow + "]/SEL") == "Y")
+					{												
+						for (var i=1; i<=nodeListgrid3.length; i++)
+						{	
+							for (j=1; j<=nodeListgrid2.length;j++)
+							{
+								if (model.getValue("/root/gridData/grid5/item[" + j + "]/LOTNO") == model.getValue("/root/gridData/grid3/item[" + i + "]/LOTNO"))
+									return;
+							}
+							model.duplicate("/root/gridData/grid5", "/root/gridData/grid3/item["+ i +"]");												
+						}
+					}
+					else
+					{
+						for (var i=1; i<=nodeListgrid3.length; i++)
+						{
+							var curItemLotNo = model.getValue("/root/gridData/grid3/item[" + i + "]/LOTNO");
+							model.removeNodeset("/root/gridData/grid5/item[LOTNO = \"" + curItemLotNo +"\"]");
+						}
+					}
+					model.refresh();
+				}
+			]]>
+		</script>
+		<script type="vbscript">
+			<![CDATA[
+			
+'==================================================================
+' mdb에 기존에 있던 Lot정보 삭제하고 체크된 Lot 정보 insert
+'==================================================================
+Function vbmdbLotInfo(fornum, gridData, mdbDir) 
+    	Set DbCon=CreateObject("ADODB.Connection")  'mdb를 사용할 때 
+      	DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+      	Set DbRec=CreateObject("ADODB.Recordset")  ' DbRec.CursorType=1
+      	
+ 	DbRec.Open "DELETE FROM lotTemp", DbCon
+	
+	dim Data, gridValue 	
+	Data = Split(gridData, "▥")
+	
+     	for i = 0 to (fornum-1)
+'window.javaScript.alert(Data(i))
+     		gridValue = Split(Data(i),  "♧")
+     		DbRec.Open "INSERT INTO lotTemp (LOTNO, SABUN, PARTNO, ITEMNM, LOTQTY, PRCUSTNM, NAPDATE, CUSTNM, PRDDATE, SUMLOTNO, PONO )  VALUES('"&gridValue(0)&"', '"&gridValue(1)&"','"&gridValue(2)&"','"&gridValue(3)&"',"&gridValue(4)&",'"&gridValue(5)&"','"&gridValue(6)&"','"&gridValue(7)&"','"&gridValue(8)&"','"&gridValue(9)&"','"&gridValue(10)&"')" , DbCon 
+	next     	
+     
+End Function
+
+		   ]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import2" src="../script/Common.xrw" style="left:0px; top:5px; width:0px; height:0px; "/>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" caption="^발주구분^거래처^발주번호^납품일자^품목코드^품번^품명^납품수량^상태^박스수량^마지막박스수량^표준수량^" colsep="^" colwidth="27, 60, 100, 109, 100, 120, 100, 143, 80, 100, 100, 100, 100" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" data.focus-rect="hidden" style="left:0px; top:30px; width:800px; height:200px; ">
+			<col checkvalue="Y,N" ref="SEL" type="checkbox"/>
+			<col ref="ORDERNM"/>
+			<col ref="CUSTNM"/>
+			<col ref="GAHKEY"/>
+			<col ref="GADATE" format="yyyy-mm-dd"/>
+			<col ref="SABUN"/>
+			<col ref="PARTNO" style="text-align:left; "/>
+			<col ref="ITEMNM" style="text-align:left; "/>
+			<col ref="GAQTY" format="#,###" style="text-align:right; "/>
+			<col ref="STATENM"/>
+			<col ref="BOXQTY" visibility="hidden"/>
+			<col ref="EBOXQTY" visibility="hidden"/>
+			<col ref="STDQTY" visibility="hidden"/>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[				
+					if (datagrid1.colAttribute(datagrid1.col,"ref") == "SEL")
+					{			
+						datagrid1.col = 2;
+						if (datagrid1.row != 0)
+						{
+							if(model.getValue("/root/gridData/grid1/item["+datagrid1.row+"]/SEL") == "Y")
+							{
+								getLotList(datagrid1.row);
+							} else 
+							{
+								delLot(model.getValue("/root/gridData/grid1/item["+datagrid1.row+"]/GAHKEY"));
+							}
+						}
+					}
+				]]>
+			</script>
+		</datagrid>
+		<group id="groupSummary" style="left:0px; top:250px; width:220px; height:435px; ">
+			<group id="group1" style="left:5px; top:5px; width:205px; height:93px; border-style:solid; ">
+				<caption id="caption10" style="left:5px; top:35px; width:80px; height:20px; text-align:left; vertical-align:middle; ">대포장박스수</caption>
+				<caption id="caption11" style="left:5px; top:60px; width:75px; height:20px; text-align:left; vertical-align:middle; ">자투리여부</caption>
+				<caption id="caption9" style="left:5px; top:10px; width:75px; height:20px; text-align:left; vertical-align:middle; ">대포장단위</caption>
+				<input id="input2" ref="/root/formData/send2/PACKUNIT" format="#,###" style="left:90px; top:10px; width:105px; height:20px; text-align:right; ">
+					<script type="javascript" ev:event="onkeyup">
+						<![CDATA[
+							var nodeList1 = instance1.selectNodes("/root/gridData/grid2/item");						
+							var packUnit = parseInt(input2.currentText);
+							var lotCnt = parseInt(nodeList1.length);
+							var eboxYN = model.getValue("/root/formData/send2/EBOXYN");
+							var packbox = 0;
+							
+							if (packUnit > 0)
+							{
+								var boxQty = parseInt(lotCnt / packUnit);
+								packbox = boxQty;
+								
+								if (lotCnt > (packUnit * boxQty) && boxQty > 0)
+								{
+									if (eboxYN == "Y")
+										packbox = boxQty + 1;
+								}
+								else if (boxQty == 0)
+									packbox = lotCnt
+							}		
+							model.setValue("/root/formData/send2/PACKBOX", packbox);					
+							output1.refresh();						
+						]]>
+					</script>
+				</input>
+				<output id="output1" ref="/root/formData/send2/PACKBOX" format="#,###" style="left:90px; top:35px; width:105px; height:20px; text-align:right; "/>
+				<select id="checkbox1" ref="/root/formData/send2/EBOXYN" overflow="visible" appearance="full" style="left:90px; top:60px; width:105px; height:20px; border-style:none; ">
+					<choices>
+						<item>
+							<label/>
+							<value>Y</value>
+						</item>
+					</choices>
+					<script type="javascript" ev:event="onclick">
+						<![CDATA[
+							document.all("input2").dispatch("onkeyup");		
+						]]>
+					</script>
+				</select>
+			</group>
+			<caption id="caption3" visibility="hidden" style="left:10px; top:335px; width:75px; height:20px; text-align:center; vertical-align:middle; ">발 주 번 호</caption>
+			<output id="txtOrHKey" ref="/root/LeftInfo/txtOrHKey" visibility="hidden" style="left:85px; top:335px; width:130px; height:20px; "/>
+			<caption id="caption4" visibility="hidden" style="left:10px; top:365px; width:75px; height:20px; text-align:center; vertical-align:middle; ">품 목 코 드</caption>
+			<output id="txtSABUN" ref="/root/LeftInfo/txtSABUN" visibility="hidden" style="left:85px; top:365px; width:130px; height:20px; "/>
+			<caption id="caption2" visibility="hidden" style="left:10px; top:395px; width:75px; height:20px; text-align:center; vertical-align:middle; ">납 품 일 자</caption>
+			<output id="txtNapDate" ref="/root/LeftInfo/txtNapDate" visibility="hidden" format="yyyy-mm-dd" style="left:85px; top:395px; width:130px; height:20px; "/>
+			<caption id="caption5" visibility="hidden" style="left:5px; top:215px; width:75px; height:20px; text-align:center; vertical-align:middle; ">납 품 수 량</caption>
+			<output id="txtNapQty" ref="/root/LeftInfo/txtNapQty" visibility="hidden" format="#,###" style="left:80px; top:215px; width:130px; height:20px; text-align:right; "/>
+			<caption id="caption6" visibility="hidden" style="left:5px; top:275px; width:75px; height:20px; text-align:center; vertical-align:middle; ">박스당수량</caption>
+			<caption id="caption7" visibility="hidden" style="left:5px; top:245px; width:75px; height:20px; text-align:center; vertical-align:middle; ">박 스 수 량</caption>
+			<caption id="caption8" visibility="hidden" style="left:5px; top:305px; width:95px; height:20px; text-align:left; vertical-align:middle; ">마지막박스수량</caption>
+			<output id="txtStdQty" ref="/root/LeftInfo/txtStdQty" visibility="hidden" format="#,###" style="left:80px; top:275px; width:130px; height:20px; text-align:right; "/>
+			<output id="txtBOXQTY" ref="/root/LeftInfo/txtBOXQTY" visibility="hidden" format="#,###" style="left:80px; top:245px; width:130px; height:20px; text-align:right; "/>
+			<output id="txtEBOXQTY" ref="/root/LeftInfo/txtEBOXQTY" visibility="hidden" format="#,###" style="left:105px; top:305px; width:105px; height:20px; text-align:right; "/>
+			<caption id="caption13" style="left:20px; top:125px; width:75px; height:30px; text-align:center; vertical-align:middle; ">출력유형</caption>
+			<select1 id="radio1" ref="/root/printTypeSel" overflow="visible" appearance="full" style="left:105px; top:125px; width:95px; height:55px; border-style:none; ">
+				<choices>
+					<itemset nodeset="/root/printType/item">
+						<label ref="Lable"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+		</group>
+		<datagrid id="datagrid2" nodeset="/root/gridData/grid2/item" caption="^롯트번호^품목코드^품번^품명^납품수량^자사업체명^납품일자^거래처명^생산일자^INCOUNT^납품번호^PONO" colsep="^" colwidth="27, 189, 99, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" data.focus-rect="hidden" style="left:220px; top:245px; width:580px; height:440px; ">
+			<col checkvalue="Y,N" ref="SEL" type="checkbox"/>
+			<col ref="LOTNO"/>
+			<col ref="SABUN"/>
+			<col ref="PARTNO" style="text-align:left; "/>
+			<col ref="ITEMNM" style="left:436px; top:20px; width:130px; height:20px; text-align:left; "/>
+			<col ref="LOTQTY" format="#,###.0" style="text-align:right; "/>
+			<col ref="PRCUSTNM" visibility="hidden"/>
+			<col ref="NAPDATE" visibility="hidden"/>
+			<col ref="CUSTNM" visibility="hidden"/>
+			<col ref="PRDDATE" visibility="hidden"/>
+			<col ref="inCount" type="input" visibility="hidden" format="#,###" style="text-align:right; "/>
+			<col ref="GAHKEY" visibility="hidden"/>
+			<col ref="PONO" visibility="hidden"/>
+		</datagrid>
+		<group id="group2" style="left:0px; top:0px; width:800px; height:30px; ">
+			<caption id="caption1" style="left:5px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">납품일자</caption>
+			<input id="input1" ref="/root/formData/napum/FDATE" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:65px; top:5px; width:100px; height:20px; "/>
+			<select1 id="combo2" ref="/root/formData/napum/ORDERGB" appearance="minimal" style="left:235px; top:5px; width:100px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/ComboData/Combo1/item">
+						<label ref="Label"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<caption id="caption12" style="left:175px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주구분</caption>
+		</group>
+	</xhtml:body>
+</xhtml:html>

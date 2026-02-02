@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: Mate-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<send1>
+							<item>
+								<subject/>
+								<userid/>
+								<writer/>
+								<content/>
+								<fileuid/>
+								<date/>
+								<uid/>
+								<formID/>
+								<editPermit/>
+								<delPermit/>
+								<QueryKind/>
+								<filegrid>
+									<item>
+										<filename/>
+									</item>
+								</filegrid>
+								<sessionid/>
+								<isAdmin/>
+								<cust/>
+							</item>
+						</send1>
+					</formData>
+					<popData>
+						<uid/>
+						<QueryKind/>
+						<formID/>
+						<sessionname/>
+						<sessionid/>
+						<isAdmin/>
+					</popData>
+					<sendFiles>
+					</sendFiles>
+					<msgFiles>
+					</msgFiles>
+					<temp/>
+					<gridData>
+						<grid1>
+							<item>
+								<a/>
+								<b/>
+								<c/>
+							</item>
+						</grid1>
+					</gridData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				
+				function mateInit() {										
+					if (model.getValue("/root/formData/send1/item/QueryKind") == "mod"){  // datagrid 에서 수정 클릭시(관리자모드)		
+						if (model.getValue("/root/formData/send1/item/isAdmin") == "Y" &&
+							model.getValue("/root/formData/send1/item/userid") == model.getValue("/root/formData/send1/item/sessionid"))
+								btnCustSel.visible = true;
+							
+						var fileUid = model.getValue("/root/formData/send1/item/fileuid");
+						if (fileUid != "0") {
+							model.setValue("/root/sendFiles", "-");
+							upload("TrustBoard","get", fileUid);
+																		
+							var orifilelist = model.getValue("/root/msgFiles/orifilelist");
+							var oriSplit = orifilelist.split("▤");
+							for(var i=0 ; i<oriSplit.length ; i++){				
+								model.makeValue("/root/formData/send1/item/filegrid/item["+(i+1) +"]/filename", oriSplit[i]);
+							}						
+							datagrid1.refresh();
+							
+							model.makeValue("/root/formData/send1/item/savefilelist", model.getValue("/root/msgFiles/savefilelist"));
+							model.makeValue("/root/formData/send1/item/orifilelist", model.getValue("/root/msgFiles/orifilelist"));
+							model.makeValue("/root/formData/send1/item/address", model.getValue("/root/msgFiles/address"));
+						}	
+					}
+							
+					if (model.getValue("/root/popData/QueryKind") == "add") {  // 글 추가시
+						if (model.getValue("/root/popData/isAdmin") == "Y")
+							btnCustSel.visible = true;
+											
+						model.setValue("/root/formData/send1/item/QueryKind", "add");
+						model.setValue("/root/formData/send1/item/formID", model.getValue("/root/popData/formID"));
+						
+						model.setValue("/root/formData/send1/item/writer", model.getValue("/root/popData/sessionname"));	
+						writer.refresh();						
+					}
+					
+					//datagrid에 값이 없을때 생기는 줄 삭제
+					if (model.getValue("/root/formData/send1/item/fileuid") == "" || model.getValue("/root/formData/send1/item/fileuid") == "0" ){
+						model.copyNode("/root/formData/send1/item/filegrid", "/root/temp");
+						datagrid1.refresh();
+					}
+										
+					//DataGrid 헤드 영역에 CheckBox를 만들어 준다.
+					datagrid2.fixedcellcheckbox(0, 0, false) = true ;
+				}		
+								
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body scroll="autovscroll">
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; color:#000000; "/>
+		<group id="write" style="left:20px; top:20px; width:495px; height:490px; color:#000000; border-color:#999999; border-style:solid; ">
+			<input id="input1" ref="/root/formData/send1/item/cust" visibility="hidden" style="left:9px; top:459px; width:195px; height:20px; "/>
+			<button id="button1" navindex="4" style="left:289px; top:459px; width:55px; height:20px; ">
+				<caption>저장</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+					
+						var ins = instance1.selectNodes("/root/formData/send1/item/filegrid/item");
+						body.removeChild("initUpload");	
+						for (var i=1 ; i<=ins.length ; i++) {				
+							var file = model.getValue("/root/formData/send1/item/filegrid/item[" + i + "]/filename");
+							model.makeValue("/root/sendFiles/file" + i, file);
+							body.createChild("xforms:upload", "id:upload"+i);
+							document.all("upload"+i).attribute("style") = "left:100; top:100px; width:50px; height:50px;";
+							document.all("upload"+i).attribute("nodeset") = "/root/sendFiles/file" + i;
+							document.all("upload"+i).refresh();
+						}
+
+						if (subject.value == "") { 
+							alertBox("제목을 입력하세요.");
+							model.setFocus("subject");
+							return false;
+						} else if(writer.value == "") {
+							alertBox("작성자를 입력하세요.");
+							model.setFocus("writer");
+							return false;
+						} else if(content.value == "") {
+							alertBox("내용을 입력하세요.");
+							model.setFocus("content");
+							return false;
+						}else {
+							var workGB = "";
+							var isAdmin = "";
+							var formID = "";
+							var userID = "";
+							var sessionid = "";
+							
+							if (model.getValue("/root/popData/QueryKind") == "add") { //글 추가시
+
+								workGB = "Add";
+								
+								if(model.getValue("/root/sendFiles/file1") != "") { //파일이 있을경우, 파일 업로드						
+									upload("TrustBoard", "add", "0");
+									var fileUid = model.getValue("/root/msgFiles/fileUID");
+									model.setValue("/root/formData/send1/item/fileuid", fileUid);
+								} else { //파일이 없을경우
+									model.setValue("/root/formData/send1/item/fileuid", "0");	
+								}
+								
+								formID = model.getValue("/root/popData/formID");   
+								userID = model.getValue("/root/popData/sessionid"); 
+								isAdmin = model.getValue("/root/popData/isAdmin"); 
+							}
+						
+							if (model.getValue("/root/formData/send1/item/QueryKind") == "mod"){ //글 수정시
+							
+								workGB = "Update";
+								
+								var fileUid = model.getValue("/root/formData/send1/item/fileuid");									
+								upload("TrustBoard","mod", fileUid);
+								
+								model.setValue("/root/formData/send1/item/fileuid", model.getValue("/root/msgFiles/fileUID"));																
+								
+								formID = model.getValue("/root/formData/send1/item/formID");   
+								userID = model.getValue("/root/formData/send1/item/sessionid"); 
+								isAdmin = model.getValue("/root/formData/send1/item/isAdmin");   
+							}
+							
+							//작성자에 " ' " 입력시 저장 안되도록
+							if (model.getValue("/root/formData/send1/item/writer").search("'") != -1) {
+								alertBox("작성자에 ' 를 입력할수 없습니다"); 
+								model.setFocus("writer");
+								return false;
+							}
+							
+							//제목, 내용에 " ' " 입력시 " '' " 로 
+							var subject1 = model.getValue("/root/formData/send1/item/subject");
+							var content1 = model.getValue("/root/formData/send1/item/content");
+							subject1= subject1.replace(/'/g, "''");
+							content1= content1.replace(/'/g, "''");							
+							model.setValue("/root/formData/send1/item/subject",subject1);
+							model.setValue("/root/formData/send1/item/content",content1);	
+							
+							model.setValue("/root/formData/send1/item/isAdmin", model.getValue("/root/popData/isAdmin"));
+							model.setValue("/root/formData/send1/item/sessionid", model.getValue("/root/popData/sessionid"));
+							model.setValue("/root/formData/send1/item/date", getDate());
+							
+							sendBuffInit();
+							sendBuffAdd("sessionid", userID);
+							sendBuffAdd("isAdmin", isAdmin);
+							submit("sp_SCM_TrustBoard", "GetCustName");
+							CustName = model.getValue("/root/msgBuff/data/item/custName");
+							
+							if (CustName != "" && CustName != "null" && CustName != null)
+							{
+								sendBuffInit();
+								sendBuffAdd("uid", model.getValue("/root/formData/send1/item/uid"));
+								sendBuffAdd("custname", CustName);
+								sendBuffAdd("subject", model.getValue("/root/formData/send1/item/subject"));
+								sendBuffAdd("userid", userID);
+								sendBuffAdd("writer", model.getValue("/root/formData/send1/item/writer"));
+								sendBuffAdd("content", model.getValue("/root/formData/send1/item/content"));
+								sendBuffAdd("fileuid", model.getValue("/root/formData/send1/item/fileuid"));
+								sendBuffAdd("date", model.getValue("/root/formData/send1/item/date"));
+								sendBuffAdd("formid", formID);
+								sendBuffAdd("isAdmin", isAdmin);
+								if (btnCustSel.visible == true)
+									sendBuffAdd("cust", model.getValue("/root/formData/send1/item/cust"));
+						       		submit("sp_SCM_TrustBoard", workGB);	
+							}
+						}
+									
+					        parent.window.javascript.sendMsg(formID, userID, isAdmin) ;   
+					       window.close();
+														
+					]]>
+				</script>
+			</button>
+			<button id="button2" style="left:14px; top:319px; width:70px; height:20px; ">
+				<caption>파일추가</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var fileList = window.fileDialog("open", "|", true);
+						var filename = fileList.split("|");
+						
+						if(fileList != ""){
+							for (var i=0 ; i< filename.length ; i++) {
+								datagrid1.addRow();
+								datagrid1.valueMatrix(datagrid1.rows-1, 0) = filename[i];
+								initUpload.revalidate();
+							}
+						}
+						datagrid1.rebuild();
+					]]>
+				</script>
+			</button>
+			<button id="button3" style="left:14px; top:344px; width:70px; height:20px; ">
+				<caption>파일삭제</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[						
+						var row = datagrid1.mouseRow;					
+						datagrid1.deleteRow(row);	
+						datagrid1.rebuild();								
+					]]>
+				</script>
+			</button>
+			<caption id="caption9" style="left:14px; top:65px; width:50px; height:20px; font-size:10pt; vertical-align:middle; ">작성자</caption>
+			<caption id="caption10" style="left:14px; top:105px; width:50px; height:20px; font-size:10pt; vertical-align:middle; ">내용</caption>
+			<caption id="caption7" style="left:14px; top:25px; width:50px; height:20px; font-size:10pt; vertical-align:middle; ">제목</caption>
+			<input id="subject" ref="/root/formData/send1/item/subject" navindex="1" style="left:105px; top:20px; width:369px; height:25px; "/>
+			<input id="writer" ref="/root/formData/send1/item/writer" navindex="2" style="left:104px; top:64px; width:199px; height:25px; "/>
+			<textarea id="content" ref="/root/formData/send1/item/content" navindex="3" style="left:104px; top:104px; width:369px; height:205px; vertical-align:top; "/>
+			<line id="line4" style="x1:-1px; y1:449px; x2:493px; y2:449px; border-color:#999999; "/>
+			<datagrid id="datagrid1" nodeset="/root/formData/send1/item/filegrid/item" caption="File" colsep="^" colwidth="358, 100" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" data.focus-rect="hidden" style="left:104px; top:319px; width:369px; height:122px; ">
+				<col ref="filename"/>
+			</datagrid>
+			<button id="button4" navindex="5" style="left:354px; top:459px; width:55px; height:20px; ">
+				<caption>취소</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[						
+						model.reset();											
+					]]>
+				</script>
+			</button>
+			<button id="button5" navindex="6" style="left:419px; top:459px; width:55px; height:20px; ">
+				<caption>닫기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+			<upload id="initUpload" nodeset="/root/formData/send1/item/filegrid/item/filename" style="left:459px; top:309px; width:25px; height:20px; "/>
+			<button id="btnCustSel" navindex="4" visibility="hidden" style="left:374px; top:64px; width:99px; height:20px; ">
+				<caption>거래처 선택</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						if (group1.visible == false){
+							group1.visible = true;	
+						} else {
+							group1.visible = false;
+						}											
+								
+						if(model.getValue("/root/formData/send1/item/cust") == "") 
+						{		
+							sendBuffInit();		
+							sendBuffAdd("uid", model.getValue("/root/formData/send1/item/uid"));			
+							submit("sp_SCM_TrustBoard", "CustList");
+							model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+							datagrid2.refresh();
+						}
+					]]>
+				</script>
+			</button>
+		</group>
+		<group id="group1" visibility="hidden" style="left:254px; top:106px; width:240px; height:305px; background-color:#ffffff; border-color:#000000; border-style:solid; ">
+			<datagrid id="datagrid2" nodeset="/root/gridData/grid1/item" caption="^거래처^거래처" colsep="^" colwidth="31, 60, 136" mergecellsfixedrows="bycolrec" rowsep="|" style="left:5px; top:5px; width:230px; height:270px; ">
+				<col checkvalue="1,0" ref="a" type="checkbox"/>
+				<col ref="b"/>
+				<col ref="c"/>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+//						var iChkCol = datagrid2.colRef("a");
+//						
+//						if (datagrid2.row == 0 && datagrid2.col ==  iChkCol)
+//						{
+//							for (var i=1 ; i<datagrid2.rows ; i++)
+//							{
+//								if (model.getValue("/root/gridData/grid1/item[" + i + "]/a") == 1)
+//									model.setValue("/root/gridData/grid1/item[" + i + "]/a", 0);
+//								else
+//									model.setValue("/root/gridData/grid1/item[" + i + "]/a", 1);
+//							}
+//						}
+					]]>
+				</script>
+			</datagrid>
+			<button id="button6" navindex="4" style="left:179px; top:279px; width:54px; height:20px; ">
+				<caption>확인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[		
+						var sCust = "";			
+						for(var i = 1; i < datagrid2.rows; i++)
+						{
+							if (model.getValue("/root/gridData/grid1/item[" + i + "]/a") == 1)
+								sCust = sCust + model.getValue("/root/gridData/grid1/item[" + i + "]/b") + "_/";
+						}	
+						
+						if (sCust != "") {
+							model.setValue("/root/formData/send1/item/cust", sCust.substring(0, sCust.length-2));
+							input1.refresh();
+						}
+						group1.visible = false;																	
+					]]>
+				</script>
+			</button>
+		</group>
+	</xhtml:body>
+</xhtml:html>

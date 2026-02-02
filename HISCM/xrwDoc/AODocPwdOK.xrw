@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: 비밀번호 입력 :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<Password/>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<subject/>
+								<writer/>
+								<custname/>
+								<date/>
+								<file/>
+								<edit/>
+								<del/>
+								<detail/>
+								<custuid/>
+								<state/>
+								<INSGB/>
+								<uid/>
+							</item>
+						</grid1>
+					</gridData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			function mateInit() { // 초기 로딩
+				model.setFocus("DocPass");
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<group id="group1" style="left:0px; top:0px; width:310px; height:45px; ">
+			<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+			<button id="OKBtn" navindex="6" style="left:185px; top:10px; width:55px; height:20px; ">
+				<caption>확인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+					
+						sendBuffInit();
+						sendBuffAdd("UID", model.getValue("/root/gridData/grid1/item/uid"));
+						sendBuffAdd("PWD", model.getValue("/root/formData/Password"));
+						submit("sp_SCM_TrustAODoc", "PWDOK");
+
+						var pwd = model.getValue("/root/msgBuff/data/item/pwd");
+					
+						if (pwd == "NO_PASS") {
+							alertBox("비밀번호가 맞지 않습니다. ");
+							DocPass.value = "";
+							model.setFocus("DocPass");
+						} else { 
+	  			 	      		window.load("AODocSendView.xrw", "modal" ,"ViewFrm", "left:200px; top:100px;width:550;height:550;resize:false; sysmenu:hidden", "/root/gridData/grid1/item", "/root/output/data");											  							  					
+		  			       		
+		  			       		if (model.getValue("/root/gridData/grid1/item/userid").toLowerCase( ) != model.getValue("/root/popData/sessionid").toLowerCase( ))
+		  			       		{
+								sendBuffInit();
+								sendBuffAdd("custuid", model.getValue("/root/gridData/grid1/item/custuid"));
+								
+								submit("sp_SCM_TrustAODoc", "TakeReadUpd");
+		  			       		}	  			       	
+	
+							window.close(); 
+						}
+					]]>
+				</script>
+			</button>
+			<caption id="caption2" style="left:5px; top:10px; width:70px; height:20px; font-weight:bold; text-align:right; vertical-align:middle; ">비밀번호</caption>
+			<secret id="DocPass" ref="/root/formData/Password" navindex="2" imemode="disabled" style="left:80px; top:10px; width:100px; height:20px; border-color:#000000; border-style:solid; ">
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						// 비밀번호 입력 후 엔터키 눌렀을 로그인 처리
+						if (event.keyCode == 13) {
+							// 로그인 버튼 강제 클릭
+							model.setFocus("OKBtn");
+							OKBtn.dispatch("onclick") ;
+						}
+					]]>
+				</script>
+			</secret>
+			<button id="button1" navindex="6" style="left:245px; top:10px; width:55px; height:20px; ">
+				<caption>취소</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[					
+						window.close(); 
+					]]>
+				</script>
+			</button>
+		</group>
+	</xhtml:body>
+</xhtml:html>

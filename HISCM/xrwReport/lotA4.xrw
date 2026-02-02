@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: 부품 식별표 인쇄 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<lotInfo>
+						<item>
+							<LOTNO/>
+							<SABUN/>
+							<PARTNO/>
+							<ITEMNM/>
+							<LOTQTY/>
+							<PRCUSTNM/>
+							<NAPDATE/>
+							<CUSTNM/>
+							<PRDDATE/>
+							<SUMLOTNO/>
+							<inCount/>
+							<PONO/>
+						</item>
+					</lotInfo>
+					<LotNo/>
+					<item>
+						<lot1/>
+						<lot2/>
+					</item>
+					<LotNo/>
+					<YN>N</YN>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			function resetReport() {
+				//Report 눈금자 표시 여부 설정
+				object1.window.showRuler(false);
+         			var doc = object1.document ; 
+				model.copyNode("/root/LotNo", "/root/LotNo");
+				
+				var nodeList = instance1.selectNodes("/root/lotInfo/item");
+				if (model.getValue("/root/YN") == "Y")
+				{
+					for (var i=1; i<=nodeList.length; i++)
+					{
+						model.copyNode("/root/item/lot1", "/root/lotInfo/item["+ i +"]");
+						model.setValue("/root/item/lot1/PRCUSTNM", model.getValue("/root/item/lot1/PRCUSTNM"));
+						model.setValue("/root/item/lot1/LOTNO", model.getValue("/root/item/lot1/LOTNO"));
+						model.setValue("/root/item/lot1/SABUN", model.getValue("/root/item/lot1/SABUN"));
+						model.setValue("/root/item/lot1/PARTNO", model.getValue("/root/item/lot1/PARTNO"));	
+						model.setValue("/root/item/lot1/ITEMNM", model.getValue("/root/item/lot1/ITEMNM"));
+						model.setValue("/root/item/lot1/LOTQTY", model.getValue("/root/item/lot1/LOTQTY").split(".")[0]);
+						model.setValue("/root/item/lot1/NAPDATE", model.getValue("/root/item/lot1/NAPDATE"));
+						model.setValue("/root/item/lot1/CUSTNM", model.getValue("/root/item/lot1/CUSTNM"));
+						model.setValue("/root/item/lot1/PRDDATE", model.getValue("/root/item/lot1/PRDDATE"));
+						model.makeValue("/root/item/lot1/LOTNO1", "*"+model.getValue("/root/item/lot1/LOTNO")+"*");
+						model.setValue("/root/item/lot1/SUMLOTNO", model.getValue("/root/item/lot1/SUMLOTNO"));
+						model.setValue("/root/item/lot1/PONO", model.getValue("/root/item/lot1/PONO"));
+						
+						model.copyNode("/root/item/lot2", "/root/lotInfo/item["+ i +"]");
+						model.setValue("/root/item/lot2/PRCUSTNM", model.getValue("/root/item/lot2/PRCUSTNM"));
+						model.setValue("/root/item/lot2/LOTNO", model.getValue("/root/item/lot2/LOTNO"));
+						model.setValue("/root/item/lot2/SABUN", model.getValue("/root/item/lot2/SABUN"));
+						model.setValue("/root/item/lot2/PARTNO", model.getValue("/root/item/lot2/PARTNO"));	
+						model.setValue("/root/item/lot2/ITEMNM", model.getValue("/root/item/lot2/ITEMNM"));
+						model.setValue("/root/item/lot2/LOTQTY", model.getValue("/root/item/lot2/LOTQTY").split(".")[0]);
+						model.setValue("/root/item/lot2/NAPDATE", model.getValue("/root/item/lot2/NAPDATE"));
+						model.setValue("/root/item/lot2/CUSTNM", model.getValue("/root/item/lot2/CUSTNM"));
+						model.setValue("/root/item/lot2/PRDDATE", model.getValue("/root/item/lot2/PRDDATE"));
+						model.makeValue("/root/item/lot2/LOTNO1", "*"+model.getValue("/root/item/lot2/LOTNO")+"*");
+						model.setValue("/root/item/lot2/SUMLOTNO", model.getValue("/root/item/lot2/SUMLOTNO"));
+						model.setValue("/root/item/lot2/PONO", model.getValue("/root/item/lot2/PONO"));
+						
+						model.duplicate("/root/LotNo", "/root/item");
+					}
+				} 
+				else 
+				{
+					var i = 1;
+					while(i<=nodeList.length)
+					{
+						model.copyNode("/root/item/lot1", "/root/lotInfo/item["+ i +"]");
+						model.setValue("/root/item/lot1/PRCUSTNM", model.getValue("/root/item/lot1/PRCUSTNM"));
+						model.setValue("/root/item/lot1/LOTNO", model.getValue("/root/item/lot1/LOTNO"));
+						model.setValue("/root/item/lot1/SABUN", model.getValue("/root/item/lot1/SABUN"));
+						model.setValue("/root/item/lot1/PARTNO", model.getValue("/root/item/lot1/PARTNO"));	
+						model.setValue("/root/item/lot1/ITEMNM", model.getValue("/root/item/lot1/ITEMNM"));
+						model.setValue("/root/item/lot1/LOTQTY", model.getValue("/root/item/lot1/LOTQTY").split(".")[0]);
+						model.setValue("/root/item/lot1/NAPDATE", model.getValue("/root/item/lot1/NAPDATE"));
+						model.setValue("/root/item/lot1/CUSTNM", model.getValue("/root/item/lot1/CUSTNM"));
+						model.setValue("/root/item/lot1/PRDDATE", model.getValue("/root/item/lot1/PRDDATE"));
+						model.makeValue("/root/item/lot1/LOTNO1", "*"+model.getValue("/root/item/lot1/LOTNO")+"*");
+						i++;
+						try {
+							model.copyNode("/root/item/lot2", "/root/lotInfo/item["+ i +"]");
+							model.setValue("/root/item/lot2/PRCUSTNM", model.getValue("/root/item/lot2/PRCUSTNM"));
+							model.setValue("/root/item/lot2/LOTNO", model.getValue("/root/item/lot2/LOTNO"));
+							model.setValue("/root/item/lot2/SABUN", model.getValue("/root/item/lot2/SABUN"));
+							model.setValue("/root/item/lot2/PARTNO", model.getValue("/root/item/lot2/PARTNO"));	
+							model.setValue("/root/item/lot2/ITEMNM", model.getValue("/root/item/lot2/ITEMNM"));
+							model.setValue("/root/item/lot2/LOTQTY", model.getValue("/root/item/lot2/LOTQTY").split(".")[0]);
+							model.setValue("/root/item/lot2/NAPDATE", model.getValue("/root/item/lot2/NAPDATE"));
+							model.setValue("/root/item/lot2/CUSTNM", model.getValue("/root/item/lot2/CUSTNM"));
+							model.setValue("/root/item/lot2/PRDDATE", model.getValue("/root/item/lot2/PRDDATE"));
+							model.makeValue("/root/item/lot2/LOTNO1", "*"+model.getValue("/root/item/lot2/LOTNO")+"*");
+						} catch(e) {}
+						model.duplicate("/root/LotNo", "/root/item");
+						i++;
+					}
+				}
+				
+				var selXml = model.instance1.selectNodesXml("/root");
+				doc.loadXML(selXml);	
+				doc.refresh() ;	
+			}				
+			]]>
+		</script>
+		<script type="javascript" ev:event="xforms-model-construct-done">
+			<![CDATA[			
+				object1.location = document.url;
+				
+				if (model.getValue("/root/lotInfo/item/PONO") != "")
+				{
+					object1.src = "lotA4_Z.xfr";	 
+				}
+				else
+				{
+					object1.src = "lotA4.xfr";	
+				}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body pagewidth="870" pageheight="700" style="background-color:#800000; ">
+		<object id="object1" clsid="{463fee31-9147-4082-8b55-be24e9338b56}" style="left:10px; top:35px; width:845px; height:650px; ">
+			<script id="script1" type="javascript" ev:event="onLoad()">
+				<![CDATA[ 
+					resetReport();
+	     			   ]]>
+			</script>
+		</object>
+		<caption id="caption1" style="left:15px; top:10px; width:405px; height:20px; font-weight:bold; color:#ffffff; vertical-align:middle; ">부품식별표를 좌우 양쪽에 동일 내용으로 인쇄하시겠습니까?</caption>
+		<select1 id="radio1" ref="/root/YN" overflow="visible" appearance="full" cols="2" style="left:425px; top:10px; width:125px; height:20px; font-weight:bold; color:#ffffff; background-color:#800000; border-style:none; ">
+			<choices>
+				<item>
+					<label>예</label>
+					<value>Y</value>
+				</item>
+				<item>
+					<label>아니오</label>
+					<value>N</value>
+				</item>
+			</choices>
+			<script type="javascript" ev:event="xforms-value-changed">
+				<![CDATA[
+					resetReport();
+				]]>
+			</script>
+		</select1>
+		<button id="button1" style="left:780px; top:10px; width:70px; height:20px; ">
+			<caption>폰트적용</caption>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					window.exec("C:\\WINDOWS\\Fonts\\3OF9.TTF");
+				]]>
+			</script>
+		</button>
+		<caption id="caption2" style="left:625px; top:10px; width:150px; height:20px; font-weight:bold; color:#ffffff; vertical-align:middle; ">바코드 폰트 수동 적용</caption>
+	</xhtml:body>
+</xhtml:html>

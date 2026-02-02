@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: NOTICE WRITE PAGE :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<send1>
+							<subject/>
+							<writer/>
+							<content/>
+							<filegrid>
+								<item>
+									<filename/>
+								</item>
+							</filegrid>
+						</send1>
+					</formData>
+					<popData>
+						<uid/>
+						<QueryKind/>
+						<formID/>
+						<sessionname/>
+						<sessionid/>
+						<subject/>
+						<writer/>
+						<coutent/>
+						<fileuid/>
+						<date/>
+					</popData>
+					<sendFiles/>
+					<msgFiles/>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				
+				function mateInit() {
+					model.copyNode("/root/formData/send1/filegrid", "/root/msgFiles");
+					datagrid1.refresh();
+					
+					if (model.getValue("/root/popData/QueryKind") == "mod") {  // datagrid 에서 수정 클릭시(관리자모드)	
+						
+						model.setValue("/root/formData/send1/subject", model.getValue("/root/popData/subject"));
+						model.setValue("/root/formData/send1/writer", model.getValue("/root/popData/writer"));
+						model.setValue("/root/formData/send1/content", model.getValue("/root/popData/content"));
+										
+						var fileUid = model.getValue("/root/popData/fileuid");				
+						if (fileUid != 0) { 
+							upload("TrustNotice","get", fileUid);
+																		
+							var orifilelist = model.getValue("/root/msgFiles/orifilelist");
+							var oriSplit = orifilelist.split("▤");
+							for(var i=0 ; i<oriSplit.length ; i++){				
+								model.makeValue("/root/formData/send1/filegrid/item["+(i+1) +"]/filename", oriSplit[i]);
+							}					
+							datagrid1.refresh();
+						}
+					}
+					if (model.getValue("/root/popData/QueryKind") == "add") {  // 글 추가시
+						model.setValue("/root/formData/send1/writer", model.getValue("/root/popData/writer"));			
+					}
+					model.refresh();			
+				}		
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body scroll="autovscroll">
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; color:#000000; "/>
+		<group id="write" style="left:20px; top:20px; width:495px; height:490px; color:#000000; border-color:#999999; border-style:solid; ">
+			<button id="button1" navindex="4" style="left:289px; top:459px; width:55px; height:20px; ">
+				<caption>저장</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+																
+						if (subject.value == "") { 
+							alertBox("제목을 입력하세요.");
+							model.setFocus("subject");
+							return false;
+						} else if(writer.value == "") {
+							alertBox("작성자를 입력하세요.");
+							model.setFocus("writer");
+							return false;
+						} else if(content.value == "") {
+							alertBox("내용을 입력하세요.");
+							model.setFocus("content");
+							return false;
+						}else {
+							if (model.getValue("/root/popData/QueryKind") == "add") { //글 추가 시			
+															
+								if(model.getValue("/root/formData/send1/filegrid/item/filename") != "") { //파일이 있을 경우, 파일 업로드
+									uploadReset();					
+									upload("TrustNotice", "add", "0");
+									var fileUid = model.getValue("/root/msgFiles/fileUID");
+									model.setValue("/root/popData/fileuid", fileUid);
+								} else { //파일이 없을 경우 
+									model.setValue("/root/popData/fileuid", 0);
+								}
+							}
+							
+							if (model.getValue("/root/popData/QueryKind") == "mod"){ // 글 수정 시
+								var fileUid = model.getValue("/root/popData/fileuid");		
+								if (fileUid != 0  ||  (fileUid == 0 && model.getValue("/root/formData/send1/filegrid/item/filename") != "")) {
+									uploadReset();
+									upload("TrustNotice","mod", fileUid);
+									model.setValue("/root/popData/fileuid", model.getValue("/root/msgFiles/fileUID"));									
+								} 
+							}
+																									
+							model.setValue("/root/popData/date", getDate("yyyy-mm-dd"));
+							
+							sendBuffInit();
+							sendBuffAdd("uid", model.getValue("/root/popData/uid"));
+							sendBuffAdd("userid", model.getValue("/root/popData/sessionid"));
+							sendBuffAdd("subject", model.getValue("/root/formData/send1/subject"));
+							sendBuffAdd("writer", model.getValue("/root/formData/send1/writer"));
+							sendBuffAdd("content", model.getValue("/root/formData/send1/content"));
+							sendBuffAdd("fileuid", model.getValue("/root/popData/fileuid"));
+							sendBuffAdd("date", model.getValue("/root/popData/date"));
+							sendBuffAdd("formid", model.getValue("/root/popData/formID"));
+							
+							var queryKind = model.getValue("/root/popData/QueryKind");
+							if (queryKind == "mod") {
+						       		submit("sp_SCM_TrustNotice", "Update");	
+						       	}  else if (queryKind == "add")
+							{
+						       		submit("sp_SCM_TrustNotice", "Add");
+							}
+						}		
+						// 게시판 목록 갱신 및 창 닫기
+					       parent.window.javascript.sendMsg(); 					
+					       window.close();
+														
+					]]>
+				</script>
+			</button>
+			<button id="button2" style="left:14px; top:319px; width:70px; height:20px; ">
+				<caption>파일추가</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var fileList = window.fileDialog("open", "|", true);
+						var filename = fileList.split("|");
+						
+						if(fileList != ""){
+							for (var i=0 ; i< filename.length ; i++) {
+								datagrid1.addRow();
+								datagrid1.valueMatrix(datagrid1.rows-1, 0) = filename[i];
+								initUpload.revalidate();
+							}
+						}
+						datagrid1.rebuild();
+						datagrid1.refresh();
+					]]>
+				</script>
+			</button>
+			<button id="button3" style="left:14px; top:344px; width:70px; height:20px; ">
+				<caption>파일삭제</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[						
+						var row = datagrid1.row;
+						datagrid1.deleteRow(row);		
+						datagrid1.rebuild();
+						datagrid1.refresh();										
+					]]>
+				</script>
+			</button>
+			<caption id="caption7" style="left:14px; top:25px; width:50px; height:20px; vertical-align:middle; ">제목</caption>
+			<caption id="caption9" style="left:14px; top:65px; width:50px; height:20px; vertical-align:middle; ">작성자</caption>
+			<caption id="caption10" style="left:14px; top:105px; width:50px; height:20px; vertical-align:middle; ">내용</caption>
+			<input id="subject" ref="/root/formData/send1/subject" navindex="1" style="left:105px; top:20px; width:369px; height:25px; "/>
+			<input id="writer" ref="/root/formData/send1/writer" navindex="2" editable="false" style="left:104px; top:64px; width:199px; height:25px; "/>
+			<textarea id="content" ref="/root/formData/send1/content" navindex="3" style="left:104px; top:104px; width:369px; height:200px; vertical-align:top; "/>
+			<line id="line4" style="x1:-1px; y1:449px; x2:493px; y2:449px; border-color:#999999; "/>
+			<datagrid id="datagrid1" nodeset="/root/formData/send1/filegrid/item" caption="File" colsep="^" colwidth="358, 100" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" data.focus-rect="hidden" style="left:104px; top:319px; width:369px; height:122px; ">
+				<col ref="filename"/>
+			</datagrid>
+			<button id="button4" navindex="5" style="left:354px; top:459px; width:55px; height:20px; ">
+				<caption>취소</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[						
+						model.reset();										
+					]]>
+				</script>
+			</button>
+			<button id="button5" navindex="6" style="left:419px; top:459px; width:55px; height:20px; ">
+				<caption>닫기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+			<upload id="initUpload" nodeset="/root/formData/send1/filegrid/item/filename" style="left:459px; top:309px; width:25px; height:20px; "/>
+		</group>
+	</xhtml:body>
+</xhtml:html>

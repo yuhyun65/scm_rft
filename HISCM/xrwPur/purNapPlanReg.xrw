@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:my="http://www.comsquare.co.kr/example" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:: 납품등록 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<NAPDATE>0</NAPDATE>
+					<formData>
+						<search>
+							<FDATE/>
+							<LDATE/>
+							<ORDKEY/>
+							<SABUN/>
+							<ITEMNM/>
+							<ORDERGB/>
+						</search>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<ORDKEY/>
+								<SAORDKEY/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<ORDERNM/>
+								<ORQTY/>
+								<MQTY/>
+								<NAPPLANDATE/>
+								<CONFGB/>
+								<ORDATE/>
+								<NAPDATE/>
+								<CUSTCD/>
+								<CUSTNM/>
+								<REMARK/>
+							</item>
+						</grid1>
+					</gridData>
+					<initGridData/>
+					<ComboData>
+						<Combo1>
+							<item>
+								<Label/>
+								<Value/>
+							</item>
+						</Combo1>
+						<Combo2>
+							<item>
+								<Label>ALL</Label>
+								<Value/>
+							</item>
+						</Combo2>
+					</ComboData>
+					<addord>0</addord>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" src="excel.js"/>
+		<script type="javascript">
+			<![CDATA[
+			
+			var sCustCD = "";			
+			var isADDYN = "N";
+			function mateInit() { // 초기 로딩
+					
+				sCustCD = getUserID().substring(1);
+				
+				input2.value = getDate("yyyymmdd");
+				input1.value = prevMonth(getDate("yyyymmdd"));
+								
+				//발주구분
+				sendBuffInit();
+				
+				sendBuffAdd("CODHCD", "M002");
+				submit("sp_ComCode", "GetCodeList");
+				
+				model.copyNode("/root/ComboData/Combo1", "/root/msgBuff/data");
+				model.duplicate("/root/ComboData/Combo1", "/root/ComboData/Combo2/item");
+				combo2.refresh();
+				
+				mateSearch();
+	
+			}			
+			function matetimer() {
+				
+				// Submit으로 보낼 값들을 셋팅한다.
+				sendBuffInit();
+				
+				sendBuffAdd("FDATE", model.getValue("/root/formData/search/FDATE"));
+				sendBuffAdd("LDATE", model.getValue("/root/formData/search/LDATE"));
+				sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+				sendBuffAdd("ORDKEY", model.getValue("/root/formData/search/ORDKEY"));
+				sendBuffAdd("ORDERGB", model.getValue("/root/formData/search/ORDERGB"));
+				sendBuffAdd("USERID", getUserID());
+				submit("sp_SCM_OrderManager", "GetOrdList");
+										
+				var obj = instance1.selectNodes("/root/msgBuff/data/item");
+				var addord = parseInt(model.getValue("/root/addord"));
+				if (addord != 0 && isADDYN == "N" )
+				{
+					if (addord < obj.length)
+					{
+						isADDYN = "Y";
+						parent.window.javascript.TimeEnd();
+						var isSch = yesAlert("추가발주가 존재합니다. 조회하시겠습니까? ");
+						if (isSch == 0) return;
+						
+						mateSearch();
+					}
+				}
+				else 
+				{
+					if (isADDYN == "Y")
+						parent.window.javascript.TimeStart();
+					isADDYN = "N";				
+				}
+			}
+			// 공통 함수 선언
+			function mateSearch() {  // 조회 버튼 눌렀을 때...
+			
+				// Submit으로 보낼 값들을 셋팅한다.
+				sendBuffInit();
+				
+				sendBuffAdd("FDATE", model.getValue("/root/formData/search/FDATE"));
+				sendBuffAdd("LDATE", model.getValue("/root/formData/search/LDATE"));
+				sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+				sendBuffAdd("ORDKEY", model.getValue("/root/formData/search/ORDKEY"));
+				sendBuffAdd("ORDERGB", model.getValue("/root/formData/search/ORDERGB"));
+				sendBuffAdd("USERID", getUserID());
+				submit("sp_SCM_OrderManager", "GetOrdList");
+
+				model.copyNode("/root/gridData/grid1", "/root/gridData/grid1");
+				datagrid1.refresh();
+				
+				model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+				model.copyNode("/root/initGridData","/root/gridData/grid1");
+				datagrid1.refresh();
+				datagrid1.clearStatus();
+				// setColor();
+				model.setValue("/root/addord", datagrid1.rows-1);	
+				model.refresh();
+			}
+			function mateAdd() { // 추가 버튼 눌렀을 때...
+			}
+			function mateSave() { // 저장 버튼 눌렀을 때...
+							
+				var orkeySTR = "";
+				var saordkeySTR = "";
+				var napplanSTR = "";
+
+				for (var i=1; i<=datagrid1.rows ; i++)
+				{
+					if (datagrid1.rowStatus(i) == 2) 
+					{
+						var orkey = model.getValue("/root/gridData/grid1/item["+ i + "]/ORDKEY") ;
+						var saordkey = model.getValue("/root/gridData/grid1/item["+ i +"]/SAORDKEY");
+						var napplan = model.getValue("/root/gridData/grid1/item["+ i +"]/NAPPLANDATE");
+						
+						if(model.getValue("/root/gridData/grid1/item["+ i +"]/CONFGB") == "Y")
+						{
+							alertBox("확정된 납기예상일자는 수정할수 없습니다.\n한일정밀 담당자분에게 확인하십시요.");
+							return;
+						}
+						orkeySTR = orkeySTR + orkey + "_/";
+						saordkeySTR = saordkeySTR+ saordkey + "_/";
+						napplanSTR = napplanSTR + napplan + "_/";
+					}					
+				}
+								
+				sendBuffInit();
+
+				sendBuffAdd("ORDKEYSTR", orkeySTR);		
+				sendBuffAdd("SAORDKEYSTR", saordkeySTR);
+				sendBuffAdd("NAPPLANSTR", napplanSTR);
+				sendBuffAdd("FUSER", getUserID());
+				sendBuffAdd("FFORM", getFormID());
+				
+				submit("sp_SCM_OrderManager", "NapPlanUPD");				
+									
+				var chk = model.getValue("/root/msgBuff/data/item/CHK");
+				var errmsg = model.getValue("/root/msgBuff/data/item/ERRMSG");			
+				if (chk == "X")
+				{
+					alertBox(errmsg);
+				} else {
+					mateSearch(); 
+				}
+			}
+			function mateDel() { // 삭제 버튼 눌렀을 때...
+			}
+			function matePrint() { // 출력 버튼 눌렀을 때...
+			}
+			function mateClose() { // 닫기 버튼 눌렀을 때...
+			}
+			function pageResize() { // 그리드 페이지에 맞게 확장
+				controlResize("datagrid1");
+			}
+			//엑셀클릭시
+			function mateExcel() {
+				openExcel("datagrid1", "true");
+			}
+			function setColor()
+			{
+				for (var i=1; i<=datagrid1.rows; i++)
+				{
+					//var OrUr = model.getValue("/root/gridData/grid1/item["+ i +"]/OrUrGYN");
+					var OrUr = datagrid1.valueMatrix(i, datagrid1.colRef("OrUrGYN"));
+					if (OrUr == "1")
+					{
+						datagrid1.cellstyle("background-color", i, datagrid1.colRef("OrQty"), i, datagrid1.colRef("MinapQty")) = "#ff66cc";
+					}
+				}
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" backcoloralternate="transparent" caption="발주번호^수주번호^품목코드^품번^품명^발주구분^발주수량^미납수량^납품예상일자^확정여부^발주일자^납기일자^CustCD^거래처명^비고" colsep="▤" colwidth="127, 100, 104, 91, 128, 60, 80, 80, 100, 80, 80, 80, 60, 104, 138" frozencols="6" mergecellsfixedrows="bycolrec" rowheader="update" rowsep="▥" style="left:0px; top:55px; width:800px; height:200px; ">
+			<col editable="false" ref="ORDKEY"/>
+			<col editable="false" ref="SAORDKEY"/>
+			<col editable="false" ref="SABUN"/>
+			<col editable="false" ref="PARTNO"/>
+			<col editable="false" ref="ITEMNM"/>
+			<col editable="false" ref="ORDERNM"/>
+			<col disabled="true" ref="ORQTY" format="#,###.0" style="text-align:right; "/>
+			<col disabled="true" ref="MQTY" format="#,###.0" style="text-align:right; "/>
+			<col ref="NAPPLANDATE" type="inputdate" format="yyyy-mm-dd" style="text-align:right; background-color:#ccffcc; "/>
+			<col checkvalue="Y,N" disabled="true" ref="CONFGB" type="checkbox"/>
+			<col disabled="true" ref="ORDATE" format="yyyy-mm-dd"/>
+			<col disabled="true" ref="NAPDATE" format="yyyy-mm-dd"/>
+			<col editable="false" ref="CUSTCD" visibility="hidden"/>
+			<col editable="false" ref="CUSTNM"/>
+			<col editable="false" ref="REMARK" style="text-align:left; "/>
+			<script type="javascript" ev:event="onendedit">
+				<![CDATA[
+					var row = datagrid1.row;
+					var col = datagrid1.col;
+					var colref = datagrid1.colAttribute(col,"ref");
+					if(colref == "NAPQTY") { // 납품 수량을 입력했을때
+						
+						var Minap = model.getValue("/root/initGridData/item["+row+"]/MQTY");
+						
+						model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",Minap);
+			
+						var text = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/NAPQTY"));
+						var MinapQty = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/MQTY"));
+						if(!(isNum(text))) { // 납품 수량에 문자열을 입력한 경우 메시지창을 띄운다.
+							alertBox("납품수량에 문자열을 입력할 수 없습니다.");
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY","");
+						} else if(MinapQty < text){ // 납품수량이 미납수량보다 많을경우 메시지창을 띄운다.
+							alertBox("미납수량보다 납품수량이 많습니다. \n\n다시 입력해주십시요.");
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY","");
+						} else { //납품수량과 박스수량을 체크해서 그 내용을 셋팅한다.
+							var qty = model.getValue("/root/gridData/grid1/item["+row+"]/STDQTY");
+							var Boxnum = parseInt(text / qty);
+							
+							model.setValue("/root/gridData/grid1/item["+row+"]/ETCYN", "N");
+							if (qty == "0") 
+							{
+								model.setValue("/root/gridData/grid1/item["+row+"]/STDQTY", text);
+								model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM", "1");
+							}						
+							else if(text % qty != 0 && Boxnum > 0)
+							{
+								var answer = yesAlert("짜투리 박스를 사용하시겠습까?");									
+								if( answer == 1 ) {
+									model.setValue("/root/gridData/grid1/item["+row+"]/ETCYN", "Y");
+									Boxnum++;
+								}
+							} else if ( text % qty != 0 && Boxnum == 0) {
+								Boxnum++;								
+							}
+							var MinapQty = model.getValue("/root/gridData/grid1/item["+row+"]/MQTY");
+							MinapQty -= text; 
+							model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",MinapQty);
+							model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM",Boxnum);
+						}
+						
+					} else if(colref == "BOXNUM") {
+						var Boxnum = model.getValue("/root/gridData/grid1/item["+row+"]/BOXNUM");
+						var Qty = model.getValue("/root/gridData/grid1/item["+row+"]/STDQTY");
+						
+						if (parseInt(Qty) == 0)
+						{
+							alertBox("표준 수량은 0 이 될수 없습니다. ");
+							model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM", "");
+							return;
+						}
+						
+						var Minap = parseInt(model.getValue("/root/initGridData/item["+row+"]/MQTY"));
+						
+						model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",Minap);
+						var ReqQTY = parseInt(Boxnum * Qty);
+						var MinapQTY = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/MQTY"));
+					
+						if(MinapQTY < ReqQTY){ // 납품수량이 미납수량보다 많을경우 메시지창을 띄운다.
+							alertBox("미납수량보다 납품수량이 많습니다. \n\n다시 입력해주십시요.");
+							model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM","");
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY", "");
+						} else { //납품수량과 박스수량을 체크해서 그 내용을 셋팅한다.
+							MinapQTY =  parseInt(parseInt(MinapQTY) - parseInt(ReqQTY)); 
+							model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",MinapQTY);
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY",ReqQTY);
+						}
+					} else if (colref == "STDQTY") {
+						var Boxnum = model.getValue("/root/gridData/grid1/item["+row+"]/BOXNUM");
+						var Qty = model.getValue("/root/gridData/grid1/item["+row+"]/STDQTY");
+						
+						if (parseInt(Qty) == 0)
+						{
+							alertBox("표준 수량은 0 이 될수 없습니다. ");
+							model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM", "");
+							return;
+						}
+						
+						var Minap = parseInt(model.getValue("/root/initGridData/item["+row+"]/MQTY"));
+						
+						model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",Minap);
+						var ReqQTY = parseInt(Boxnum * Qty);
+						var MinapQTY = parseInt(model.getValue("/root/gridData/grid1/item["+row+"]/MQTY"));
+					
+						if(MinapQTY < ReqQTY){ // 납품수량이 미납수량보다 많을경우 메시지창을 띄운다.
+							alertBox("미납수량보다 납품수량이 많습니다. \n\n다시 입력해주십시요.");
+							model.setValue("/root/gridData/grid1/item["+row+"]/STDQTY","");
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY", "");
+						} else { //납품수량과 박스수량을 체크해서 그 내용을 셋팅한다.
+							MinapQTY =  parseInt(parseInt(MinapQTY) - parseInt(ReqQTY)); 
+							model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",MinapQTY);
+							model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY",ReqQTY);
+						}
+//						var MinapQTY = parseInt(model.getValue("/root/initGridData/item["+row+"]/MQTY"));
+//						model.setValue("/root/gridData/grid1/item["+row+"]/NAPQTY","");
+//						model.setValue("/root/gridData/grid1/item["+row+"]/BOXNUM","");
+//						model.setValue("/root/gridData/grid1/item["+row+"]/MQTY",MinapQTY);
+					}
+						
+					datagrid1.refresh();
+				]]>
+			</script>
+		</datagrid>
+		<group id="group1" ref="/root/gridData/grid1/item" style="left:0px; top:0px; width:800px; height:55px; ">
+			<input id="input4" ref="/root/formData/search/ITEMNM" editable="false" style="left:149px; top:30px; width:136px; height:20px; background-color:#fefec3; "/>
+			<caption id="caption1" style="left:5px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주일자</caption>
+			<caption id="caption2" style="left:5px; top:30px; width:55px; height:20px; text-align:left; vertical-align:middle; ">품목코드</caption>
+			<caption id="caption4" style="left:465px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주번호</caption>
+			<input id="input1" ref="/root/formData/search/FDATE" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:65px; top:5px; width:100px; height:20px; "/>
+			<input id="input2" ref="/root/formData/search/LDATE" navindex="2" inputtype="date" format="yyyy-mm-dd" style="left:185px; top:5px; width:100px; height:20px; "/>
+			<caption id="caption5" style="left:170px; top:5px; width:30px; height:20px; vertical-align:middle; ">~</caption>
+			<input id="input3" ref="/root/formData/search/SABUN" navindex="4" style="left:65px; top:30px; width:85px; height:20px; ">
+				<script type="javascript" ev:event="onmousedown">
+					<![CDATA[
+						if (event.button == 3) {
+							document.all(event.target).dispatch("ondblclick");
+						}
+					]]>
+				</script>
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						if(event.keyCode == 13) { // 엔터키를 눌렀을때 ondblclick이벤트를 발생한다.
+							document.all(event.target).dispatch("ondblclick");
+						}		
+					]]>
+				</script>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					
+						try {		  								
+							setHelpPop("gridCaption", "품목코드, 품명");
+							setHelpPop("colWidth", "100,100");
+							setHelpPop("cmdHelp", "help_Itcst");
+							setHelpPop("winHeight", "380");
+							setHelpPop("xPath1", "/root/formData/search/SABUN");
+							setHelpPop("xPath2", "/root/formData/search/ITEMNM");
+							setHelpPop("xPath3", sCustCD);
+							
+							helpPop("/root/cmdTemp");  //Help 창을 띄운다.
+							
+							group1.refresh();
+							
+						}catch(e) {}	
+							
+					]]>
+				</script>
+			</input>
+			<input id="input5" ref="/root/formData/search/ORDKEY" navindex="5" style="left:525px; top:5px; width:115px; height:20px; "/>
+			<caption id="caption6" style="left:295px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주구분</caption>
+			<select1 id="combo2" ref="/root/formData/search/ORDERGB" appearance="minimal" style="left:355px; top:5px; width:100px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/ComboData/Combo1/item">
+						<label ref="Label"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<input id="addord" ref="/root/addord" visibility="hidden" style="left:295px; top:30px; width:100px; height:20px; "/>
+		</group>
+	</xhtml:body>
+</xhtml:html>

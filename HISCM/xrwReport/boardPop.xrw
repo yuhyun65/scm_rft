@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: MATE-ERP ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" ev:event="xforms-model-construct-done">
+			<![CDATA[
+				object1.location = document.url;
+				object1.src = "boardPrint.xfr";	 
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<object id="object1" clsid="{463fee31-9147-4082-8b55-be24e9338b56}" style="left:0px; top:0px; width:933px; height:1290px; ">
+			<script id="script1" type="javascript" ev:event="onLoad()">
+				<![CDATA[ 
+				
+					//Report 눈금자 표시 여부 설정
+					object1.window.showRuler(false);
+					
+	         			var doc = object1.document ; 	
+	         			var splitCon = model.getValue("/root/content").split("\n");
+	         			
+	         			//alert(splitCon.length);
+	         			
+	         			for(var i=0 ; i<splitCon.length ; i++){
+	         				model.makeValue("/root/repeatC["+(i+1)+"]/content", splitCon[i]);
+	         			}
+	         			
+	         			//2007-01-07 => 2007년 01월 07일	         				         			
+	         			var getdate= model.getValue("/root/getdate");
+					var setdate = getdate.substring(0,4) + "년 " + getdate.substring(5,7) + "월 " + getdate.substring(8,10) + "일";
+					model.setValue("/root/getdate", setdate);
+	         				         			
+	         			var selXml = model.instance1.selectNodesXml("/root");
+					doc.loadXML(selXml);	
+					doc.refresh() ;	
+	        		]]>
+			</script>
+		</object>
+	</xhtml:body>
+</xhtml:html>

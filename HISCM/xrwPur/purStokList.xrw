@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: 재고조회 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<search>
+							<SABUN/>
+							<ITEMNM/>
+						</search>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<CUSTNM/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<ITSPEC/>
+								<GONGNM/>
+								<STOKQTY/>
+							</item>
+						</grid1>
+					</gridData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" src="excel.js"/>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				function mateInit() {  // 초기 로딩
+									
+					mateSearch();
+				} 
+				
+				//조회클릭시
+				function mateSearch() {
+					
+					sendBuffInit();
+					sendBuffAdd("CUSTCD", getUserID().substring(1));
+					sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+					
+					submit("sp_SCM_StokList", "GetStokList");
+					model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+					datagrid1.refresh();
+				}
+				//추가클릭시
+				function mateAdd() {
+				}
+				//저장클릭시
+				function mateSave() {
+				}
+				//삭제클릭시
+				function mateDel() {
+				}
+				//출력클릭시
+				function matePrint() {
+				}
+				//엑셀클릭시
+				function mateExcel() {
+					openExcel("datagrid1", "true");
+				}
+				//닫기클릭시
+				function mateClose() {
+				}				
+				function pageResize() {
+					controlResize("datagrid1");
+				}
+					
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<group id="group1" style="left:0px; top:0px; width:800px; height:30px; ">
+			<caption id="caption2" style="left:5px; top:5px; width:55px; height:20px; text-align:left; vertical-align:middle; ">품목코드</caption>
+			<input id="input3" ref="/root/formData/search/SABUN" navindex="4" style="left:65px; top:5px; width:85px; height:20px; ">
+				<script type="javascript" ev:event="onmousedown">
+					<![CDATA[
+						if (event.button == 3) {
+							document.all(event.target).dispatch("ondblclick");
+						}
+					]]>
+				</script>
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						if(event.keyCode == 13) { // 엔터키를 눌렀을때 ondblclick이벤트를 발생한다.
+							document.all(event.target).dispatch("ondblclick");
+						}		
+					]]>
+				</script>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					
+						try {		  								
+							setHelpPop("gridCaption", "품목코드, 품명");
+							setHelpPop("colWidth", "100,100");
+							setHelpPop("cmdHelp", "help_Itcst");
+							setHelpPop("winHeight", "380");
+							setHelpPop("xPath1", "/root/formData/search/SABUN");
+							setHelpPop("xPath2", "/root/formData/search/ITEMNM");
+							setHelpPop("xPath3", getUserID().substring(1));
+							
+							helpPop("/root/cmdTemp");  //Help 창을 띄운다.
+							
+							group1.refresh();
+							
+						}catch(e) {}	
+							
+					]]>
+				</script>
+			</input>
+			<input id="input4" ref="/root/formData/search/ITEMNM" editable="false" style="left:149px; top:5px; width:141px; height:20px; background-color:#fefec3; "/>
+		</group>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" scroll="auto" caption="거래처명^품목코드^품번^품명^규격^공정명^현재고^" colsep="▤" colwidth="121, 100, 100, 130, 100, 100, 100, 100" mergecellsfixedrows="bycolrec" rowheader="update" rowsep="▥" selectionmode="byrow" data.focus-rect="hidden" style="left:0px; top:30px; width:800px; height:185px; ">
+			<col ref="CUSTNM"/>
+			<col ref="SABUN"/>
+			<col ref="PARTNO" style="text-align:left; "/>
+			<col ref="ITEMNM" style="text-align:left; "/>
+			<col ref="ITSPEC"/>
+			<col ref="GONGNM"/>
+			<col ref="STOKQTY" format="#,###" style="text-align:right; "/>
+			<col/>
+			<script type="javascript" ev:event="onaftersort">
+				<![CDATA[
+					datagrid1.gridToInstance();
+				]]>
+			</script>
+			<script type="javascript" ev:event="onaftermovecolumn">
+				<![CDATA[
+					datagrid1.gridToInstance();
+				]]>
+			</script>
+		</datagrid>
+	</xhtml:body>
+</xhtml:html>

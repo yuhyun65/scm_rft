@@ -1,0 +1,1603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+//==================================================
+// (주) 컴퓨터메이트 - 공통 함수 선언 
+//***************************************************
+// ComMate: 공통 변수 선언
+//***************************************************
+var rootURL = (htmlwindow.location + "").split("/xrwCom")[0] ;
+var sendBuff = "/root/sendBuff";
+var msgBuff = "/root/msgBuff";
+
+//***************************************************
+// ComMate: 모든 서브밋 정보는 반드시 이 함수를 통해서 서브밋
+//***************************************************	
+function submit(spName, workGB)
+{ try{
+	
+	if (workGB != "" && workGB != null)
+	{
+		model.setValue("/root/sendBuff/spName", spName);
+		model.setValue("/root/sendBuff/workGB", workGB);
+	} else {
+		model.setValue("/root/sendBuff/queryString", spName);
+	}
+	
+	var objSubmit = document.all("submit");
+	objSubmit.attribute("action") = rootURL + "/servlet/Common.Controller" ;
+	objSubmit.attribute("ref") = sendBuff;
+	objSubmit.attribute("resultref") = msgBuff ;
+
+	objSubmit.attribute("encoding") = "utf-8" ;
+	objSubmit.attribute("method") = "post" ;
+	objSubmit.attribute("mediatype") = "application/x-www-form-urlencoded" ;
+
+	//진행창 보이기
+	body.disabled = true;
+	setProgress(true);
+	
+	model.send("submit", false);
+	
+	try {
+		var errMsg = model.getValue("/root/msgBuff/data/GetDataErr");
+		model.setValue("/root/msgBuff/data/GetDataErr", replaceAll(errMsg, "at ", "\r\n\tat "));
+	} catch(e) {}
+	
+	//진행창 숨기기
+	setProgress(false);
+	body.disabled = false;
+
+	return true;
+	
+} catch(e) { model.alert(getFormID() + " => function => submit => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 파일 업로드 단독 사용
+//***************************************************
+function sendBuffInit()
+{ try{
+	model.copyNode("/root/sendBuff", "/root/cmdTemp");
+	instance1.selectSingleNode("/root/sendBuff").appendChild(instance1.createElement("argList"));
+	instance1.selectSingleNode("/root/sendBuff").appendChild(instance1.createElement("spName"));
+	instance1.selectSingleNode("/root/sendBuff").appendChild(instance1.createElement("workGB"));
+	instance1.selectSingleNode("/root/sendBuff").appendChild(instance1.createElement("queryString"));
+} catch(e) { model.alert(getFormID() + " => function => sendBuffSet => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 파일 업로드 단독 사용
+//***************************************************
+function sendBuffAdd(argName, argValue)
+{ try{
+	var argList = model.getValue("/root/sendBuff/argList");
+	if (argList == "") {
+		model.setValue("/root/sendBuff/argList", argName);
+	} else {
+		model.setValue("/root/sendBuff/argList", argList + "," + argName);
+	}
+
+	instance1.selectSingleNode("/root/sendBuff").appendChild(instance1.createElement(argName));
+	model.setValue("/root/sendBuff/" + argName, argValue);
+	
+} catch(e) { model.alert(getFormID() + " => function => sendBuffAdd => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 파일 업로드 단독 사용
+//***************************************************
+function upload(tableName, type, fileUID)
+{ try{
+		var objUpload = document.all("submit");
+
+		objUpload.attribute("action") = rootURL + "/servlet/Common.Controller" ;
+		
+		model.setValue("/root/cmdUpload/tableName", tableName); // 파일을 보유하고 있는 테이블
+		model.setValue("/root/cmdUpload/type", type); 
+		model.setValue("/root/cmdUpload/fileUID", fileUID);
+		model.setValue("/root/cmdUpload/userName", getUserName());
+		model.setValue("/root/cmdUpload/upload", "Y");
+		
+		if (type == "get" || type == "del") {
+			model.setValue("/root/sendFiles", "-");
+		}
+
+		objUpload.attribute("ref") =  "/root/sendFiles,/root/cmdUpload,/root/cmdMdbUserInfo" ; 
+		objUpload.attribute("resultref") = "/root/msgBuff" ;
+
+		objUpload.attribute("encoding") = "utf-8" ;
+
+		objUpload.attribute("method") = "form-data-post" ;
+		objUpload.attribute("mediatype") = "multipart/form-data" ;
+
+		//진행창 보이기
+		body.disabled = true;
+		var printStr = "※ 파일 업로드중입니다. 잠시만 기다려주십시오." ;
+		setProgress(true, printStr);
+		
+		model.send("submit");
+				
+		model.copyNode("/root/msgFiles", "/root/msgBuff/msgFiles");	
+
+		//진행창 숨기기
+		setProgress(false);
+		body.disabled = false;
+		
+		return true;
+		
+} catch(e) { model.alert(getFormID() + " => function => upload => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 간단한 암호화 처리
+//***************************************************
+function enCode(str, key)
+{ try{
+	// " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,.-:;/()[]{}"
+	var keyCode = parseInt(key);
+	if (keyCode == 0) keyCode = 10 ;
+	
+	var codeList = "sEeGhSA;/nTwQ3xUkF(gK]l8.fVo N[b2qD:rM-udCBcYpO)yP}1Lai5v9,Hz0jmR6Z7W4IJ{X" ;
+	var returnStr = "" ;
+	for (var i=0; i<str.length; i++) {
+	   var index = codeList.indexOf(str.charAt(i)) ;
+	   if (index == -1) { // 리스트에 없다면 원래 문자 추가
+	   	returnStr += str.charAt(i) ; 
+	   } else {  // 리스트에 있다면 해당 문자 추가
+	   	index += keyCode ;
+	   	while (index >= codeList.length) {
+	   		index = index - codeList.length ; 
+	   	}
+	   	returnStr += codeList.charAt(index); 
+	   }
+	}
+	return returnStr;
+} catch(e) { model.alert(getFormID() + " => function => enCode => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 복호화
+//***************************************************
+function deCode(str, key)
+{ try{
+	
+	var keyCode = parseInt(key);
+	if (keyCode == 0) keyCode = 10 ;
+	
+	var codeList = "sEeGhSA;/nTwQ3xUkF(gK]l8.fVo N[b2qD:rM-udCBcYpO)yP}1Lai5v9,Hz0jmR6Z7W4IJ{X" ;
+	var returnStr = "" ;
+	for (var i=0; i<str.length; i++) {
+	   var index = codeList.indexOf(str.charAt(i)) ;
+	   if (index == -1) { // 리스트에 없다면 원래 문자 추가
+	   	returnStr += str.charAt(i) ; 
+	   } else {  // 리스트에 있다면 해당 문자 추가
+	   	index -= keyCode ;
+	   	while (index < 0) {
+	   		index = index + codeList.length ; 
+	   	}
+	   	returnStr += codeList.charAt(index); 
+	   }
+	}
+	return returnStr;
+} catch(e) { model.alert(getFormID() + " => function => deCode => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 진행중 창 설정
+//***************************************************
+function setProgress(showFlag, str)
+{ try{
+	var printStr = "※ 진행중입니다. 잠시만 기다려주십시오." ;
+	if (str != null || str != "") { // 출력 문자열 지정했을 경우
+		printStr = str ;
+	}
+	try {
+		progress.visible = showFlag;
+	} catch(e) {
+		try {
+			parent.document.all("progress").text = printStr;
+			parent.document.all("progress").visible = showFlag;
+		}catch(e) {
+			try {
+				parent.parent.document.all("progress").text = printStr;
+				parent.parent.document.all("progress").visible = showFlag;
+			}catch(e) {
+			}
+		}
+	}
+
+} catch(e) { model.alert(getFormID() + " => function => setProgress => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 마우스 팝업 디자인
+//***************************************************
+function mousePopup(gridID)
+{ try{
+	 if (document.all(gridID).mouserow >= document.all(gridID).fixedrows && document.all(gridID).selectionMode == "free") //그리드에서 데이타영역만
+	{	
+		model.property("gridID") = gridID;
+		window.setPopupMenu(true, "/root/cmdMousePopup/menu/item", "name", "func", false);
+		//사용자지정팝업메뉴설정
+	} else if (document.all(gridID).mouserow >= document.all(gridID).fixedrows && document.all(gridID).selectionMode != "free"){
+		var viewSource = model.getValue("/root/setValue/viewSource") ;
+		if (viewSource == "N") {
+			window.showPopupMenu(false);
+		}
+		window.setPopupMenu(false);
+	}else if (document.all(gridID).mouserow == 0 ){
+		 if(event.button == 1) {
+			try {
+				var colRef = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+				var colList = colRef.split(",");
+				for(var i = 0; i < colList.length; i++) {
+					document.all(gridID).subtotal("clear",-1,document.all(gridID).colRef(colList[i]));
+				}
+				
+			}catch(e) {}
+		}
+		else {
+		 	var col = document.all(gridID).mousecol;
+		 	model.property("gridID") = gridID;
+			model.property("colStr") = document.all(gridID).colAttribute(col,"ref");
+		 	window.setPopupMenu(true, "/root/cmdMousePopup/subtotal/item", "name", "func", false);
+		 	//alert("마지막");
+		}
+ 	}
+} catch(e) { model.alert(getFormID() + " => function => mousePopup => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: help창 띄워주는 함수
+//***************************************************
+function helpPop(popDataPath)
+{ try{
+	var ctrlLeft;
+	var ctrlTop;
+	var parentObj;
+	try { // 일반 컨트롤일 경우..
+		ctrlLeft = parseInt(document.all(event.target).attribute("left"));
+		ctrlTop = parseInt(document.all(event.target).attribute("top"));
+		parentObj = document.all(event.target).parent ;
+	}catch(e) {		//datagrid일 경우..
+		try {
+			ctrlLeft = parseInt(document.all(event.ptarget.parent.attribute("id")).attribute("left"));
+			ctrlTop = parseInt(document.all(event.ptarget.parent.attribute("id")).attribute("top"));
+			parentObj = document.all(event.ptarget.parent.attribute("id")).parent ;
+		}catch (e) {	//수정한것....
+			gridID = model.property("gridID");
+			ctrlLeft = parseInt(document.all(gridID).attribute("left"));
+			ctrlTop = parseInt(document.all(gridID).attribute("top"));
+			parentObj = document.all(gridID).parent ;
+		}
+	}
+	
+	while(parentObj.elementName != "xhtml:body") {
+		ctrlLeft += parseInt(parentObj.attribute("left"));
+		ctrlTop += parseInt(parentObj.attribute("top"));
+		parentObj = parentObj.parent ;
+	}
+	
+	try {
+		ctrlLeft += parseInt(parent.document.all("iviewerPrevMain").attribute("left"));
+		ctrlTop += parseInt(parent.document.all("iviewerPrevMain").attribute("top"));
+
+		ctrlLeft += parseInt(parent.document.all("switchMain").attribute("left"));
+		ctrlTop += parseInt(parent.document.all("switchMain").attribute("top"));
+	}catch(e) {}
+	
+	var colWidth = model.getValue("/root/cmdHelpPopData/colWidth").split(","); 
+	var popupSizeX = 100;
+	var popupSizeY = parseInt(model.getValue("/root/cmdHelpPopData/winHeight"));
+	for(var i = 0; i < colWidth.length; i++) {
+		popupSizeX += parseInt(colWidth[i]);
+	}
+	var searchData = "" ;
+	
+	try{
+		// 일반 텍스트 박스에서 help 창 띄울 경우...
+		 model.setValue("/root/cmdHelpPopData/searchData", document.all(event.target).currentText);
+	}catch(e){
+		// 그리드에서 help창 띄울 경우...
+ 		try{
+ 			// 데이터 그리드 셀의 값 얻어 오기
+			var target = event.ptarget.parent.attribute("id");
+			var row = document.all(target).row;
+			var col = document.all(target).col;
+			searchData = document.all(target).valueMatrix(row,col);
+			var colWidth = document.all(target).attribute("colwidth").split(",");	//그리드일때 left위치 구할때
+
+			for( var i = 0; i < col; i++) {
+				ctrlLeft += parseInt(colWidth[i]);
+			}
+			
+			var dataHeight = document.all(target).attribute("dataheight");		//그리드일때 top위치 구할때
+			ctrlTop += parseInt(dataHeight) * parseInt((row+1));
+			model.setValue("/root/cmdHelpPopData/searchData",searchData);
+		}catch(e){}
+	}
+
+	if(popDataPath != "" && popDataPath != null) {
+		model.copyNode("/root/cmdHelpPopData/popData", popDataPath);
+	}
+	var windowX = parent.window.width;
+	var windowY = parent.window.height;
+	if((ctrlTop+popupSizeY) > windowY) {
+		var tempTop = (ctrlTop+popupSizeY) - windowY;
+		ctrlTop = ctrlTop - tempTop;
+	}
+
+	if(((ctrlLeft-(popupSizeX/2))+popupSizeX) > windowX) {
+		var tempLeft = (ctrlLeft-(popupSizeX/2)+popupSizeX) - windowX;
+		ctrlLeft = (ctrlLeft-(popupSizeX/2)) - tempLeft;
+	} else {
+		ctrlLeft = ctrlLeft-(popupSizeX/2);
+	}
+
+	if(ctrlLeft < 0 ) {
+		ctrlLeft = 0;
+	}
+	
+	if(ctrlTop < 0 ) {
+		ctrlTop = 0;
+	}
+
+	window.load("../xrwHelp/helpCmd.xrw","modal","", "left:"+ctrlLeft+"px; top:"
+	+ctrlTop+"px; width:"+popupSizeX+"px; height:"+popupSizeY+"px; max:hidden;","/root/cmdHelpPopData","/root/cmdHelpPopData");
+	
+} catch(e) { model.alert(getFormID() + " => function => helpPop => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: help창 속성 설정
+//***************************************************
+function setHelpPop(attr, value)
+{ try {
+	model.setValue("/root/cmdHelpPopData/"+attr, value);
+} catch(e) { model.alert(getFormID() + " => function => setHelpPop => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 서브 토탈 함수
+//***************************************************
+function gridSubtotal(gridID, col)
+{ try{
+	for (var i = 1; i< document.all(gridID).cols ; i++) {
+		var curColRef = document.all(gridID).colAttribute(i,"ref") ;
+		if (col.indexOf(curColRef) == -1) {
+			model.property("colStr") = curColRef ;
+			break;
+		}
+	}	
+	model.property("gridID") = gridID ;
+	var colValue = "";
+	try {
+		colValue = model.getValue("/root/cmdSubtotalColList/"+gridID);
+	}catch(e) {}
+	
+	if(colValue == "") {
+		model.makeNode("/root/cmdSubtotalColList/"+gridID);
+		model.setValue("/root/cmdSubtotalColList/"+gridID,","+col);
+	} else {
+		if(colValue.search(col) == -1) {
+			col = colValue + "," + col;
+			model.setValue("/root/cmdSubtotalColList/"+gridID,col);
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => function => gridSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+function ascSubtotal() 
+{ try{
+//	setSubtotal();
+	try {
+		var gridID = model.property("gridID");
+		var colRef = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+		getSubtotal(colRef, "asc");
+	}catch(e) {
+		alerBox("소계할 항목을 추가 하십시오");
+	}
+//	var colRef = model.property("gridCol");
+//	getSubtotal(colRef, "asc");
+} catch(e) { model.alert(getFormID() + " => function => ascSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+function descSubtotal() 
+{ try{
+	try {
+		var gridID = model.property("gridID");
+		var colRef = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+		getSubtotal(colRef, "asc");
+	}catch(e) {
+		alerBox("소계할 항목을 추가 하십시오");
+	}
+//	setSubtotal();
+//	var colRef = model.property("gridCol");
+	getSubtotal(colRef, "desc");
+} catch(e) { model.alert(getFormID() + " => function => descSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+function getSubtotal(colRef, type) 
+{ try{
+	 var grid = document.all(model.property("gridID"));
+	 var colStr = model.property("colStr");
+	 var col = grid.colRef(colStr);
+	 var colList = colRef.split(",");
+	 var index = grid.colRef(colStr);
+	 
+	 for(var i = 1; i < colList.length; i++) { // 서브토탈 없애기
+	 	if(grid.colRef(colStr) == grid.colRef(colList[i])) {
+	 		for(var j = 1; j < grid.cols; j++) {
+	 			if(colRef.indexOf(grid.colAttribute(j,"ref")) == -1) {
+	 				index = j;
+	 				break;	 				
+	 			}
+	 		}
+	 	}
+	  	grid.subtotal("clear",-1,grid.colRef(colList[i]));
+	 }
+	grid.colSort(col) = type; // 오른차순 내림차순 타입 지정
+	grid.sort(1,1, grid.rows-1, grid.cols-1) = "usersort";  // 소팅
+	grid.refresh(); 
+	grid.colSort(col) = "none";
+	
+	// grid.gridToInstance(); // 소팅 결과 인스턴스로 복사
+	
+	grid.subtotalposition= "after";
+	
+	// 그룹: grid.colRef(col)   소계할 Col : grid.colRef(colList[1])   소계 문자열 표시 위치: grid.colRef(col)
+	grid.subtotal("sum", grid.colRef(colStr), grid.colRef(colList[1]), "#,###", "color:#660000;font-weight:boldl;background-color:#cccccc", index, "소계");
+	grid.subtotal("sum", -1, grid.colRef(colList[1]), "#,###", "color:#660000;font-weight:bold;background-color:#b59baa" ,index,"총계");
+	 for(var i = 2; i < colList.length; i++) {
+		grid.subtotal("sum", grid.colRef(colStr), grid.colRef(colList[i]), "#,###", "", "", "");
+		grid.subtotal("sum", -1, grid.colRef(colList[i]), "#,###", "", "", "");
+	 }
+ 	 initSetGrid(); // MDB 정보를 통한 그리드 초기화
+} catch(e) { model.alert(getFormID() + " => function => getSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+function addSubtotal() 
+{ try{
+	var gridID = model.property("gridID");
+	var node = "";
+	try {
+		node = instance1.selectSingleNode("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+		var col = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드 정보 가져오기
+		var colList = col.split(",");
+		for(var i = 1; i < colList.length; i++) {
+			if( colList[i] == model.property("colStr") ){ //값이 있다면
+				return;
+			} 
+		}
+		// 값이 없다면 추가
+		model.setValue("/root/cmdSubtotalColList/"+gridID, col+","+model.property("colStr") );
+	}catch(e) {
+		//해당그리드 정보가 없다면 노드 생성후 초기값 추가
+ 		model.makeNode("/root/cmdSubtotalColList/"+gridID);
+		model.setValue("/root/cmdSubtotalColList/"+gridID,","+model.property("colStr") );
+	}
+	ascSubtotal();
+} catch(e) { model.alert(getFormID() + " => function => addSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+
+function delSubtotal() 
+{ try{
+	var gridID = model.property("gridID");
+	var node = "";
+	try {
+		node = instance1.selectSingleNode("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+		var col = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드 정보 가져오기
+		var colList = col.split(",");
+		var newColList = "";
+		for(var i = 1; i < colList.length; i++) {
+			if( colList[i] != model.property("colStr") ){ //값이 있다면
+				newColList += "," + colList[i];
+			}
+		}
+		model.setValue("/root/cmdSubtotalColList/"+gridID,newColList);
+	}catch(e) {}
+	if(newColList != ""){
+		ascSubtotal();
+	}else {
+		var colRef = model.getValue("/root/cmdSubtotalColList/"+gridID);	//해당 그리드정보 있는지 체크
+		var colList = colRef.split(",");
+		for(var i = 0; i < colList.length; i++) {
+			document.all(gridID).subtotal("clear",-1,document.all(gridID).colRef(colList[i]));
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => function => delSubtotal => " + e, "ComMate DEBUG"); return false; }}
+
+function userSort() // 수정
+{ try{
+	try {
+		var gridID = model.property("gridID");
+		var gridCaption = document.all(gridID).attribute("caption");
+		var captionList = gridCaption.split("^");
+		var cols = document.all(gridID).cols;
+		gridCaption = "";
+		var colIndex = "";
+		for( var i = 0; i < cols ; i++) {
+			if(document.all(gridID).attribute("rowheader") != "") {
+				if(i > 0) {
+					if(document.all(gridID).colAttribute(i,"ref") != "" && captionList[i-1] != "" && document.all(gridID).colAttribute(i,"visibility") != "hidden" ) {
+						colIndex += "," + i;
+						gridCaption += "," + captionList[i-1];
+					}
+				}
+			} else {
+				if(document.all(gridID).colAttribute(i,"ref") != "" && captionList[i] != "" && document.all(gridID).colAttribute(i,"visibility") != "hidden" ) {
+					colIndex += "," + i;
+					gridCaption += "," + captionList[i];
+				}
+			}
+		}
+		model.setValue("/root/cmdSortPopData/colIndex",colIndex);
+		model.setValue("/root/cmdSortPopData/gridCaption",gridCaption);
+		var xPath1 = "/root/cmdSortPopData/gridSort";
+		var xPath2 = "/root/cmdSortPopData/isAsc" ;
+		var popDataPath = "/root/cmdSortPopData";			
+		helpGridPop("helpSort",xPath1,xPath2,"","","",popDataPath);  //Help 창을 띄운다.
+		var gridSort = model.getValue("/root/cmdSortPopData/gridSort");
+		var isAsc = model.getValue("/root/cmdSortPopData/isAsc");
+		var SortList = gridSort.split(",");
+		var AscList = isAsc.split(",");
+		for(var i = 1; i < SortList.length; i++) {
+			if(AscList[i] == 1) {
+				document.all(gridID).colSort(SortList[i]) = "asc";
+			} else if (AscList[i] == 2){
+				document.all(gridID).colSort(SortList[i]) = "desc";
+			}
+		}
+		document.all(gridID).sort(1,1, document.all(gridID).rows-1, document.all(gridID).cols-1) = "usersort";
+		var cols = document.all(gridID).cols;
+		for(var i = 0; i < cols; i++) {
+			document.all(gridID).colSort(i) = "none";
+		}
+	}catch(e) {
+		alerBox("그리드가 아닙니다.");
+	}
+} catch(e) { model.alert(getFormID() + " => function => userSort => " + e, "ComMate DEBUG"); return false; }}
+
+
+function gridHidden() // 그리드 컬럼 히든 함수
+{ try{
+	try {
+		var gridID = model.property("gridID");
+		var gridCaption = document.all(gridID).attribute("caption");
+		var captionList = gridCaption.split("^");
+		var cols = document.all(gridID).cols;
+		gridCaption = "";
+		var colIndex = "";
+		var colWidth = "";
+ 		var isHidden = "";
+		for( var i = 0; i < cols ; i++) {
+			if(document.all(gridID).attribute("rowheader") != "") {
+				if(i > 0) {
+					if(captionList[i-1] != "" && document.all(gridID).colAttribute(i,"_hidden") != "2" ) {
+						colIndex += "," + i;
+						gridCaption += "," + captionList[i-1];
+						isHidden += "," + document.all(gridID).colHidden(i);
+						colWidth += "," + document.all(gridID).colWidth(i);
+					}
+				}
+			} else {
+				if(captionList[i] != "" && document.all(gridID).colAttribute(i,"_hidden") != "2" ) {
+					colIndex += "," + i;
+					gridCaption += "," + captionList[i];
+					isHidden += "," + document.all(gridID).colHidden(i);
+					colWidth += "," + document.all(gridID).colWidth(i);
+				}
+			}
+		}
+		model.setValue("/root/cmdHiddenPopData/colIndex",colIndex);
+		model.setValue("/root/cmdHiddenPopData/gridCaption",gridCaption);
+		model.setValue("/root/cmdHiddenPopData/isHidden",isHidden);
+		model.setValue("/root/cmdHiddenPopData/colWidth",colWidth);
+
+		var xPath1 = "/root/cmdHiddenPopData/colIndex" ;
+		var xPath2 = "/root/cmdHiddenPopData/isHidden" ;
+		var xPath3 = "/root/cmdHiddenPopData/colWidth" ;
+		var popDataPath = "/root/cmdHiddenPopData";	
+		
+		helpGridPop("helpHidden",xPath1,xPath2,xPath3,"","",popDataPath);  //Help 창을 띄운다.
+		
+		colIndex = model.getValue(xPath1);
+		isHidden = model.getValue(xPath2);
+		colWidth = model.getValue(xPath3);
+		
+		var colList = colIndex.split(",");
+		var hiddenList = isHidden.split(",");
+		var widthList = colWidth.split(",");
+		
+		for(var i = 1; i < colList.length; i++) {
+			if(hiddenList[i] == 1) {
+				document.all(gridID).colHidden(colList[i]) = true;
+			}else {
+				document.all(gridID).colHidden(colList[i]) = false;
+			}
+			
+			document.all(gridID).colWidth(colList[i]) = widthList[i];
+		}
+		document.all(gridID).refresh();
+		// saveGridInfo();
+
+	}catch(e) {
+		alerBox("그리드가 아닙니다.");
+	}
+} catch(e) { model.alert(getFormID() + " => function => gridHidden => " + e, "ComMate DEBUG"); return false; }}
+
+function gridColHidden(gridID, colRef, isHidden) {
+	var col = document.all(gridID).colRef(colRef);
+	if(isHidden == "1") {
+		document.all(gridID).colHidden(col) = true;
+		document.all(gridID).colAttribute(col,"_hidden") = "2";
+	}
+}
+
+function gridColWidth(gridID, colRef, Size) {
+	var col = document.all(gridID).colRef(colRef);
+	document.all(gridID).colWidth(col) = Size;
+}
+
+function helpGridPop(fileName, xPath1, xPath2, xPath3, xPath4, xPath5, popDataPath)
+{ try{
+	var ctrlLeft;
+	var ctrlTop;
+	var parentObj;
+	try { // 일반 컨트롤일 경우..
+		ctrlLeft = parseInt(document.all(event.target).attribute("left"));
+		ctrlTop = parseInt(document.all(event.target).attribute("top"));
+		parentObj = document.all(event.target).parent ;
+	}catch(e) {		//datagrid일 경우..
+		try {
+			ctrlLeft = parseInt(document.all(event.ptarget.parent.attribute("id")).attribute("left"));
+			ctrlTop = parseInt(document.all(event.ptarget.parent.attribute("id")).attribute("top"));
+			parentObj = document.all(event.ptarget.parent.attribute("id")).parent ;
+		}catch (e) {	//수정한것....
+			gridID = model.property("gridID");
+			ctrlLeft = parseInt(document.all(gridID).attribute("left"));
+			ctrlTop = parseInt(document.all(gridID).attribute("top"));
+			parentObj = document.all(gridID).parent ;
+		}
+	}
+	while(parentObj.elementName != "xhtml:body") {
+		ctrlLeft += parseInt(parentObj.attribute("left"));
+		ctrlTop += parseInt(parentObj.attribute("top"));
+		parentObj = parentObj.parent ;
+	}
+	
+	ctrlLeft += parseInt(parent.document.all("iviewerPrevMain").attribute("left"));
+	ctrlTop += parseInt(parent.document.all("iviewerPrevMain").attribute("top"));
+
+	ctrlLeft += parseInt(parent.document.all("switchMain").attribute("left"));
+	ctrlTop += parseInt(parent.document.all("switchMain").attribute("top"));
+	
+	var popupSizeX = 280;
+	var popupSizeY = 380;
+	
+	if (fileName == "helpHidden") { // 품번 목록
+  		popupSizeX = 400;
+  		popupSizeY = 500; 
+ 	}
+ 	
+	var searchData = "" ;
+	try{
+		// 일반 텍스트 박스에서 help 창 띄울 경우...
+		 model.setValue("/root/cmdHelpPopData/searchData", document.all(event.target).currentText);
+	}catch(e){
+		// 그리드에서 help창 띄울 경우...
+ 		try{
+ 			// 데이터 그리드 셀의 값 얻어 오기
+			var target = event.ptarget.parent.attribute("id");
+			var row = document.all(target).row;
+			var col = document.all(target).col;
+			searchData = document.all(target).valueMatrix(row,col);
+			var colWidth = document.all(target).attribute("colwidth").split(",");	//그리드일때 left위치 구할때
+
+			for( var i = 0; i < col; i++) {
+				ctrlLeft += parseInt(colWidth[i]);
+			}
+			
+			var dataHeight = document.all(target).attribute("dataheight");		//그리드일때 top위치 구할때
+			ctrlTop += parseInt(dataHeight) * parseInt((row+1));
+			model.setValue("/root/cmdHelpPopData/searchData",searchData);
+		}catch(e){}
+	}
+	
+	model.setValue("/root/cmdHelpPopData/xPath1", xPath1);
+	model.setValue("/root/cmdHelpPopData/xPath2", xPath2);
+	model.setValue("/root/cmdHelpPopData/xPath3", xPath3);
+	model.setValue("/root/cmdHelpPopData/xPath4", xPath4);
+	model.setValue("/root/cmdHelpPopData/xPath5", xPath5);
+	model.copyNode("/root/cmdHelpPopData/popData", popDataPath);
+	
+	var windowX = parent.window.width;
+	var windowY = parent.window.height;
+	
+	if((ctrlTop+popupSizeY) > windowY) {
+		var tempTop = (ctrlTop+popupSizeY) - windowY;
+		ctrlTop = ctrlTop - tempTop;
+	}
+	
+	if(((ctrlLeft-(popupSizeX/2))+popupSizeX) > windowX) {
+		var tempLeft = (ctrlLeft-(popupSizeX/2)+popupSizeX) - windowX;
+		ctrlLeft = (ctrlLeft-(popupSizeX/2)) - tempLeft;
+	} else {
+		ctrlLeft = ctrlLeft-(popupSizeX/2);
+	}
+	
+	window.load("../xrwHelp/"+fileName+".xrw","modal","", "left:"+ctrlLeft+"px; top:"
+	+ctrlTop+"px; width:"+popupSizeX+"px; height:"+popupSizeY+"px; max:hidden;","/root/cmdHelpPopData","/root/cmdHelpPopData");
+	
+} catch(e) { model.alert(getFormID() + " => function => helpPop => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 그리드 최소값 구하기
+//***************************************************
+function gridMin()
+{ try{
+	var gridID = document.all(model.property("gridID"));
+	var min;
+	for(i = 0; i < gridID.selectedCells.length; i++) {
+		var row = gridID.selectedCells.item(i).row;
+		var col = gridID.selectedCells.item(i).col ;
+		var value = gridID.valueMatrix(row,col) ;
+		value = parseFloat(value);
+		if (isNum(value)) {
+			if(value<min || min == null)
+				min = value;
+		} else {
+			alertBox("문자열은 계산할 수 없습니다.");
+			return ;
+		}
+	}
+	alertBox("최소값은 " + min);
+	
+} catch(e) { model.alert(getFormID() + " => function => gridMin => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 그리드 최대값 구하기
+//***************************************************
+function gridMax()
+{ try{
+	var gridID = document.all(model.property("gridID"));
+	var max;
+	for(i = 0; i < gridID.selectedCells.length; i++) {
+		var row = gridID.selectedCells.item(i).row;
+		var col = gridID.selectedCells.item(i).col ;
+		var value = gridID.valueMatrix(row,col) ;
+		value = parseFloat(value);
+		if (isNum(value)) {
+			if(value>max || max == null)
+				max = value;
+		} else {
+			alertBox("문자열은 계산할 수 없습니다.");
+			return ;
+		}
+	}
+	alertBox("최대값은 " + max);
+} catch(e) { model.alert(getFormID() + " => function => gridMax => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 그리드 합계 구하기
+//***************************************************
+function gridSum()
+{ try{
+	var gridID = document.all(model.property("gridID"));
+	var sum = 0;
+	for(i = 0; i < gridID.selectedCells.length; i++) {
+		var row = gridID.selectedCells.item(i).row;
+		var col = gridID.selectedCells.item(i).col ;
+		var value = gridID.valueMatrix(row,col) ;
+		value = parseFloat(value);
+		if (isNum(value)) {
+			sum += parseFloat(value);
+		} else {
+			alertBox("문자열은 계산할 수 없습니다.");
+			return ;
+		}
+	}
+	alertBox("합계는 " + sum);
+	
+} catch(e) { model.alert(getFormID() + " => function => gridSum => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 그리드 평균값 구하기
+//***************************************************
+function gridEve()
+{ try{
+	var sum = 0;
+	var eve = 0;
+	var gridID = document.all(model.property("gridID"));
+	for(i = 0; i < gridID.selectedCells.length; i++) {
+		var row = gridID.selectedCells.item(i).row;
+		var col = gridID.selectedCells.item(i).col ;
+		var value = gridID.valueMatrix(row,col) ;
+		value = parseFloat(value);
+		if (isNum(value)) {
+			sum += parseFloat(value);
+		} else {
+			alertBox("문자열은 계산할 수 없습니다.");
+			return ;
+		}
+	}
+
+	eve = sum / parseFloat(gridID.selectedCells.length);
+	eve = mathRound(eve, 2) ;
+
+	alertBox("평균값은 "+ eve);
+} catch(e) { model.alert(getFormID() + " => function => gridEve => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 스트링 데이터를 instance 노드로 추가하기
+//***************************************************
+function copyXmlNode(xPath, xmlString) 
+{ try{
+//	var afterIndex = index.split(",");
+//	var xmlString = "";
+//	for( var i = 1; i < afterIndex.length; i++) {
+//		var node = instance1.selectSingleNode(xPath+"["+afterIndex[i]+"]");
+//		xmlString += node.xml;
+//	}
+//	var xPathXml = replaceAll(instance1.selectNodesXml(xPath),"\\t","") ;
+//	var rootXml = replaceAll(instance1.selectNodesXml("/root"),"\\t","") ;
+//	rootXml = rootXml.replace(xPathXml,xmlString);
+//	instance1.loadXML(rootXml);
+} catch(e) { model.alert(getFormID() + " => function => copyXmlNode => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 페이지 폼 이름 얻기
+//***************************************************
+function getFormID() 
+{ try{
+	var docSplit = document.url.split("/");
+	var formID = docSplit[docSplit.length-1].replace("$", "") ;
+	formID = formID.substring(0, formID.length-4);
+	// 게시판이라면 boardInfo 의 formID 로 교체
+	if (formID.substring(0, 9) == "boardA001" || formID.substring(0, 10) == "noticeA001") {
+		formID = model.getValue("/root/boardInfo/formID");
+	}
+	return formID ;
+} catch(e) { model.alert(getFormID() + " => function => getFormID => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 사용자 아이디 얻기
+//***************************************************
+function getUserID() 
+{ try{
+	var userID =  model.getValue("/root/formData/sendLogin/userID");
+
+	if (userID == "" || userID == null)
+	{
+		try {
+			userID = model.getValue(parent.root.formData.sendLogin.userID);
+		} catch(e) {
+			userID = model.getValue(parent.parent.root.formData.sendLogin.userID);
+		}
+	}
+	return userID ;
+} catch(e) { model.alert(getFormID() + " => function => getUserID => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 사용자 이름 얻기
+//***************************************************
+function getUserName() 
+{ try{
+	var userName =  model.getValue("/root/formData/sendLogin/userName");
+	if (userName == "" || userName == null)
+	{
+		try {
+			userName = model.getValue(parent.root.formData.sendLogin.userName);
+		} catch(e) 
+		{
+			userName = model.getValue(parent.parent.root.formData.sendLogin.userName);
+		}
+	}
+	return userName ;
+} catch(e) { model.alert(getFormID() + " => function => getUserName => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 그리드 행내용을 디테일 그룹에 복사
+//***************************************************
+function gridDetail(groupControl, row) 
+{ try{
+	if(row != -1 && row != 0) {
+		var obj = document.controls;
+		for (var i=0 ; i<obj.length; i++) {
+			try {
+				var parentObj = obj.item(i).parent;
+				while(parentObj.attribute("id") != groupControl && parentObj.elementName != "xhtml:body" ) {
+					parentObj = parentObj.parent ;
+				}
+				if (parentObj.attribute("id") == groupControl) {
+					if ((obj.item(i).attribute("ref").indexOf("gridData") != -1)&&(obj.item(i).attribute("ref").indexOf("item") != -1)) {
+						var refList = obj.item(i).attribute("ref").split("/item");
+						var refFirst = refList[0] ;
+						var refLast = refList[1].split("/")[1];
+						obj.item(i).attribute("ref") = refFirst + "/item["+row+"]/"+refLast ;
+						obj.item(i).refresh();
+					}
+				}
+			}catch(e) {}
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => function => gridDetail => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 입력 컨트롤 키이벤트에 대소문자 변환
+//***************************************************
+function convertCase(inputmode)
+{ try{
+   if ( (inputmode == "A") && (97 <= event.keyCode && event.keyCode <= 122) ) {
+       event.keyCode -= 32;
+       return;
+   }
+   else if ( (inputmode == "a") && (65 <= event.keyCode && event.keyCode <= 90) ) {
+       event.keyCode += 32;
+       return;
+   }
+} catch(e) { model.alert(getFormID() + " => function => convertCase => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 문자열 내의 앞 뒤 공백 제거
+//***************************************************
+function trim(str)
+{ try{
+	return str.replace(/(^\s*)|(\s*$)/gi, "");
+} catch(e) { model.alert(getFormID() + " => function => trim => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 문자열내의 왼쪽 공백 제거
+//***************************************************
+function leftTrim(str)
+{ try{
+	return str.replace(/(^\s*)/g, "");
+} catch(e) { model.alert(getFormID() + " => function => leftTrim => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 문자열내의 오른쪽 공백 제거
+//***************************************************
+function rightTrim(str)
+{ try{
+	return str.replace(/(\s*$)/g, "");
+} catch(e) { model.alert(getFormID() + " => function => rightTrim => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 현재 로컬 시스템의 날짜 지정 포멧으로 반환
+//***************************************************
+function getDate(format)
+{ try{
+	var date = new Date();
+
+	var y = date.getYear();
+	var m = date.getMonth() + 1;
+	var d = date.getDate();
+
+	var ret = "";
+
+	if (format == "yyyymmdd" || format == null) {
+		ret += y;
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "yyyy-mm-dd") {
+		ret += y;
+		ret += "-";
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += "-";
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "yyyy/mm/dd") {
+		ret += y;
+		ret += "/";
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += "/";
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "yyyymm") {
+		ret += y;
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "yyyy/mm") {
+		ret += y;
+		ret += "/";
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "yyyy-mm") {
+		ret += y;
+		ret += "-";
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "mmdd") {
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "mm/dd") {
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += "/" ;
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "mm-dd") {
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += "-" ;
+		ret += (d < 10 ) ? "0" + d : d;
+	} else if (format == "yyyy") 	{
+		ret += y;
+	} else if (format == "mm") 	{
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "dd") 	{
+		ret += (d < 10 ) ? "0" + d : d;
+	} else {
+		// 에러 처리
+		ret += "err" ;
+	}
+	return ret;
+} catch(e) { model.alert(getFormID() + " => function => getDate => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 현재 로컬 시스템의 시간을 지정 포멧으로 반환
+//***************************************************
+function getTime(format)
+{ try{
+	var date = new Date();
+
+	var h = date.getHours();
+	var m = date.getMinutes();
+	var s = date.getSeconds();
+
+	var ret = "";
+
+	if (format == "hhmmss" || format == null) {
+		ret += (h < 10 ) ? "0" + h : h;
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += (s < 10 ) ? "0" + s : s;
+	} else if (format == "hhmm") {
+		ret += (h < 10 ) ? "0" + h : h;
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "hh:mm:ss") {
+		ret += (h < 10 ) ? "0" + h : h;
+		ret += ":";
+		ret += (m < 10 ) ? "0" + m : m;
+		ret += ":";
+		ret += (s < 10 ) ? "0" + s : s;
+	} else if (format == "hh:mm") {
+		ret += (h < 10 ) ? "0" + h : h;
+		ret += ":";
+		ret += (m < 10 ) ? "0" + m : m;
+	} else if (format == "hh") {
+		ret += (h < 10 ) ? "0" + h : h;
+	} else if (format == "mm") {
+		ret += (m < 10 ) ? "0" + m : m;
+	} else {
+		ret += "err";
+	}
+	return ret;
+} catch(e) { model.alert(getFormID() + " => function => getTime => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 숫자 앞에 지정 자리수 만큼의 "0" 추가하기
+//***************************************************
+function addZero(num, len)
+{ try{
+	num = num.toString();
+	if (num.length < len)
+	{
+		var space = "";
+		var slen = len - num.length;
+			for (var i = 0; i < slen; i++)
+				space += "0";
+		num = (space + num);
+	}
+	return num;
+} catch(e) { model.alert(getFormID() + " => function => addZero => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 숫자 앞에 지정 자리수 만큼의 공백 추가하기
+//***************************************************
+function addSpace(num, len)
+{ try{
+	num = num.toString();
+	if (num.length < len)
+	{
+		var space = "";
+		var slen = len - num.length;
+			for (var i = 0; i < slen; i++)
+				space += " ";
+		num = (space + num);
+	}
+	return num;
+} catch(e) { model.alert(getFormID() + " => function => addSpace => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 지정한 날자형 문자열을 날자 포멧에 맞게 바꾸기
+// 예: calDate(200711365) = > 2007년도 11월 365일 경과후 값: 20071030
+//***************************************************
+function calDate(sDate)
+{ try{
+
+    if( sDate != null ){
+
+        var curYear = parseInt(sDate.substring(0,4), 10);
+        var curMon  = parseInt(sDate.substring(4,6), 10) -1;
+        var curDay  = parseInt(sDate.substring(6), 10);
+    }
+
+    var  objDate = ( sDate == null ? new Date() : new Date(curYear,curMon,curDay));
+
+    var dateYear = objDate.getYear();
+    var dateMonth = objDate.getMonth() + 1;
+    var dateDay = objDate.getDate();
+
+    dateMonth = (dateMonth < 10 ?  "0" + dateMonth : dateMonth);
+    dateDay = (dateDay < 10 ?  "0" + dateDay : dateDay);
+
+    var s = dateYear.toString();
+    s += dateMonth.toString();
+    s += dateDay.toString();
+
+    return(s);
+
+} catch(e) { model.alert(getFormID() + " => function => calDate => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 정해진 날자의 다음날 얻기
+// 예: nextDate("20071120") => 리턴값: 20071121
+//***************************************************
+function nextDay(sDate)
+{ try{
+    if (sDate == "" || sDate == null) 
+    	sDate = getDate() ;
+
+    var trgDate = parseInt(sDate, 10) + 1;
+    var strDate = trgDate.toString();
+
+    return(calDate(strDate));
+
+} catch(e) { model.alert(getFormID() + " => function => nextDay => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 정해진 날자의 이전날 얻기
+// 예: nextDate("20071120") => 리턴값: 20071119
+//***************************************************
+function prevDay(sDate)
+{ try{
+	if (sDate == "" || sDate == null) 
+		sDate = getDate() ;
+		
+	var trgDate = parseInt(sDate, 10) - 1;
+	var strDate = trgDate.toString();
+
+	return(calDate(strDate));
+} catch(e) { model.alert(getFormID() + " => function => prevDay => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 지정한 년도 월에 따라 마지막 날 리턴
+// 예: lastDay(200711) = > 2007년도 11월의 마지막 날: 30
+//***************************************************
+function lastDay(sDate)
+{ try{
+	if (sDate == "" || sDate == null) // sDate 값이 없다면 오늘 날짜
+    		sDate = getDate().substring(0,6) ;
+    	
+	var curYear = parseInt(sDate.substring(0, 4));
+	var curMon = parseInt(sDate.substring(4, 6)) + 1 ;
+	if (curMon > 12) {
+		curYear++ ;
+		curMon = "01" ;
+	}
+	curMon = addZero(curMon, 2);
+	sDate = curYear + curMon + "01" ;
+	return(prevDay(sDate).substring(6,8));
+} catch(e) { model.alert(getFormID() + " => function => lastDay => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 정해진 날짜의 이전달 날짜 얻기
+// 예: prevMonth("20080116") => 리턴값: 20080216
+//	 prevMonth("20080131") => 리턴값: 20080229
+//***************************************************
+function prevMonth(sDate)
+{
+  	var y =parseInt(sDate.substring(0, 4)); 
+	var m = sDate.substring(4,6); 
+	if (m < 10)
+		m =  sDate.substring(5,6) ;	
+	var d = sDate.substring(6,8);  
+
+	var curLastD= lastDay(y+ m);  
+	
+	m = new String(parseInt(m)-1);
+	
+	if (m == 0) {
+		y = new String(y-1);
+		m= "12" ;
+	}else {			
+		if (m < 10 )	
+			m = "0" + m;
+	}
+	var mm = m;
+	if (m < 10)
+		mm = m.replace("0", "");		
+	var nextLastD = lastDay(y+mm); 
+	
+	if (parseInt(d) > parseInt(nextLastD))
+		var ymd = y+m+nextLastD;
+	else
+		var ymd = y+m+d;
+						
+	return (ymd);			
+}	
+
+//***************************************************
+// ComMate: 정해진 날짜의 다음달 날짜 얻기
+// 예: nextMonth("20080116") => 리턴값: 20071216
+//	 nextMonth("20080331") => 리턴값: 20080229
+//***************************************************
+function nextMonth(sDate){
+
+	var y =parseInt(sDate.substring(0, 4)); 
+	var m = sDate.substring(4,6); 
+	if (m < 10)
+		m =  sDate.substring(5,6) ;	
+	var d = sDate.substring(6,8);  
+
+	var curLastD= lastDay(y+ m);  
+	
+	m = new String(parseInt(m)+1);
+	
+	if (m > 12) {
+		y = new String(y+1);
+		m= "01" ;
+	}else {			
+		if (m < 10 )	
+			m = "0" + m;
+	}	
+					
+	var mm = m;
+	if (m < 10)
+		mm = m.replace("0", "");				
+	var nextLastD= lastDay(y+mm); 
+		
+	if (parseInt(d) > parseInt(nextLastD))
+		var ymd = y+m+nextLastD;
+	else
+		var ymd= y+m+d;
+					
+	return (ymd);	
+}	
+
+//***************************************************
+// ComMate: 지정한 날자에 따라 요일 구하기
+// 예: getWeek("20071213") => 결과값: 목
+//***************************************************
+function getWeek(sDate) 
+{ try{
+	var weekDate = new Date();
+	if (sDate != null && sDate != "") {
+		weekDate = new Date(sDate.substring(4,6) + "-" + sDate.substring(6,8) + "-" + sDate.substring(0,4)) ;
+	}
+    	var index = weekDate.getDay(); //일요일=0,월요일=1,...,토요일=6
+    	var week = new Array('일','월','화','수','목','금','토');
+    	return week[index];
+} catch(e) { model.alert(getFormID() + " => function => getWeek => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 숫자 반올림 처리 ( 소수점 아래 자리수 지정 가능 )
+// 예: mathRound(65.67, 1) => 결과값 65.7
+//***************************************************
+function mathRound(num, length) 
+{ try{
+	return parseFloat(num).toFixed(length);
+} catch(e) { model.alert(getFormID() + " => function => mathRound => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 일반 메시지 확인창 띄우기
+// 모든 alert 함수는 alertBox 로 대체할 것
+//***************************************************
+function alertBox(msg)
+{ try{
+	// 언어 변환
+	msg = msg + "" ; // returnSubmit(msg) ;
+	
+	// msg = replaceAll(msg, "\\n", "     \n") ;
+	var MyReturn = model.alert(msg, "", 0x40 | 0 );
+	return MyReturn ;
+} catch(e) { model.alert(getFormID() + " => function => alertBox => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 경고창 띄우기
+//***************************************************
+function errAlert(msg)
+{ try{
+	// 언어 변환
+	msg = msg + "" ; // returnSubmit(msg) ;
+	
+	var MyReturn = model.alert(msg, "", 0x10 | 0 );   // MB_ICONQUESTION, YesNo // 6 이면 Yes, 7 이면 No
+	return MyReturn;
+} catch(e) { model.alert(getFormID() + " => function => errAlert => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 예/아니오 창 띄우기
+//***************************************************
+function yesAlert(msg)
+{ try{
+	// 언어 변환
+	msg = msg + "" ; // returnSubmit(msg) ;
+	
+	var MyReturn = model.alert(msg, "", 0x20 | 4 );   // MB_ICONQUESTION, YesNo // 6 이면 Yes, 7 이면 No
+	if( MyReturn == 6) return 1;
+	else return 0;
+} catch(e) { model.alert(getFormID() + " => function => yesAlert => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: alertBox 언어 변환 submit 후 리턴
+//***************************************************
+function returnSubmit(msg) 
+{ try{
+	var pageLang = model.getValue("/root/cmdMdbUserInfo/pageLang");
+	if (pageLang != "LANGKS") {
+		msg = replaceAll(msg, "\\n", "▤") ;
+	
+		model.setValue("/root/cmdSendLang/pageLang", pageLang);
+		model.setValue("/root/cmdSendLang/alertStr", msg);
+		model.setValue("/root/cmdSendLang/gridStr", "");
+		model.setValue("/root/cmdSendLang/capStr", "");
+		model.setValue("/root/cmdSendLang/comboStr", "");
+		model.setValue("/root/cmdSendLang/btnStr", "");
+		
+		submit("commonChangeLang","/root/cmdSendLang");
+		msg = model.getValue("/root/msgBuff/changeLang/alertStr");
+		msg = replaceAll(msg, "▤", "     \n");
+		msg = replaceAll(msg, "null", "");
+		return msg + "     " ;
+	} else {
+		msg = replaceAll(msg, "\\n", "     \n") ;
+		return msg + "     " ;
+	}
+} catch(e) { model.alert(getFormID() + " => function => returnSubmit => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 문자열 변환 함수 
+// 예: replaceAll("a0a0a0a0", "a", "b") => b0b0b0b
+//***************************************************
+function replaceAll(strData, str1, str2)
+{ try{
+  return  strData.replace(eval("/" + str1 + "/gi"), str2);
+} catch(e) { model.alert(getFormID() + " => function => replaceAll => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 숫자 뒤에 붙는 문자 제거 숫자만 반환
+// 예: replacePx("650pxpx", "pxpx") => 650 ( 두번째 인자 기본값 "px" )
+//***************************************************
+function removePx(srcNum, splitStr)
+{ try{
+	if( splitStr ){
+		if(  !isNumber(srcNum)  )   srcNum = srcNum.replace(splitStr, "");
+	}else{
+		if(  !isNumber(srcNum)  )   srcNum = srcNum.replace("px", "");
+	}
+	return parseInt(srcNum, 10);
+} catch(e) { model.alert(getFormID() + " => function => removePx => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 문자열 바이트수 구하기 한,중,일 2 byte 로 계산
+// 예: getStrByte("한-a3") => 결과값: 5
+//***************************************************
+ function getStrByte(str)
+ { try{
+       var strByte = 0;
+       if ( str == null ) return 0;
+       for(var i=0; i<str.length; i++){
+          var curStr = escape(str.charAt(i));
+          if ( curStr.length == 1 ) strByte ++;
+          else if ( curStr.indexOf("%u") != -1 ) strByte += 2;
+          else if ( curStr.indexOf("%") != -1 ) strByte += curStr.length/3;
+       }
+       return strByte;
+} catch(e) { model.alert(getFormID() + " => function => getStrByte => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 숫자인지 확인
+//***************************************************
+function isNum(str)
+{ try{
+    str = str.toString();
+    str = str.replace(".", "");
+    for(var i=0; i < str.length; i++){
+    	var curStr = str.charAt(i) ;
+	if ( curStr < '0' || curStr > '9') {
+		return false;
+	}
+    }
+    return true;
+} catch(e) { model.alert(getFormID() + " => function => isNum => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 입력값이 E-mail 형식인지 확인
+//***************************************************
+//function isValidEmail(input) {
+////    var format = /^(\S+)@(\S+)\.([A-Za-z]+)$/;
+//    var format = /^((\w|[\-\.])+)@((\w|[\-\.])+)\.([A-Za-z]+)$/;
+//    return isValidFormat(input,format);
+//}
+//***************************************************
+// ComMate: 한글인지 확인
+//***************************************************
+function isKor(str)
+{ try{
+    str = str.toString();
+     for(var i=0; i < str.length; i++) {
+	var curStr = escape(str.charAt(i));
+	if ( curStr.indexOf("%u") == -1 ) {
+		 return false;
+	}
+    }
+    return true;  
+} catch(e) { model.alert(getFormID() + " => function => isKor => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 영문인지 확인
+//***************************************************
+function isEng(str)
+{ try{
+    str = str.toString();
+    for(var i=0; i < str.length; i++){
+    	var curStr = str.charAt(i) ;
+	if (!((curStr >='a' && curStr <= 'z') || (curStr >= 'A' && curStr <= 'Z'))){
+		return false;
+	}
+    }
+    return true;
+} catch(e) { model.alert(getFormID() + " => function => isEng => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: RGB값을 16진수로 변환.
+//***************************************************
+function RGBtoHex(R,G,B)
+{ try{
+    return "#" + toHex(R) + toHex(G) + toHex(B);
+} catch(e) { model.alert(getFormID() + " => function => RGBtoHex => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 10진수 값을 16진수로 변환.
+//***************************************************
+function toHex(Num)
+{ try{
+
+    if(isNaN(Num) || Num == null || Num == 0 ) return "00";
+    Num = parseInt(Num, 10);
+
+    return "0123456789ABCDEF".charAt((Num-Num%16)/16)
+    		+ "0123456789ABCDEF".charAt(Num%16);
+
+} catch(e) { model.alert(getFormID() + " => function => toHex => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 디버깅 함수
+//***************************************************
+function debug(msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8, msg9, msg10)
+{ try{
+	alert(msg1 +", "+msg2+", "+msg3+", "+msg4+", "+msg5+", "+msg6+", "+msg7+", "+msg8+", "+msg9+", "+msg10) ;
+} catch(e) { model.alert(getFormID() + " => function => debug => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 폴더 생성 (존재안할때만) 
+//***************************************************
+function createFolder(fldr) 
+{ try{
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	   
+	if(!(fso.FolderExists(fldr))) {
+		f = fso.GetFolder(fldr.substring(0, fldr.lastIndexOf("\\")+1));
+		fc = f.SubFolders;
+		nf = fc.Add(fldr.substring(fldr.lastIndexOf("\\")+1));
+	}
+} catch(e) { model.alert(getFormID() + " => function => createFolder => " + e, "ComMate DEBUG"); return false; }}
+
+//**********************************************************
+// ComMate: 지정 폴더 하위 파일 전부 지우기 ( 클라이언트 폴더 )
+// isDeleteFolder "yes"일 경우 폴더 지우기, 디폴트 남김
+// 리턴값: 지우지 못한 파일 갯수
+//**********************************************************
+function deleteFolder(folderspec, isDeleteFolder)
+{ try{ 
+       var fucObj =  arguments.callee; 
+	var notRemoveCount = 0 ;
+	var fso = new ActiveXObject("Scripting.FileSystemObject");
+	var folderObj ; 
+	try {
+		folderObj = fso.GetFolder(folderspec);
+		var fileList = new Enumerator(folderObj.files);  // 하위 폴더 리스트 얻기
+		for (; !fileList.atEnd(); fileList.moveNext()) {
+			var curFile = fileList.item();
+			try {
+				fso.DeleteFile(folderspec + "\\" + curFile.name) ;
+			} catch(e) {
+				notRemoveCount ++ ; // 하위 폴더 지우기 실패시 지우기 실패한  카운터 올리기
+//				alert("열려져 있는 "+ curFile.name +" 파일을 닫아주십시오." );
+			}
+		}
+	} catch(e) {
+		//alert(folderspec + " 는(은) 존재하지 않는 폴더입니다. ") ;
+	}
+	if (notRemoveCount == 0 && isDeleteFolder == "yes") { // 하위 파일을 전부 삭제 했을 경우 폴더 지우기
+		try { fso.DeleteFolder(folderspec); } catch(e) {}
+	}
+	return notRemoveCount ; // 지우기 실패한 파일 갯수 리턴
+} catch(e) { getDebug(); return false; }}
+
+//**********************************************************
+// ComMate: 파일보기
+//**********************************************************
+function viewFile(control) 
+{ try{ 
+
+	var obj = document.controls(control) ;
+	if (obj.elementName == "xforms:datagrid") {
+		var orifilelist = model.getValue("/root/msgFiles/orifilelist");
+		var oriSplit = orifilelist.split("▤");
+		for(var i=0 ; i<oriSplit.length ; i++){ 
+			document.all(control).addRow();
+			document.all(control).valueMatrix(datagrid1.rows-1, 0) = oriSplit[i];       
+		}      
+		document.all(control).rebuild();
+	}else if (obj.elementName == "xforms:img") {  
+		var savefile = model.getValue("/root/msgFiles/savefilelist"); 
+		var address = model.getValue("/root/msgFiles/address");     
+		document.all(control).src = address + savefile;		     
+		document.all(control).refresh();
+	}
+	 
+} catch(e) { model.alert(getFormID() + " => function => viewFile => " + e, "ComMate DEBUG"); return false; }}
+
+//**********************************************************
+// ComMate: 파일다운로드 
+//**********************************************************
+function downFile(control, selFile) 
+{ try{ 
+	var obj = document.controls(control) ;
+	if (obj.elementName == "xforms:datagrid") {
+		var savefilelist = model.getValue("/root/msgFiles/savefilelist");
+		var saveSplit = savefilelist.split("▤");	 
+		if (selFile > 0) {      
+			var address = model.getValue("/root/msgFiles/address"); 
+			var fileNames = saveSplit[selFile-1].replace(/\\/g, "/");
+			var savePath = address + fileNames;
+			//alert(savePath);
+			var nodeSet = document.all(control).attribute("nodeset");       
+			var node = instance1.selectSingleNode(nodeSet); 
+			var nodeList = node.childNodes;
+			var tmp, downName = "";
+			while( (tmp = nodeList.nextNode() ) != null ) {
+				downName = tmp.tagName ;   
+			}
+			
+			var winWidth = htmlwindow.screen.width; 
+			var winHeight = htmlwindow.screen.height;
+			window.load("../xrwHelp/doSaveFile.xrw", "modal", "doSaveFile", "min:hidden;max:hidden;resize:false;left:"+parseInt((winWidth-250)/2)+"px;top:"+parseInt((winHeight-150)/2)+"px;width:240px;height:120px;");
+			var doSaveFile = model.getValue("/root/doSaveFile");
+			if (doSaveFile == "save") {
+				var file = window.fileDialog("save", "", "", model.getValue(nodeSet  + "[" + selFile + "]/" + downName));
+				if (file != "") model.download(savePath, file, true);	
+			} else if (doSaveFile == "open") {
+				createFolder("C:\\ComMate\\temp");
+				model.download(savePath, "C:\\ComMate\\temp\\"+model.getValue(nodeSet  + "[" + selFile + "]/" + downName), true);
+				window.exec(model.getValue(nodeSet  + "[" + selFile + "]/" + downName), "", "C:\\ComMate\\temp\\") ;
+			}
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => function => downFile => " + e, "ComMate DEBUG"); return false; }} 
+	
+//**********************************************************
+// ComMate: 업로드 컨트롤 셋팅
+//**********************************************************
+function uploadReset()
+{ try{
+
+ var obj = document.controls ;
+ for (var i=0; i<obj.length; i++) {
+  if (obj.item(i).elementName == "xforms:upload") {
+   model.resetInstanceNode("/root/sendFiles"); // sendFiles 노드 리셋하기
+   var gridNode = obj.item(i).attribute("nodeset").split("/item")[0] ; 
+   var itemLength = instance1.selectNodes(gridNode + "/item").length ;
+   for (var j=1; j <= itemLength; j++) {
+    // sendFiles 밑에 파일 숫자만큼 노드 추가하고 파일 이름 설정하기
+    var fileList = instance1.selectSingleNode(gridNode + "/item["+j+"]").childNodes ;
+    var fileNode = fileList.nextNode(); 
+    var fileName = model.getValue(fileNode);
+    model.makeValue("/root/sendFiles/file" + j, fileName);
+    
+    // 파일 숫자만큼 upload 컨트롤 생성하고 sendFiles 와 연결하기
+    body.createChild("xforms:upload", "id:upload"+j);
+    document.all("upload"+j).attribute("style") = "left:100; top:100px; width:50px; height:50px;";
+    document.all("upload"+j).attribute("nodeset") = "/root/sendFiles/file" + j;
+    document.all("upload"+j).refresh();        
+   }
+   // 초기 upload 컨트롤 삭제하기
+   document.all(obj.item(i).attribute("id")).parent.removeChild(obj.item(i).attribute("id")); 
+   break;
+  } 
+ }
+} catch(e) {  return false; }}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body idprefix="function_"/>
+</xhtml:html>

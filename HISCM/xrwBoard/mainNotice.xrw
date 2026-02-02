@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:::::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<boardInfo>
+						<formID/>
+						<isMainBoard/>
+					</boardInfo>
+				</root>
+			</instance>
+			<script type="javascript" ev:event="xforms-model-construct-done">
+				<![CDATA[
+					// formID 구하기
+					var docSplit = document.url.split("/");
+					var formID= docSplit[docSplit.length-1].replace(".xrw","") ;
+					model.setValue("/root/boardInfo/formID", formID);
+					
+					// 메인 공지사항인지 확인
+					var itemIndex = parent.switchMain.selectedIndex ;
+					if (itemIndex == 0) { 
+						model.setValue("/root/boardInfo/isMainBoard", "Y");
+					} else {
+						model.setValue("/root/boardInfo/isMainBoard", "N");
+					}
+
+					// 공지사항 게시판으로 이동					
+					window.load("noticeA001_List.xrw","replace","","","/root/boardInfo","/root/boardInfo");
+				]]>
+			</script>
+		</model>
+	</xhtml:head>
+	<xhtml:body/>
+</xhtml:html>

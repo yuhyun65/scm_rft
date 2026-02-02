@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: 납품리스트 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<search>
+							<FDATE/>
+							<LDATE/>
+							<SABUN/>
+							<ITEMNM/>
+							<ORDERGB/>
+						</search>
+					</formData>
+					<gridData>
+						<grid1>
+							<item>
+								<ORDERNM/>
+								<CUSTNM/>
+								<GAHKEY/>
+								<GADATE/>
+								<SABUN/>
+								<PARTNO/>
+								<ITEMNM/>
+								<GAQTY/>
+								<STATENM/>
+								<SUHAPYN/>
+								<IPGOYN/>
+							</item>
+						</grid1>
+					</gridData>
+					<ComboData>
+						<Combo1>
+							<item>
+								<Label/>
+								<Value/>
+							</item>
+						</Combo1>
+						<Combo2>
+							<item>
+								<Label>ALL</Label>
+								<Value/>
+							</item>
+						</Combo2>
+					</ComboData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" src="excel.js"/>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				function mateInit() {  // 초기 로딩
+					var curDay = getDate("yyyymmdd");
+					for (var i=0; i<7; i++)
+					{
+						curDay = prevDay(curDay);
+					}
+					model.setValue("/root/formData/search/FDATE", curDay);
+					model.setValue("/root/formData/search/LDATE", getDate("yyyymmdd"));
+					input1.refresh();
+					input2.refresh();
+					
+					//발주구분
+					sendBuffInit();
+					
+					sendBuffAdd("CODHCD", "M002");
+					submit("sp_ComCode", "GetCodeList");
+					
+					model.copyNode("/root/ComboData/Combo1", "/root/msgBuff/data");
+					model.duplicate("/root/ComboData/Combo1", "/root/ComboData/Combo2/item");
+					combo2.refresh();
+
+					mateSearch();
+				} 
+				
+				//조회클릭시
+				function mateSearch() {
+					
+					sendBuffInit();
+					sendBuffAdd("USERID", getUserID());
+					sendBuffAdd("FDATE", model.getValue("/root/formData/search/FDATE"));
+					sendBuffAdd("LDATE", model.getValue("/root/formData/search/LDATE"));
+					sendBuffAdd("SABUN", model.getValue("/root/formData/search/SABUN"));
+					sendBuffAdd("ORDERGB", model.getValue("/root/formData/search/ORDERGB"));
+					
+					submit("sp_SCM_OrderManager", "GetGaipList");
+					model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+					
+					model.property("colStr") = "GaDate";	
+					descSubtotal();
+				}
+				//추가클릭시
+				function mateAdd() {
+				}
+				//저장클릭시
+				function mateSave() {
+				}
+				//삭제클릭시
+				function mateDel() {
+
+					var GAHKEY = datagrid1.valueMatrix(datagrid1.row, datagrid1.colRef("GAHKEY")) ;								
+					if (GAHKEY == "")
+					{
+						alertBox("취소할 납품정보를 선택하세요.");			
+						return;
+					}
+					var isDel = yesAlert("선택한 납품을 취소하시겠습니까? ");
+					if (isDel == 1) 
+					{
+						sendBuffInit();
+						sendBuffAdd("GAHKEY", GAHKEY);
+						submit("sp_SCM_OrderManager", "DeleteGaipList");
+						
+						var chk = model.getValue("/root/msgBuff/data/item/CHK");
+						var errmsg = model.getValue("/root/msgBuff/data/item/ERRMSG");		
+						if (chk == "X")
+						{
+							alertBox("납품 취소 실패!! \n" + errmsg);
+						} else {
+							alertBox("납품취소 성공!!");
+							mateSearch(); 
+						}
+					}
+				}
+				//출력클릭시
+				function matePrint() {
+					window.print(true);
+				}
+				//엑셀클릭시
+				function mateExcel() {
+					openExcel("datagrid1", "true");
+				}
+				//닫기클릭시
+				function mateClose() {
+				}				
+				function pageResize() {
+					controlResize("datagrid1");
+				}
+				function setSubtotal() {
+					gridSubtotal("datagrid1", "GaQty") ;
+					gridSubtotal("datagrid1", "IpGoQty") ;
+				}
+					
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<group id="group1" style="left:0px; top:0px; width:800px; height:30px; ">
+			<caption id="caption6" style="left:295px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">발주구분</caption>
+			<select1 id="combo2" ref="/root/formData/search/ORDERGB" appearance="minimal" style="left:355px; top:5px; width:100px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/ComboData/Combo1/item">
+						<label ref="Label"/>
+						<value ref="Value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<caption id="caption1" style="left:5px; top:5px; width:55px; height:20px; text-align:right; vertical-align:middle; ">납품일자</caption>
+			<caption id="caption2" style="left:465px; top:5px; width:55px; height:20px; text-align:left; vertical-align:middle; ">품목코드</caption>
+			<caption id="caption5" style="left:170px; top:5px; width:30px; height:20px; vertical-align:middle; ">~</caption>
+			<input id="input1" ref="/root/formData/search/FDATE" navindex="1" inputtype="date" format="yyyy-mm-dd" style="left:65px; top:5px; width:100px; height:20px; "/>
+			<input id="input2" ref="/root/formData/search/LDATE" navindex="2" inputtype="date" format="yyyy-mm-dd" style="left:185px; top:5px; width:100px; height:20px; "/>
+			<input id="input3" ref="/root/formData/search/SABUN" navindex="4" style="left:525px; top:5px; width:85px; height:20px; ">
+				<script type="javascript" ev:event="onmousedown">
+					<![CDATA[
+						if (event.button == 3) {
+							document.all(event.target).dispatch("ondblclick");
+						}
+					]]>
+				</script>
+				<script type="javascript" ev:event="onkeyup">
+					<![CDATA[
+						if(event.keyCode == 13) { // 엔터키를 눌렀을때 ondblclick이벤트를 발생한다.
+							document.all(event.target).dispatch("ondblclick");
+						}		
+					]]>
+				</script>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					
+						try {		  								
+							setHelpPop("gridCaption", "품목코드, 품명");
+							setHelpPop("colWidth", "100,100");
+							setHelpPop("cmdHelp", "help_Itcst");
+							setHelpPop("winHeight", "380");
+							setHelpPop("xPath1", "/root/formData/search/SABUN");
+							setHelpPop("xPath2", "/root/formData/search/ITEMNM");
+							setHelpPop("xPath3", getUserID().substring(1));
+							
+							helpPop("/root/cmdTemp");  //Help 창을 띄운다.
+							
+							group1.refresh();
+							
+						}catch(e) {}	
+							
+					]]>
+				</script>
+			</input>
+			<input id="input4" ref="/root/formData/search/ITEMNM" editable="false" style="left:609px; top:5px; width:141px; height:20px; background-color:#fefec3; "/>
+		</group>
+		<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" scroll="auto" caption="발주구분^거래처명^납품번호^납품일자^품목코드^품번^품명^납품수량^상태^검사여부^입고여부" colsep="▤" colwidth="60, 86, 100, 85, 100, 100, 130, 90, 100, 66, 100" mergecellsfixedrows="bycolrec" rowheader="update" rowsep="▥" selectionmode="byrow" caption-layout="static" removehscroll="true" data.focus-rect="hidden" removevscroll="true" style="left:0px; top:30px; width:800px; height:185px; ">
+			<col ref="ORDERNM"/>
+			<col ref="CUSTNM"/>
+			<col ref="GAHKEY"/>
+			<col ref="GADATE" format="yyyy-mm-dd"/>
+			<col ref="SABUN"/>
+			<col ref="PARTNO" style="text-align:left; "/>
+			<col ref="ITEMNM" style="text-align:left; "/>
+			<col ref="GAQTY" format="#,###.0" style="text-align:right; "/>
+			<col ref="STATENM"/>
+			<col ref="SUHAPYN"/>
+			<col ref="IPGOYN"/>
+			<script type="javascript" ev:event="onaftersort">
+				<![CDATA[
+				//CUSTNM, GAHKEY, GADATE, SABUN, PARTNO, ITEMNM, GAQTY, GAIPCFYN, IPGOYN
+					datagrid1.gridToInstance();
+				]]>
+			</script>
+			<script type="javascript" ev:event="onaftermovecolumn">
+				<![CDATA[
+					datagrid1.gridToInstance();
+				]]>
+			</script>
+		</datagrid>
+	</xhtml:body>
+</xhtml:html>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:my="http://www.comsquare.co.kr/example" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:: 거래명세서출력 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<grid>
+						<item>
+							<CustName/>
+							<CustCD/>
+							<UserID/>
+							<UserPass/>
+							<Address/>
+						</item>
+					</grid>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				// 공통 함수 선언
+				function mateInit() {
+									
+					mateSearch();
+				}
+				//조회클릭시
+				function mateSearch() {
+					
+					sendBuffInit();
+					submit("sp_SCM_MemberShip", "GetCustList");
+					
+					model.copyNode("/root/grid", "/root/msgBuff/data");
+					model.refresh();
+				}
+				//추가클릭시
+				function mateAdd() { 
+				}
+				//저장클릭시
+				function mateSave() { 
+				}
+				//삭제클릭시
+				function mateDel() { 
+				}
+				//출력클릭시
+				function matePrint() { 
+									
+				}
+				//엑셀크릭시
+				function mateExcel() {
+
+				}
+				//닫기클릭시
+				function mateClose() { 
+				}
+				function pageResize() {
+					controlResize("datagrid1");
+				}									
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<datagrid id="datagrid1" nodeset="/root/grid/item" scroll="auto" caption="거래처명^거래처코드^아이디^pw^주소" colsep="^" colwidth="165, 110, 162, 100, 244" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" data.focus-rect="hidden" style="left:0px; top:75px; width:800px; height:180px; ">
+			<col ref="CustName" style="font-size:8pt; text-align:left; padding-left:3; "/>
+			<col ref="CustCD" style="font-size:8pt; text-align:left; padding-left:3; "/>
+			<col ref="UserID" style="font-size:8pt; text-align:left; padding-left:3; "/>
+			<col ref="UserPass" visibility="hidden" style="font-size:8pt; text-align:left; padding-left:3; "/>
+			<col ref="Address" style="font-size:8pt; text-align:left; padding-right:3; "/>
+			<script type="javascript" ev:event="ondblclick">
+				<![CDATA[
+					var UserID = datagrid1.valueMatrix(datagrid1.row, datagrid1.colRef("UserID"));
+					var UserPass =  datagrid1.valueMatrix(datagrid1.row, datagrid1.colRef("UserPass"));
+					
+					model.setValue(parent.root.formData.sendLogin.userID, UserID);
+					model.setValue(parent.root.formData.sendLogin.userPass, UserPass);
+					
+					window.parent.document.all("loginUserID").refresh();
+					window.parent.document.all("loginUserPass").refresh();
+					window.parent.model.toggle("caseLogout");
+
+				]]>
+			</script>
+		</datagrid>
+		<caption id="caption1" style="left:15px; top:15px; width:634px; height:45px; vertical-align:middle; ">
+			<![CDATA[거래처를 더블 클릭하면 해당 거래처 아이디와 패스워드로 로그인 정보를 설정합니다.
+
+로그인 버튼을 클릭하면 해당 거래처 아이디로 로그인 처리됩니다.]]>
+		</caption>
+	</xhtml:body>
+</xhtml:html>

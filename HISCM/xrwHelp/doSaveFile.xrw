@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: Cputermate Co., Ltd. ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<example>Sample</example>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			function mateInit() {
+				model.setFocus("import1");
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body style="background-color:#999966; ">
+		<import id="import1" src="../script/Common.xrw" style="left:5px; top:5px; width:0px; height:0px; "/>
+		<caption id="caption1" style="left:20px; top:15px; width:199px; height:20px; font-weight:bold; color:#ffffff; vertical-align:middle; ">첨부 파일을 저장하겠습니까?</caption>
+		<button id="button1" navindex="1" style="left:25px; top:45px; width:50px; height:20px; ">
+			<caption>저장</caption>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					model.setValue(parent.root.doSaveFile, "save") ;
+					window.close();
+				]]>
+			</script>
+		</button>
+		<button id="button2" navindex="2" style="left:90px; top:45px; width:50px; height:20px; ">
+			<caption>열기</caption>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					model.setValue(parent.root.doSaveFile, "open") ;
+					window.close();
+				]]>
+			</script>
+		</button>
+		<button id="button3" navindex="3" style="left:155px; top:45px; width:45px; height:20px; ">
+			<caption>취소</caption>
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					model.setValue(parent.root.doSaveFile, "cancel") ;
+					window.close();
+				]]>
+			</script>
+		</button>
+	</xhtml:body>
+</xhtml:html>

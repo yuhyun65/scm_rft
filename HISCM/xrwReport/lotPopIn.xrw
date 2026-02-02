@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: MATE-ERP ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<lotInfo>
+						<item>
+							<LOTNO/>
+							<SABUN/>
+							<PARTNO/>
+							<ITEMNM/>
+							<LOTQTY/>
+							<PRCUSTNM/>
+							<NAPDATE/>
+							<CUSTNM/>
+							<PRDDATE/>
+							<SUMLOTNO/>
+							<inCount/>
+							<PONO/>
+						</item>
+					</lotInfo>
+					<LotNo/>
+					<item>
+						<LOTNO/>
+						<SABUN/>
+						<PARTNO/>
+						<ITEMNM/>
+						<LOTQTY/>
+						<PRCUSTNM/>
+						<NAPDATE/>
+						<CUSTNM/>
+						<PRDDATE/>
+						<inCount/>
+						<LOTNO1/>
+						<SUMLOTNO/>
+						<PONO/>
+					</item>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" ev:event="xforms-model-construct-done">
+			<![CDATA[
+				object1.location = document.url;							   
+					
+				if (model.getValue("/root/lotInfo/item/PONO") != "")
+				{
+					object1.src = "lotPrintIn_Z.xfr";	 
+				}
+				else
+				{
+					object1.src = "lotPrintIn.xfr";	 
+				}
+					
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body guideline="2,1449;">
+		<object id="object1" clsid="{463fee31-9147-4082-8b55-be24e9338b56}" style="left:15px; top:10px; width:445px; height:345px; ">
+			<script id="script1" type="javascript" ev:event="onLoad()">
+				<![CDATA[ 
+				
+					//Report 눈금자 표시 여부 설정
+					object1.window.showRuler(false);
+
+	         			var doc = object1.document ; 
+	         			
+	         			var nodeList = instance1.selectNodes("/root/lotInfo/item");
+	         			for (var i=1; i<=nodeList.length; i++)
+					{
+						model.setValue("/root/item/PRCUSTNM", model.getValue("/root/lotInfo/item["+i+"]/PRCUSTNM"));
+						model.setValue("/root/item/SABUN", model.getValue("/root/lotInfo/item["+i+"]/SABUN"));
+						model.setValue("/root/item/PARTNO", model.getValue("/root/lotInfo/item["+i+"]/PARTNO"));
+						model.setValue("/root/item/ITEMNM", model.getValue("/root/lotInfo/item["+i+"]/ITEMNM"));
+						model.setValue("/root/item/PRDDATE", model.getValue("/root/lotInfo/item["+i+"]/PRDDATE"));
+						model.setValue("/root/item/NAPDATE", model.getValue("/root/lotInfo/item["+i+"]/NAPDATE"));
+						model.setValue("/root/item/LOTNO", model.getValue("/root/lotInfo/item["+i+"]/LOTNO"));
+						model.setValue("/root/item/SUMLOTNO", model.getValue("/root/lotInfo/item["+i+"]/SUMLOTNO"));
+						model.setValue("/root/item/CUSTNM", model.getValue("/root/lotInfo/item["+i+"]/CUSTNM"));
+						model.setValue("/root/item/PONO", model.getValue("/root/lotInfo/item["+i+"]/PONO"));
+												
+						var inCount = parseInt(model.getValue("/root/lotInfo/item["+ i +"]/inCount"));
+						model.setValue("/root/item/LOTQTY", parseInt(model.getValue("/root/lotInfo/item["+i+"]/LOTQTY")));// / inCount);
+						model.setValue("/root/item/LOTNO1", "*" + model.getValue("/root/lotInfo/item["+i+"]/LOTNO") + "*");
+						for (var j=0; j<inCount; j++)
+						{
+							model.duplicate("/root/LotNo", "/root/item");
+						}
+					}         
+					
+					var selXml = model.instance1.selectNodesXml("/root");
+					doc.loadXML(selXml);	
+					doc.refresh() ;	
+	        		]]>
+			</script>
+		</object>
+	</xhtml:body>
+</xhtml:html>

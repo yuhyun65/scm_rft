@@ -1,0 +1,1056 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:ex="http://www.comsquare.co.kr/xforms/excel" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:my="http://www.comsquare.co.kr/example" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:cs="http://www.comsquare.co.kr/xforms">
+	<xhtml:head>
+		<xhtml:title>:::::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<changePass>
+						<oldPass/>
+						<newPass1/>
+						<newPass2/>
+					</changePass>
+					<formData>
+						<sendTree>
+							<GroupCode/>
+							<TreeView/>
+							<userID/>
+						</sendTree>
+						<sendLogin>
+							<userID/>
+							<userPass/>
+							<userName/>
+							<isLogin>N</isLogin>
+						</sendLogin>
+						<iviewerPermit>
+							<userID/>
+							<XGPMID/>
+						</iviewerPermit>
+					</formData>
+					<comboData>
+						<GroupCode>
+							<item>
+								<uid/>
+								<Label/>
+								<PageURL/>
+							</item>
+						</GroupCode>
+						<TreeView>
+							<item>
+								<PageURL/>
+								<Label/>
+							</item>
+						</TreeView>
+						<WorkGroup>
+							<item>
+								<label>본사</label>
+								<value/>
+							</item>
+						</WorkGroup>
+						<WorkGroupValue>main</WorkGroupValue>
+						<userSetup>
+							<item>
+								<label>:: 그리드설정 ::</label>
+								<value>list</value>
+							</item>
+							<item>
+								<label>▷설정저장</label>
+								<value>save</value>
+							</item>
+							<item>
+								<label>▷설정초기화</label>
+								<value>init</value>
+							</item>
+						</userSetup>
+						<userSetupValue>list</userSetupValue>
+					</comboData>
+					<pageDesign>
+						<iviewerWidth>800</iviewerWidth>
+						<iviewerHeight>600</iviewerHeight>
+						<menuBarShow>yes</menuBarShow>
+						<menuBarFix>yes</menuBarFix>
+					</pageDesign>
+					<temp/>
+					<CustMenu>
+						<item>
+							<PageURL>/xrwPur/purNapPlanReg.xrw</PageURL>
+							<Label>납품예상일자등록</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purNapRegister.xrw</PageURL>
+							<Label>납품등록</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purNapList.xrw</PageURL>
+							<Label>납품조회</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purLotPrint.xrw</PageURL>
+							<Label>부품식별표인쇄</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purSumLotPrint.xrw</PageURL>
+							<Label>파레트라벨인쇄</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purSumLotRePrint.xrw</PageURL>
+							<Label>파레트라벨재인쇄</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purAccount.xrw</PageURL>
+							<Label>거래명세서인쇄</Label>
+						</item>
+						<item>
+							<PageURL>/xrwPur/purStokList.xrw</PageURL>
+							<Label>재고조회</Label>
+						</item>
+						<item>
+							<PageURL>/xrwBoard/boardA001_List.xrw</PageURL>
+							<Label>업체게시판</Label>
+						</item>
+						<item>
+							<Label>품질정보</Label>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList6.xrw</PageURL>
+								<Label>대표이사 신문고</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList1.xrw</PageURL>
+								<Label>부적합 통지</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList2.xrw</PageURL>
+								<Label>개선대책서 등록</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList3.xrw</PageURL>
+								<Label>정기신뢰성자료</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList4.xrw</PageURL>
+								<Label>업체 시정조치 사항</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList5.xrw</PageURL>
+								<Label>품질 요청 자료</Label>
+							</item>
+						</item>
+					</CustMenu>
+					<AdminMenu>
+						<item>
+							<Label>품질정보</Label>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList6.xrw</PageURL>
+								<Label>대표이사 신문고</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList.xrw</PageURL>
+								<Label>전체공지</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList1.xrw</PageURL>
+								<Label>부적합 통지</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList2.xrw</PageURL>
+								<Label>개선대책서 등록</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList3.xrw</PageURL>
+								<Label>정기신뢰성자료</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList4.xrw</PageURL>
+								<Label>업체 시정조치 사항</Label>
+							</item>
+							<item>
+								<PageURL>/xrwDoc/AODocSendList5.xrw</PageURL>
+								<Label>품질 요청 자료</Label>
+							</item>
+						</item>
+						<item>
+							<PageURL>/xrwBoard/noticeA001_List.xrw</PageURL>
+							<Label>공지사항</Label>
+						</item>
+						<item>
+							<PageURL>/xrwBoard/boardA001_List.xrw</PageURL>
+							<Label>업체게시판</Label>
+						</item>
+						<item>
+							<PageURL>/xrwCom/comCustList.xrw</PageURL>
+							<Label>거래처로그인</Label>
+						</item>
+					</AdminMenu>
+					<sendFiles>
+						<file1/>
+						<fileuid/>
+					</sendFiles>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			
+				var clockTimer;
+				var itime = 1000*60*5;
+				function TimeSch()
+				{
+					document.all("btnTimer").dispatch("onclick");
+				}
+				function TimeStart()
+				{
+					clockTimer = window.setInterval("TimeSch()", itime);	
+				}
+				function TimeEnd()
+				{
+					 window.clearInterval(clockTimer);
+				}
+				function mateInit() { // 초기 로딩
+					setTitle(); // 타이틀 지정
+					copyUserInfo() ; 
+					// changeLang();
+					loginBtn.dispatch("onclick") ; 
+					// 자동 로그인 ( 페이지 리사이징 로그인 성공시 수행 )
+					
+					var userID = getUserID();					
+					if (userID == "mateadmin" || userID == "dhdo")
+					{
+						model.setValue("/root/formData/sendLogin/isAdmin", "Y");
+					}
+				}
+				// 전체 페이지 자동 크기 조절
+				function mainPageResize() {
+					// 최대화 및 iviewerWidth창 크기 얻기
+					window.maximize() ;  
+					var iviewerWidth = window.width - 10;
+					var iviewerHeight = window.height - 140 ;
+					
+					// Hidden Bar 설정에 따른 페이지 조절
+					var isShow = model.getValue("/root/pageDesign/menuBarShow");
+					if (isShow == "yes") {
+						groupHidden.attribute("visibility") = "visible" ;
+						groupPrevPage.attribute("left") = "200px" ; 
+						groupBtn.attribute("left") = "200px" ;
+						switchMain.attribute("left") = "200px" ;
+						captionPrevMain.attribute("left") = "10px" ;
+						iviewerWidth -= 200 ;
+					} else {
+						groupHidden.attribute("visibility") = "hidden" ;
+						groupPrevPage.attribute("left") = "15px" ; 
+						groupBtn.attribute("left") = "15px" ;
+						switchMain.attribute("left") = "15px" ;
+						captionPrevMain.attribute("left") = "25px" ;
+						iviewerWidth -= 15 ;
+					}
+					
+					// iviewer 사이즈 인스턴스에 저장
+					model.setValue("/root/pageDesign/iviewerWidth", iviewerWidth);
+					model.setValue("/root/pageDesign/iviewerHeight", iviewerHeight);
+
+					groupHidden.attribute("height") = iviewerHeight + 100 + "px" ; 
+					treeview1.attribute("height") = iviewerHeight + 100 - 135 + "px" ;
+					
+					groupPrevPage.attribute("width") = iviewerWidth + "px" ; 
+					groupBtn.attribute("width") = iviewerWidth + "px" ; 
+					
+					switchMain.attribute("width") = iviewerWidth + "px" ;
+					switchMain.attribute("height") = iviewerHeight + 60 + "px" ;
+					
+					// iviewer 크기 조절
+					iviewerResize();		
+				}
+
+				function iviewerResize() {
+					var iviewerWidth = model.getValue("/root/pageDesign/iviewerWidth");
+					var iviewerHeight = model.getValue("/root/pageDesign/iviewerHeight");
+					var iviewerObj = switchMain.children.item(switchMain.selectedIndex).children.item(3);
+					iviewerObj.attribute("style") = "height:"+ iviewerHeight + "px; width:"+ iviewerWidth + "px;" ;
+					try {
+						// iviewer 문서 속의 pageResize() 호출
+						iviewerObj.window.javascript.pageResize();
+					} catch(e) {}
+							
+					var itemIndex = switchMain.selectedIndex ;
+					var selectedCase = switchMain.children.item(itemIndex).attribute("id") ;			
+					var pageName = selectedCase.substring(8,selectedCase.length);
+								
+					btnPrint.disabled = true;					
+					if(pageName == "purSumLotRePrint" || pageName == "purLotPrint" || pageName == "purSumLotPrint" || pageName == "purAccount")
+					{
+						btnPrint.disabled = false;						
+					}	
+				}
+					
+				// 탭 메뉴 간격 조절 하기
+				function shiftTab() {
+					// 버튼 탭 길이와 버튼 탭 갯수 얻기
+					var groupWidth = parseInt(groupPrevPage.attribute("width")) ;
+					var tabList = groupPrevPage.children ;
+
+					var btnWidth = 79 ; // 기본 버튼 탭 길이 지정 
+					// 전체 그룹 길이 초과하지 않도록 버튼 길이 조절
+					while ( (btnWidth * tabList.length + 10) > groupWidth ) {
+						btnWidth -= 10 ; 
+					}
+					// 조절된 버튼 길이 만큼 배치
+					for (var i=0; i<tabList.length; i++) {
+						tabList.item(i).attribute("left") = (10 + btnWidth * i ) + "px" ;
+					}
+				}
+				
+				// 버튼 배경 이미지 설정
+				function setButton() {
+					var styleType = model.getValue("/root/cmdMdbUserInfo/styleType") ;
+					var colorType = styleType.substring(0,1) ;
+				
+					var obj = document.controls ;
+					for (var i=0; i<obj.length; i++) {
+						var ctrlEle = obj.item(i).elementName;
+						if (ctrlEle == "xforms:button") { 
+							var isComm = obj.item(i).attribute("_type");
+							var isGroup = obj.item(i).attribute("group") ;
+							if (((isGroup == null) || (isGroup == "")) && (isComm != "common")) { 
+							// 일반 버튼 일 경우 설정, 공통 메뉴는 디자인 시점에서 직접 설정
+								var btnText = obj.item(i).text ; 
+								var btnLength = btnText.length ;  // 버튼 텍스트 길이
+								if (!isKor(btnText)) btnLength = parseInt((btnLength+1)/2) ;  // 한글일 경우 영문길이와 맞춤
+								if (btnLength>5) btnLength = 5 ;  // 최대 5글자로 제한
+								else if (btnLength<2) btnLength = 2 ; // 최소 2글자로 제한
+								
+								// 버튼 배경과 버튼 길이 설정
+								obj.item(i).attribute("style") = "background-image:../images/button/"+ colorType +"Length"+ btnLength +".jpg" ;
+								obj.item(i).attribute("style") = "width:"+(55 + 15*(btnLength -2))+"px; text-align:right; border-style:solid; padding-right:5;" ;
+								
+							} 
+						} 
+					}
+				}
+				
+				// 로그인 현재 시각 타이머
+				function loginTimer() {
+					curTime.text = getTime("hh:mm:ss");
+				}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+		<img id="imgHiddenBar" src="../images/button/yHiddenBar.jpg" style="left:0px; top:0px; width:15px; height:300px; font-size:10pt; background-stretch:stretch; cursor:hand; ">
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+					// Hidden Bar 닫기 버튼 눌렀을 때
+					var isShow = model.getValue("/root/pageDesign/menuBarShow");
+					if (isShow == "yes") {
+						model.setValue("/root/pageDesign/menuBarShow", "no");
+					} else {
+						model.setValue("/root/pageDesign/menuBarShow", "yes");
+					}
+					mainPageResize(); // 페이지 리사이징
+					shiftTab(); // 탭 버튼 간격 조절
+				]]>
+			</script>
+		</img>
+		<group id="groupPrevPage" scroll="none" style="left:200px; top:0px; width:800px; height:40px; ">
+			<button id="btnPrevMain" group="btnPrevPage" selected="true" style="left:10px; top:15px; width:80px; height:25px; ">
+				<caption>공지사항</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+					model.toggle("casePrevMain") ; 
+					iviewerResize(); // iviewer 크기 조절
+					shiftTab();
+					]]>
+				</script>
+			</button>
+		</group>
+		<switch id="switchMain" class="color3" style="left:200px; top:40px; width:800px; height:600px; ">
+			<case id="casePrevMain">
+				<iviewer id="iviewerPrevMain" style="left:0px; top:60px; width:800px; height:530px; "/>
+				<caption id="captionPrevMain" style="left:10px; top:5px; width:500px; height:20px; font-size:10pt; vertical-align:middle; ">:: (주) 한일정밀 웹발주시스템 :::</caption>
+				<group id="progress" visibility="hidden" popup="true" style="left:250px; top:200px; width:285px; height:50px; background-color:#eeeeee; border-style:solid; ">
+					<caption id="progresstext" style="left:15px; top:15px; width:243px; height:20px; vertical-align:middle; ">※ 진행중입니다. 잠시만 기다려주십시오.</caption>
+				</group>
+			</case>
+		</switch>
+		<group id="groupBtn" class="color2" scroll="none" style="left:200px; top:70px; width:800px; height:30px; font-size:10pt; ">
+			<script type="javascript" ev:event="onclick">
+				<![CDATA[
+
+				// 공통 버튼 클릭 시 ( 이벤트 버블링으로 처리 )				
+				var itemIndex = switchMain.selectedIndex ;
+				var selectedCase = switchMain.children.item(itemIndex).attribute("id") ;
+				var pageName = selectedCase.substring(8,selectedCase.length);
+					
+				if (event.target == "btnSearch") {	//조회버튼을 눌렀을때..
+					try { 
+						//조회 권한이 있는지 확인한다.			
+						var XGSRYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGSRYN") ;
+						if(XGSRYN == "Y") {
+							document.all(selectedCase).children.item(3).window.javascript.mateSearch();
+							document.all(selectedCase).children.item(3).window.javascript.addGridCol();
+							document.all(selectedCase).children.item(3).window.model.refresh();
+						} else {
+							alertBox("조회 권한이 없습니다. \n\n관리자에게 문의하십시요.  ");
+						}
+					 } catch(e) { }
+				} else if (event.target == "btnAdd") {	//추가 버튼을 눌렀을때..
+					try {
+						//추가 권한이 있는지 확인한다..
+						var XGINYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGINYN") ;
+						if(XGINYN == "Y") {
+							document.all(selectedCase).children.item(3).window.javascript.mateAdd(); 
+						} else {
+							alertBox("추가 권한이 없습니다. \n\n관리자에게 문의하십시요. ");
+						}
+					 } catch(e) {} 
+				} else if (event.target == "btnSave") {		// 저장버튼을 눌렀을때..
+					try {
+						// 저장 권한이 있는지 확인한다.
+						var XGSVYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGSVYN") ;
+						if(XGSVYN == "Y") {
+							document.all(selectedCase).children.item(3).window.javascript.mateSave(); 
+						} else {
+							alertBox("저장 권한이 없습니다. \n\n관리자에게 문의하십시요.  ");
+						}
+					 } catch(e) {} 
+				} else if (event.target == "btnDel") {		//삭제버튼을 눌렀을때..
+					try {
+						//삭제 권한이 있는지 확인한다.
+						var XGDEYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGDEYN") ;
+						if(XGDEYN == "Y") {
+							document.all(selectedCase).children.item(3).window.javascript.mateDel(); 
+						} else {
+							alertBox("삭제 권한이 없습니다. \n\n관리자에게 문의하십시요.  ");
+						}
+					 } catch(e) {} 
+				} else if (event.target == "btnPrint") {		//프린트 버튼을 눌렀을때..
+					try {
+						//프린트 권한이 있는지 확인한다.
+						var XGPTYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGPTYN") ;
+						if(XGPTYN == "Y") {
+//							var ret = TFStarter.getConfig(rootURL+"/install/printConfig.jsp");
+//							if (ret == false) {
+//								alert("프린트 모듈을 설치하지 못하였습니다. \n\n출력 오류 발생 시 관리자한테 문의하세요.");
+//							}
+							document.all(selectedCase).children.item(3).window.javascript.matePrint(); 
+						} else {
+							alertBox("프린트 권한이 없습니다. \n\n관리자에게 문의하십시요.  ");
+						}
+					 } catch(e) {} 
+				} else if (event.target == "btnExcel") {	//엑셀 버튼을 눌렀을때..
+					//엑셀 권한이 있는지 확인힌다.
+					var XGEXYN = document.all(selectedCase).children.item(3).model.getValue("/root/cmdPagePermit/XGEXYN") ;
+					if(XGEXYN == "Y") {
+//						alertBox("엑셀파일로 출력할 그리드를 마우스로 클릭하세요.  ");
+//						document.all(selectedCase).children.item(3).model.setValue("/root/cmdExcelFlag",1);
+						document.all(selectedCase).children.item(3).window.javascript.mateExcel(); 
+					} else {
+						alertBox("엑셀 권한이 없습니다.	\n\n관리자에게 문의하십시요.  ");
+					}
+				} else if (event.target == "btnClose") {			
+					if (pageName == "purNapRegister" || pageName == "purNapPlanReg")
+						window.clearInterval(clockTimer);	
+						
+					if (selectedCase == "casePrevMain") { // 메인 화면일 때...									
+						if (groupPrevPage.children.length > 1) {
+							alertBox("열려 있는 모든 페이지를 닫으십시요. ");
+							var lastItem = groupPrevPage.children.length - 1 ;
+							groupPrevPage.children.item(lastItem).dispatch("onclick");
+						} else {
+							var isCloseAll = yesAlert("메인 화면입니다.\n\n전체 화면을 닫으시겠습니까?  ") ;
+							if (isCloseAll == 1) { // 전체 창을 닫고자 할 경우...
+								window.close() ; 
+							}
+						}
+					} else { // 메인 화면이 아닐 경우...
+						try {
+							var isClose = 1 ;
+							try { 
+								// 페이지 내부 mateClose() 호출
+								var ok = document.all(selectedCase).children.item(3).window.javascript.mateClose(); 
+								// mateClose() 리턴값이 없거나 함수가 존재하지 않다면 ok 값은 null 혹은 ""
+								// 닫지 못하게 하려면 ok 리턴 값을 0, false,"false", "False" 로 주면 된다. 
+								if (ok == 0 || ok == false || ok == "false" || ok == "False") 
+									isClose = 0 ; 
+							} catch(e) { isClose = 1 ; }
+							
+							if (isClose == 1) {  // 제대로 실행되었거나 처리 로직이 없을 시 닫기
+							
+								switchMain.removeChild(selectedCase);
+								groupPrevPage.removeChild("btnPrev"+pageName) ;
+
+								// 다음 버튼으로 이동
+								var lastItem = groupPrevPage.children.length - 1 ;
+								var delItem = itemIndex + 3 ;
+								if (lastItem >= delItem) {
+									toBtnName = groupPrevPage.children.item(delItem).attribute("id") ;
+								} else {
+									toBtnName = groupPrevPage.children.item(lastItem).attribute("id") ;
+								}
+								document.all(toBtnName).dispatch("onclick");
+								
+								iviewerResize();
+								shiftTab() ;
+							}
+							
+						} catch(e) {}
+					}
+				} 				
+				]]>
+			</script>
+			<button id="btnSearch" navindex="7" _type="common" style="left:10px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnSearch.gif; ">
+				<caption>조 회</caption>
+			</button>
+			<button id="btnAdd" navindex="8" _type="common" style="left:90px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnAdd.gif; ">
+				<caption>추 가</caption>
+			</button>
+			<button id="btnSave" navindex="9" _type="common" style="left:170px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnSave.gif; ">
+				<caption>저 장</caption>
+			</button>
+			<button id="btnDel" navindex="10" _type="common" style="left:250px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnDel.gif; ">
+				<caption>삭 제</caption>
+			</button>
+			<button id="btnPrint" navindex="11" _type="common" style="left:330px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnPrint.gif; ">
+				<caption>출 력</caption>
+			</button>
+			<button id="btnExcel" navindex="12" _type="common" style="left:410px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnExcel.gif; ">
+				<caption>엑 셀</caption>
+			</button>
+			<button id="btnClose" navindex="13" _type="common" style="left:490px; top:5px; width:70px; height:20px; text-align:right; padding-right:5; background-image:../images/css/btnClose.gif; ">
+				<caption>닫 기</caption>
+			</button>
+			<select1 id="combo2" ref="/root/comboData/WorkGroupValue" navindex="15" visibility="hidden" appearance="minimal" style="left:725px; top:5px; width:70px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/comboData/WorkGroup/item">
+						<label ref="label"/>
+						<value ref="value"/>
+					</itemset>
+				</choices>
+			</select1>
+			<select1 id="comboUserSetup" ref="/root/comboData/userSetupValue" navindex="15" appearance="minimal" style="left:585px; top:5px; width:120px; height:20px; ">
+				<choices>
+					<itemset nodeset="/root/comboData/userSetup/item">
+						<label ref="label"/>
+						<value ref="value"/>
+					</itemset>
+				</choices>
+				<script type="javascript" ev:event="xforms-select">
+					<![CDATA[
+						var index = comboUserSetup.selectedIndex + 1;
+						var value = model.getValue("/root/comboData/userSetup/item["+index+"]/value");
+						var selectedCase = switchMain.children.item(switchMain.selectedIndex).attribute("id") ;
+						if (value == "save") {
+							try {
+								document.all(selectedCase).children.item(3).window.javascript.saveGridInfo(); 
+							 } catch(e) {}
+						} else if (value == "init") {
+							try {
+								document.all(selectedCase).children.item(3).window.javascript.initMdbGridInfo(); 
+							 } catch(e) {}
+						} 
+						comboUserSetup.value = "list" ;
+					]]>
+				</script>
+			</select1>
+			<button id="btnTimer" visibility="hidden" style="left:570px; top:5px; width:100px; height:20px; ">
+				<caption>button11</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+								
+						var itemIndex = switchMain.selectedIndex ;
+						var selectedCase = switchMain.children.item(itemIndex).attribute("id") ;
+						var pageName = selectedCase.substring(8,selectedCase.length);
+							
+						if (pageName == "purNapRegister" || pageName == "purNapPlanReg")
+						{
+							document.all(selectedCase).children.item(3).window.javascript.matetimer();
+						}												
+						
+					]]>
+				</script>
+			</button>
+		</group>
+		<group id="groupHidden" scroll="none" style="left:15px; top:0px; width:185px; height:640px; background-color:transparent; border-style:none; ">
+			<treeview id="treeview1" ref="/root/formData/sendTree/TreeView" class="color2" navindex="6" expanddepth="1" hasimages="true" itemsettype="node" oneclickexpand="true" style="left:0px; top:150px; width:185px; height:490px; padding-top:10; border-style:none; ">
+				<itemset nodeset="/root/comboData/TreeView/item">
+					<label ref="Label"/>
+					<value ref="PageURL"/>
+				</itemset>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					// 트리 메뉴 더블 클릭 시
+					var userID = model.getValue("/root/formData/sendLogin/userID");
+					if (model.getValue("/root/formData/sendLogin/isLogin") == "Y") { // 로그인 상태라면...
+
+						// 선택 아이템 정보 얻어오기
+						var itemIndex = treeview1.selectedIndex + 1;
+						var PageURL = treeview1.value;
+						var Label = treeview1.label;
+						
+						if (PageURL == "") return;
+						
+						var pageStr = PageURL.split("/");
+						var pageName = pageStr[pageStr.length-1].replace(".xrw", "");
+													
+						// prevButton 설정
+						var btnName = Label ;
+						if (isEng(Label.replace(" ", ""))) {
+							if (Label.length>= 9) btnName = Label.substring(0, 7) + ".." ;
+						} else {
+							if (Label.length >= 6) btnName = Label.substring(0, 4) + ".." ;
+						}
+												// 열려져 있는 페이지 인지 확인
+						var case_exist = switchMain.isChild("casePrev" + pageName);
+						if( !case_exist ){ // 열려져 있지 않은 페이지라면 해당 Prev탭 추가
+
+							// Switch Case 추가	
+							var switchCase = switchMain.createChild("xforms:case","id:casePrev"+ pageName +";");
+							
+							// iviewer 추가 ( src를 지정하지 않은 빈 페이지 생성 )
+							var iviewerWidth = model.getValue("/root/pageDesign/iviewerWidth");
+							var iviewerHeight = model.getValue("/root/pageDesign/iviewerHeight");
+							switchCase.createChild("xforms:iviewer","id:iviewerPrev"+pageName+";left:0px; top:60px; width:"+iviewerWidth+"px; height:"+iviewerHeight+"px;");
+							
+							// 캡션 추가
+							switchCase.createChild("xforms:caption","id:captionPrev"+pageName+";left:10px; top:5px; width:500px; height:20px; font-size:10pt; vertical-align:middle; ");							
+	
+							// Prev그룹에 탭 버튼 추가
+							var btnList = groupPrevPage.children ; 
+							var left = btnList.item(btnList.length-1).attribute("left") ; 
+							var tabButton = groupPrevPage.createChild("xforms:button","id:btnPrev"+pageName+";text:"+btnName
+										+";group:btnPrevPage;selected:true;left:"+ left +"px; top:15px; width:80px; height:25px;");
+										
+							if (pageName == "purNapRegister" || pageName == "purNapPlanReg")
+								tabButton.attribute("onclick") = "model.toggle('casePrev"+pageName+"');iviewerResize();clockTimer = window.setInterval('TimeSch()', "+itime+");";
+							else
+								tabButton.attribute("onclick") = "model.toggle('casePrev"+pageName+"');iviewerResize();window.clearInterval(clockTimer);";						               
+
+							// iviewerPage 권한 가져오기							
+							sendBuffInit();
+							submit("sp_SCM_MemberShip", "GetAuthority");
+
+							// iviewer 페이지로 권한 복사
+							model.copyNode("/root/cmdPagePermit", "/root/msgBuff/data/item");
+							
+							// iviewer 실제 페이지 로딩
+							var pageSrc = rootURL + PageURL ;
+							document.all("iviewerPrev"+pageName).src = pageSrc ;
+							
+							var sINSGB = "";
+							if (pageName.indexOf("AODocSendList") != -1)
+							{
+								sINSGB = pageName.replace("AODocSendList", "");
+								document.all("iviewerPrev"+pageName).model.setValue("/root/INSGB", sINSGB);
+//								PageURL = PageURL.replace(pageName, "AODocSendList");
+//								pageName = "AODocSendList";
+							}
+							
+							var isLoading = 1 ;  // 페이지 로딩 성공 여부 확인 필드
+							try { 
+								var node = document.all("iviewerPrev"+pageName).instance1.selectSingleNode("/root/cmdPagePermit") ;
+								// iviewer 페이지 node 접근 오류 발생 시 예외 방생 즉 페이지 로딩 실패								
+							} catch(e) {
+								isLoading = -1 ;
+							}
+													
+							// 페이지 로딩 실패 시 창 닫기 및 alert창 띄우기
+							if (isLoading == -1) {
+								model.toggle("casePrev"+pageName+""); // 추가된 페이지로 이동
+								btnClose.dispatch("onclick"); // 페이지 닫기
+								alertBox("해당 페이지가 없거나 로딩하지 못하였습니다.");
+							} else { // 페이지 로딩 성공 시
+								model.toggle("casePrev"+pageName+""); // 추가된 페이지로 이동
+																
+								// 페이지 경로 캡션 추가
+								var menu = " > " + Label ;
+								var depth = model.getValue("/root/comboData/TreeView/item["+ itemIndex +"]/Depth");
+								searchDepth = depth - 1 ;
+								for (var i=itemIndex; i>=0; i--) {  // 상위 메뉴 검색해서 현재 경로 앞에 추가
+									var parentDepth = model.getValue("/root/comboData/TreeView/item["+ i +"]/Depth");
+									if (parentDepth == searchDepth) {
+										var parentLabel = model.getValue("/root/comboData/TreeView/item["+ i +"]/Label");
+										menu = " > " + parentLabel + menu ;
+										searchDepth-- ;
+									} 
+									if (searchDepth == 0) { // 최 상위 메뉴라면
+										// var curGroupCode = model.getValue("/root/formData/sendTree/GroupCode") ;
+										// var GroupName = model.getValue("/root/comboData/GroupCode/item[uid = "+curGroupCode+"]/Label");
+										menu = ":: SCM" + menu ;
+										break;
+									}
+								}	
+								document.all("captionPrev"+pageName).text = menu ;
+							
+								iviewerResize(); // 페이지 리사이징
+								shiftTab(); // 탭 간격 조절
+							}
+							
+						} else { // 이미 열려진 페이지라면 해당 페이지로 이동
+							document.all("btnPrev"+pageName).dispatch("onclick") ;			
+						}														
+						if (pageName == "purNapRegister" || pageName == "purNapPlanReg")
+							clockTimer = window.setInterval("TimeSch()", itime);	
+						else
+					               window.clearInterval(clockTimer);
+	
+					} else { // 로그아웃 상태라면...
+						alertBox("로그인 하셔야 해당 메뉴의 이용이 가능합니다");
+					}
+					]]>
+				</script>
+			</treeview>
+			<group id="groupMenuBar" class="color5" style="left:0px; top:0px; width:185px; height:25px; font-size:10pt; ">
+				<img id="imgMiniClose" src="../images/button/yMiniClose.jpg" style="left:160px; top:5px; width:15px; height:15px; background-stretch:stretch; cursor:hand; ">
+					<script type="javascript" ev:event="onclick">
+						<![CDATA[
+							// Hidden Bar 닫기 버튼 누를 시
+							model.setValue("/root/pageDesign/menuBarShow", "no");
+							mainPageResize();
+							shiftTab();
+						]]>
+					</script>
+				</img>
+				<img id="imgMiniFix" src="../images/button/yMiniFix.jpg" style="left:140px; top:5px; width:15px; height:15px; background-stretch:stretch; cursor:hand; ">
+					<script type="javascript" ev:event="onclick">
+						<![CDATA[
+							// Hidden Bar 고정 핀 눌렀을 시
+							var isFix = model.getValue("/root/pageDesign/menuBarFix") ;
+							if (isFix == "yes") {
+								model.setValue("/root/pageDesign/menuBarFix", "no") ;
+								imgMiniFix.src = "../images/button/yMiniFixHidden.jpg" ;
+								imgMiniFix.attribute("left") = "139px" ;
+								imgMiniFix.attribute("left") = "140px" ;
+							} else {
+								model.setValue("/root/pageDesign/menuBarFix", "yes") ;
+								imgMiniFix.src = "../images/button/yMiniFix.jpg" ;
+								imgMiniFix.attribute("left") = "139px" ;
+								imgMiniFix.attribute("left") = "140px" ;
+							}				
+						]]>
+					</script>
+				</img>
+				<caption id="caption8" style="left:10px; top:0px; width:125px; height:25px; font-size:9pt; font-weight:bold; color:#ffffff; vertical-align:middle; ">::: MENU BAR :::</caption>
+			</group>
+			<switch id="switchLogin" class="color1" style="left:0px; top:25px; width:185px; height:125px; ">
+				<case id="caseLogout" selected="true">
+					<input id="loginUserID" ref="/root/formData/sendLogin/userID" navindex="1" imemode="alpha" maxlength="15" style="left:70px; top:30px; width:100px; height:20px; vertical-align:bottom; ">
+						<script type="javascript" ev:event="onkeyup">
+							<![CDATA[
+							// 로그인 버튼 엔터 키 누를 때
+							if (event.keyCode == 13) {
+								model.setFocus("loginBtn");
+								loginBtn.dispatch("onclick") ;
+							}		
+							]]>
+						</script>
+					</input>
+					<secret id="loginUserPass" ref="/root/formData/sendLogin/userPass" navindex="2" imemode="alpha" maxlength="20" appearance="secret" style="left:70px; top:55px; width:100px; height:20px; vertical-align:bottom; ">
+						<script type="javascript" ev:event="onkeyup">
+							<![CDATA[
+							// 로그인 비밀 번호 엔터 키 누를 때
+							if (event.keyCode == 13) {
+								model.setFocus("loginBtn");
+								loginBtn.dispatch("onclick") ;
+							}		
+							]]>
+						</script>
+					</secret>
+					<caption id="caption9" style="left:10px; top:30px; width:55px; height:20px; font-size:9pt; font-weight:bold; color:#ffffff; text-align:right; vertical-align:middle; ">아 이 디</caption>
+					<caption id="caption10" style="left:10px; top:55px; width:55px; height:20px; font-size:9pt; font-weight:bold; color:#ffffff; text-align:right; vertical-align:middle; ">비밀번호</caption>
+					<button id="loginBtn" navindex="3" style="left:100px; top:90px; width:70px; height:20px; text-align:right; ">
+						<caption>로그인</caption>
+						<script type="javascript" ev:event="onclick">
+							<![CDATA[						
+							// 로그인 처리
+							sendBuffInit();
+							sendBuffAdd("UserID", model.getValue("/root/formData/sendLogin/userID"));
+							sendBuffAdd("UserPass", model.getValue("/root/formData/sendLogin/userPass"));	
+							submit("sp_SCM_MemberShip", "Login");
+							
+							var userID =  model.getValue("/root/msgBuff/data/item/userID");
+							var userName = model.getValue("/root/msgBuff/data/item/userName");
+							
+							if (userID == "NO_USERID") {
+								alertBox("로그인에 실패하였습니다. \n\n존재하지 않는 아이디입니다. ");
+								loginUserID.value = "" ;
+								loginUserPass.value = "";
+								model.setFocus("loginUserID");
+							} else if (userID == "NO_USERPASS") {
+								alertBox("로그인에 실패하였습니다. \n\n비밀번호가 맞지 않습니다. ");
+								loginUserPass.value = "";
+								model.setFocus("loginUserPass");
+							} else { // 로그인 성공 시
+							
+								loginUserID.value = userID;
+								
+								model.copyNode("/root/formData/sendLogin", "/root/msgBuff/data/item");
+								
+								model.toggle("caseLogin") ;						
+								
+								var getLoginTime = getTime("hh:mm:ss");
+								loginTime.text = getLoginTime ;
+								window.setInterval("loginTimer();", 1000); // 1초마다 loginTimer() 호출
+								
+								//if (userID.substring(0,1) == "C" || userID.substring(0,1) == "c")
+//								if (userID == "mateadmin"  || userID == "dhdo")
+								if (model.getValue("/root/formData/sendLogin/isAdmin") == "Y") 	
+								{
+									if (userID != "jhlee" && userID == "mateadmin")
+									{
+										model.removenode("/root/AdminMenu/item/item[0]");
+									}				
+														
+									model.copyNode("/root/comboData/TreeView", "/root/AdminMenu");
+								} else {
+									model.copyNode("/root/comboData/TreeView", "/root/CustMenu");									
+								}
+								
+								model.refresh();
+								treeview1.rebuild();
+
+								// 로그인 성공 시 iviewer 에 공지사항 띄우기
+								iviewerPrevMain.src="../xrwBoard/mainNotice.xrw" ;
+
+								mainPageResize();  // 페이지 리사이징
+								shiftTab() ;  // 스위치 탭 간격 조절
+								setButton();  // 버튼 크기와 배경 설정 하기
+								
+								//외주업체인경우만 비번변경 가능하도록
+								if (model.getValue("/root/formData/sendLogin/isAdmin") == "N")
+									button4.visible = true;
+								else
+									button4.visible = false;
+							}
+							
+							]]>
+						</script>
+					</button>
+					<button id="userSetup" navindex="4" visibility="hidden" style="left:5px; top:90px; width:85px; height:20px; text-align:right; ">
+						<caption>환경설정</caption>
+						<script type="javascript" ev:event="onclick">
+							<![CDATA[
+								alertBox("로그인 하셔야 환경설정을 할 수 있습니다.");			
+							]]>
+						</script>
+					</button>
+				</case>
+				<case id="caseLogin">
+					<caption id="caption13" style="left:10px; top:30px; width:90px; height:20px; font-weight:bold; color:#ffffff; text-align:right; vertical-align:middle; ">로그인 시간 :</caption>
+					<button id="logoutBtn" navindex="3" style="left:90px; top:75px; width:85px; height:20px; text-align:right; ">
+						<caption>로그아웃</caption>
+						<script type="javascript" ev:event="onclick">
+							<![CDATA[
+							model.setValue("/root/formData/sendLogin/isLogin", "N");
+							// 초기 페이지 권한 초기화
+							var pagePermit = instance1.selectSingleNode("/root/cmdPagePermit");
+							model.resetInstanceNode(pagePermit);
+							
+							var pageLength = groupPrevPage.children.length ;
+							for (var i=0 ; i < pageLength-1 ; i++) {
+								try {
+									var pageName = groupPrevPage.children.item(groupPrevPage.children.length - 1).attribute("id").replace("btnPrev", "");
+									var isClose = 1 ;
+									try { 
+										var ok = document.all("casePrev"+pageName).children.item(3).window.javascript.mateClose(); 
+										if (ok == 0 || ok == false ) 
+											isClose = 0 ; 
+									} catch(e) { isClose = 1 ; }
+									
+									if (isClose == 1) {
+										switchMain.removeChild("casePrev"+pageName);
+										groupPrevPage.removeChild("btnPrev"+pageName) ;
+									}
+									
+								} catch(e) {}
+							}
+							document.all("btnPrevMain").dispatch("onclick");
+							// 열려있는 창 닫기
+							
+							//model.copyNode("/root/sendBuff", "/root/temp");
+							//submit("comLogout") ;
+							
+							//var userID = model.getValue("/root/msgBuff/userID");
+							//var userName = model.getValue("/root/msgBuff/userName");
+							
+							//model.copyNode("/root/SESSION", "/root/msgBuff/SESSION");
+
+							model.toggle("caseLogout");
+							
+							loginUserID.value = "";
+							loginUserPass.value = "";
+							
+							model.copyNode("/root/comboData/TreeView", "/root/comboData/TreeView");
+							treeview1.rebuild();
+							
+							model.setFocus("loginUserID");
+
+							]]>
+						</script>
+					</button>
+					<button id="button4" navindex="4" style="left:0px; top:75px; width:80px; height:20px; text-align:right; vertical-align:middle; ">
+						<caption>비번변경</caption>
+						<script type="javascript" ev:event="onclick">
+							<![CDATA[
+								groupChangePW.visible = true;	
+								oldPass.value = "";
+								newPass1.value = "";
+								newPass2.value = "";
+								model.setFocus("oldPass");	
+							]]>
+						</script>
+					</button>
+					<caption id="caption16" style="left:10px; top:50px; width:90px; height:20px; font-weight:bold; color:#ffffff; text-align:right; vertical-align:middle; ">현재 시간 :</caption>
+					<caption id="loginUserName" ref="/root/formData/sendLogin/userName" style="left:5px; top:5px; width:170px; height:20px; font-weight:bold; color:#99ff99; text-align:center; vertical-align:middle; ">(주) 컴퓨터메이트</caption>
+					<caption id="loginTime" style="left:100px; top:30px; width:60px; height:20px; font-weight:bold; color:#ffffff; text-align:left; vertical-align:middle; ">12:00</caption>
+					<caption id="curTime" style="left:100px; top:50px; width:60px; height:20px; font-weight:bold; color:#ffffff; text-align:left; vertical-align:middle; ">12:00</caption>
+					<button id="button5" style="left:0px; top:100px; width:80px; height:20px; text-align:right; vertical-align:middle; ">
+						<caption>도장사진</caption>
+						<script type="javascript" ev:event="onclick">
+							<![CDATA[
+			
+						var fileList = window.fileDialog("open", "|", true);
+						var filename = fileList.split("|");
+						
+						if(fileList != ""){
+							for (var i=0 ; i< filename.length ; i++) {
+								model.setValue("/root/sendFiles/file1", filename[i]);
+							}
+						}							
+						upload("TrustBoard", "add", "0");
+						var fileUid = model.getValue("/root/msgBuff/msgFiles/fileUID");;
+						model.setValue("/root/sendFiles/fileuid", fileUid);
+														
+						sendBuffInit();
+						sendBuffAdd("UserID", getUserID());
+						sendBuffAdd("fileuid", fileUid);
+						submit("sp_SCM_MemberShip", "fileuid_upd");
+									
+					]]>
+						</script>
+					</button>
+					<upload id="upload1" nodeset="/root/sendFiles/file1" style="left:134px; top:99px; width:25px; height:20px; "/>
+				</case>
+			</switch>
+			<group id="groupGroupCombo" class="color2" visibility="hidden" style="left:0px; top:150px; width:185px; height:40px; ">
+				<select1 id="comboGroup" ref="/root/formData/sendTree/GroupCode" navindex="5" appearance="minimal" style="left:10px; top:10px; width:160px; height:20px; ">
+					<choices>
+						<itemset nodeset="/root/comboData/GroupCode/item">
+							<label ref="Label"/>
+							<value ref="uid"/>
+						</itemset>
+					</choices>
+					<script type="javascript" ev:event="xforms-value-changed">
+						<![CDATA[
+						// 그룹 변경 시
+//						model.setValue("/root/formData/sendTree/GroupCode", comboGroup.value) ;
+//						model.setValue("/root/formData/sendTree/QueryKind", "byGroupCode");
+//						model.copyNode("/root/sendBuff", "/root/formData/sendTree");
+//						submit("comMain");
+//						setTreeMenu();
+					]]>
+					</script>
+				</select1>
+			</group>
+		</group>
+		<script type="javascript" ev:event="onmousemove">
+			<![CDATA[
+				// 마우스 이동 시 Hidden Bar 숨기고 보이기
+				var mouseX = event.clientX ;
+				if (mouseX > 200) {
+					var isFix = model.getValue("/root/pageDesign/menuBarFix") ;
+					var isShow = model.getValue("/root/pageDesign/menuBarShow");
+					if ( (isFix == "no") && (isShow == "yes") ) {
+						model.setValue("/root/pageDesign/menuBarShow", "no") ;
+						mainPageResize();
+						shiftTab();
+					}
+				} else if (mouseX < 15) {
+					var isFix = model.getValue("/root/pageDesign/menuBarFix") ;
+					var isShow = model.getValue("/root/pageDesign/menuBarShow");
+					if ( (isFix == "no") && (isShow == "no") ) {
+						model.setValue("/root/pageDesign/menuBarShow", "yes") ;
+						mainPageResize();
+						shiftTab();
+					}
+				}
+			]]>
+		</script>
+		<group id="groupChangePW" visibility="hidden" popup="true" style="left:25px; top:125px; width:245px; height:116px; background-color:#ccffcc; border-style:solid; ">
+			<secret id="oldPass" ref="/root/changePass/oldPass" maxlength="20" appearance="secret" style="left:99px; top:9px; width:130px; height:20px; "/>
+			<secret id="newPass1" ref="/root/changePass/newPass1" maxlength="15" appearance="secret" style="left:99px; top:34px; width:130px; height:20px; "/>
+			<secret id="newPass2" ref="/root/changePass/newPass2" maxlength="15" appearance="secret" style="left:99px; top:59px; width:130px; height:20px; "/>
+			<caption id="caption1" style="left:9px; top:9px; width:84px; height:20px; text-align:right; vertical-align:middle; ">현재 비밀번호</caption>
+			<caption id="caption2" style="left:9px; top:34px; width:84px; height:20px; text-align:right; vertical-align:middle; ">새 비밀번호</caption>
+			<caption id="caption3" style="left:9px; top:59px; width:84px; height:20px; text-align:right; vertical-align:middle; ">비밀번호 확인</caption>
+			<button id="button1" style="left:114px; top:84px; width:55px; height:20px; ">
+				<caption>닫기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						oldPass.value = "";
+						newPass1.value ="";
+						newPass2.value = "";
+						groupChangePW.visible = false;
+					]]>
+				</script>
+			</button>
+			<button id="button2" style="left:174px; top:84px; width:55px; height:20px; ">
+				<caption>확인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var userID = getUserID();
+						var oldPassWord = oldPass.value;
+						var newPassWord = newPass1.value;
+						var newPassWord2 = newPass2.value;
+						
+						if (newPassWord != newPassWord2)
+						{
+							alertBox("새 비밀번호와 확인용 비밀번호가 동일하지 않습니다. ", "HISCM");
+							model.setFocus("newPass2");
+							return;
+						}
+						else 
+						{					
+							sendBuffInit();
+							sendBuffAdd("UserID", userID);
+							sendBuffAdd("oldPassWord", oldPassWord);
+							sendBuffAdd("newPassWord", newPassWord);
+							submit("sp_SCM_MemberShip", "ChangePass");
+							
+							var Result = model.getValue("/root/msgBuff/data/item/Result");
+							if (Result == "OK")
+							{
+								groupChangePW.visible = false;
+								alertBox("비밀번호가 변경되었습니다. ");
+							} else {
+								alertBox(Result);
+								model.setFocus("oldPass");
+							}
+							
+						}
+					]]>
+				</script>
+			</button>
+			<button id="button3" style="left:345px; top:-1px; width:130px; height:20px; ">
+				<caption>도장사진 올리기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+			
+						var fileList = window.fileDialog("open", "|", true);
+						var filename = fileList.split("|");
+						
+						if(fileList != ""){
+							for (var i=0 ; i< filename.length ; i++) {
+								model.alert(filename[i]);
+							}
+						}		
+											
+						upload("TrustBoard", "add", "0");
+						var fileUid = model.getValue("/root/msgFiles/fileUID");
+						model.setValue("/root/sendData/fileuid", fileUid);
+								model.alert(fileUid);
+					]]>
+				</script>
+			</button>
+			<upload id="initUpload" nodeset="/root/sendData/STEMPSRC" style="left:479px; top:-1px; width:25px; height:20px; "/>
+		</group>
+	</xhtml:body>
+</xhtml:html>

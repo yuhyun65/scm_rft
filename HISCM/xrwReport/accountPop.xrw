@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>:: 거 래 명 세 서 출 력 ::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<item/>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript" ev:event="xforms-model-construct-done">
+			<![CDATA[
+			
+				object1.location = document.url;
+				object1.src = "accountPrint.xfr";	
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<object id="object1" clsid="{463fee31-9147-4082-8b55-be24e9338b56}" style="left:0px; top:0px; width:907px; height:1185px; ">
+			<script id="script1" type="javascript" ev:event="onLoad()">
+				<![CDATA[ 
+					//Report 눈금자 표시 여부 설정
+					object1.window.showRuler(false);
+	         			var doc = object1.document ; 
+	         									
+					var nodeList1 = instance1.selectNodes("/root/Title");
+					var detailCount = 15;
+							
+					for (var j=1; j<=nodeList1.length; j++)
+					{
+						var nodeList = instance1.selectNodes("/root/Title["+j+"]/Detail/item");	
+						var Price = 0;
+						for (var i=1; i<=nodeList.length; i++)
+						{						
+							var GaAmt = model.getValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAAMT");
+							try {
+							model.setValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAAMT", GaAmt.split(".")[0]);
+							} catch(e) {}
+							
+							var GaQty = model.getValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAQTY");
+							try {
+							model.setValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAQTY", GaQty.split(".")[0]);
+							} catch(e) {}
+							
+							var GaDan = model.getValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAPRICE");
+							try {
+							model.setValue("/root/Title["+j+"]/Detail/item["+ i +"]/GAPRICE", GaDan.split(".")[0]);
+							} catch(e) {}
+							
+							Price += parseInt(GaAmt);						
+						}
+						
+						for (var i=0; i<detailCount - nodeList.length; i++)
+						{
+							var node = instance1.createElement("item");
+							instance1.selectSingleNode("/root/Title["+j+"]/Detail").appendChild(node);
+						}
+						
+						var Tax = 0;
+						var Total = Price + Tax ;
+						model.makeValue("/root/Title["+j+"]/Price", Price);
+						model.makeValue("/root/Title["+j+"]/Tax",Tax);
+						model.makeValue("/root/Title["+j+"]/Total", Total);							
+					}
+					
+					// var Tax = parseInt(Price * 0.1) ;
+//					for (var j=1; j<=nodeList1.length; j++)
+//					{
+//						for (var i=0; i<detailCount - nodeList.length; i++)
+//						{
+//							var node = instance1.createElement("item");
+//							instance1.selectSingleNode("/root/Title["+j+"]/Detail").appendChild(node);
+//						}
+//					}
+					
+					var selXml = model.instance1.selectNodesXml("/root");
+					doc.loadXML(selXml);	
+					doc.refresh() ;					
+		        ]]>
+			</script>
+		</object>
+	</xhtml:body>
+</xhtml:html>

@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+//==================================================
+// (주) 컴퓨터메이트 - 초기 로딩 공통 함수 선언
+//================================================================
+// ComMate: 타이틀 설정
+//================================================================
+function setTitle() 
+{ try{
+	docTitle = model.getValue("/root/setValue/docTitle");
+	document.title = docTitle ;				
+} catch(e) { model.alert(getFormID() + " => init => setTitle => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 타이틀 설정
+//================================================================
+function copyUserInfo() 
+{ try{
+	// 메인에 있는 권한과 mdb 정보 복사
+	// model.copyNode("/root/SESSION", parent.root.SESSION);
+	model.copyNode("/root/cmdMdbUserInfo",parent.root.cmdMdbUserInfo);
+	model.copyNode("/root/cmdPagePermit",parent.root.cmdPagePermit);
+} catch(e) { model.alert(getFormID() + " => init => copyUserInfo => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 버튼 컨트롤 배경 이미지 설정, 그리드 환경설정 저장 및 불러오기
+//================================================================	
+function setControls() 
+{ try{
+	var styleType = model.getValue("/root/cmdMdbUserInfo/styleType") ;
+	var colorType = styleType.substring(0, 1);
+	var obj = document.controls ;
+	for (var i=0; i<obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName;
+		if (ctrlEle == "xforms:button") { 
+			var isGroup = obj.item(i).attribute("group") ;
+			if (((isGroup == null) || (isGroup == "")) && obj.item(i).parent.elementName != "xforms:calendar" ) { // 일반 버튼 일 경우
+
+				obj.item(i).text = replaceAll(obj.item(i).text, " ", ""); 
+				var btnText = obj.item(i).text ;
+				var btnLength = parseInt((getStrByte(btnText)+1)/2) ;
+				
+				if (btnLength>5) btnLength = 5 ;
+				else if (btnLength<2) btnLength = 2 ;
+
+				obj.item(i).attribute("style") = "background-image:../images/button/"+ colorType +"Length"+ btnLength +".jpg" ;
+				obj.item(i).attribute("style") = "width:"+(55 + 15*(btnLength -2))+"px;"+"height:20px";
+				obj.item(i).attribute("style") = "text-align:right;border-style:solid;padding-right:5;" ;
+
+			} else { // 그룹 버튼 일 경우
+				//obj.item(i).attribute("background-color") = color2 ;
+				//obj.item(i).attribute("select.background-color") = color3 ;
+			}
+		} else if (ctrlEle == "xforms:datagrid") { // 그리드일 경우
+			// 아이디를 gridList 에 추가
+			obj.item(i).attribute("colsep") = "▤" ;
+			obj.item(i).attribute("rowsep") = "▥" ;
+			var pageSavePermit = model.getValue("/root/cmdPagePermit/XGSVYN") ; 
+			if (pageSavePermit == "Y" && obj.item(i).attribute("rowheader") != "") {
+				obj.item(i).attribute("rowheader") = "update" ;
+			} else if (obj.item(i).attribute("rowheader") != "") {
+				obj.item(i).attribute("rowheader") = "seq" ;
+			}
+			
+			var cols = obj.item(i).cols;
+			for(var j = 0; j < cols; j++) {
+				
+				if(obj.item(i).colAttribute(j,"visibility") == "hidden") {
+					obj.item(i).colAttribute(j,"_hidden") = "2";
+				} 
+				
+			}
+			var gridID = obj.item(i).attribute("id") ;
+			var gridList = model.getValue("/root/cmdPageGridList");
+			
+			gridList += "," + gridID ;
+			model.setValue("/root/cmdPageGridList", gridList) ;
+		} else if (ctrlEle == "xforms:upload") { // 파일 업로드 컨트롤일 경우
+			obj.item(i).attribute("validate") = true ;
+			var uploadFileSize = model.getValue("/root/setValue/uploadFileSize");
+			obj.item(i).attribute("filesize") = uploadFileSize ;
+			var uploadFileCount = model.getValue("/root/setValue/uploadFileCount");
+			obj.item(i).attribute("filecount") = uploadFileCount ;
+			var uploadFileExt = model.getValue("/root/setValue/uploadFileExt");
+			if (uploadFileExt != "all" && uploadFileExt != "All" && uploadFileExt != null && uploadFileExt != "" ) {
+				obj.item(i).attribute("ext") = uploadFileExt ;
+			}
+		} 
+	}
+
+	initSetGrid() ; // MDB 사용자 설정 정보를 통한 그리드 재구성 
+
+} catch(e) { model.alert(getFormID() + " => init => setControls => " + e, "ComMate DEBUG"); return false; }}
+
+
+function addGridCol() 
+{ try{
+	
+	
+//		var gridList = model.getValue("/root/cmdPageGridList").split(",");
+//		var colRef = "";
+//		var addRefList = "";
+//		for(var i = 1; i < gridList.length; i++) {
+//			var gridID = gridList[i];
+//			alert(gridID);
+//			var nodeSet = document.all(gridID).attribute("nodeset");	
+//			var node = instance1.selectNodes(nodeSet);
+//			for(var j = 0; j < document.all(gridID).cols; j++) {
+//				colRef += ","+document.all(gridID).colAttribute(j,"ref");
+//			}
+//			for(var k = 0 ; k < node.item(0).childnodes.length ; k++){
+//				if(colRef.search(node.item(0).childnodes.item(k).nodeName) == -1){
+//					addRefList += ","+node.item(0).childnodes.item(k).nodeName;
+//				}
+//			}
+//			var refList = addRefList.split(",");
+//			for(var r = 1; r < refList.length; r++) {
+//				document.all(gridID).addColumn("ref:"+refList[r]+";",false);
+//				document.all(gridID).caption = document.all(gridID).caption + "^"+refList[r]+"";
+//				var uidCol = document.all(gridID).colRef(refList[r]);
+//				document.all(gridID).colHidden(uidCol) = true;
+//			}
+//			colRef = "";
+//			addRefList = "";
+//			document.all(gridID).refresh();
+//		}
+		
+//		var gridList = model.getValue("/root/cmdPageGridList").split(",");
+//		var colRef = "";
+//		var addRefList = "";
+//		for(var i = 1; i < gridList.length; i++) {
+//			var gridID = gridList[i];
+//			var rows  = document.all(gridID).rows;
+//			
+//			if (document.all(gridID).caption.indexOf("addUserUid") != -1) {
+//				var col = document.all(gridID).colRef("addUserUid");
+//				document.all(gridID).deleteColumn(col);
+//			}
+//			
+//			document.all(gridID).addColumn("ref:addUserUid;",false);
+//			document.all(gridID).caption = document.all(gridID).caption + "^addUserUid";
+//			var uidCol = document.all(gridID).colRef("addUserUid");
+//			document.all(gridID).colHidden(uidCol) = false;
+//			document.all(gridID).colHidden(uidCol) = true;
+//			
+//			var nodeSet = document.all(gridID).attribute("nodeset");
+//			for(var j = 1; j < rows; j++) {
+//				model.setValue(nodeSet+"["+j+"]/addUserUid",j);
+//			} 
+//		}
+		
+} catch(e) { model.alert(getFormID() + " => init => addGridCol => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 다국어 자동 언어 변환 루틴
+//================================================================			
+function changeLang() 
+{ try{
+	var pageLang = model.getValue("/root/setValue/pageLang") ;
+	try {
+		var lang = model.getValue("/root/cmdMdbUserInfo/pageLang");
+		if (lang != "" && lang != null) {
+			pageLang = lang ;
+		}
+	} catch(e) {}
+	if (pageLang != "LANGKS") {
+		model.setValue("/root/cmdSendLang/pageLang", pageLang);
+		model.setValue("/root/cmdSendLang/alertStr", "");
+		capGetLang() ;  
+		btnGetLang(); 	
+		gridGetLang(); 
+		comboGetLang(); 
+		submit("commonChangeLang","/root/cmdSendLang");
+		capSetLang(); 
+		btnSetLang(); 
+		gridSetLang();
+		comboSetLang();
+	}
+} catch(e) { model.alert(getFormID() + " => init => changeLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 스위치, 그룹, iviewer 리사이즈 - 오른쪽으로 확장, 아래로 확장 
+// 페이지 내부 pageResize() 함수에서 호출
+//================================================================	
+function controlResize(controlID,type)
+{ try{
+	
+	var groupWidth = model.getValue(parent.root.pageDesign.iviewerWidth);
+	var groupHeight = model.getValue(parent.root.pageDesign.iviewerHeight); 
+	
+	if (document.all(controlID).parent.elementName == "xforms:group") { // 그룹일 경우
+		groupWidth = parseInt(document.all(controlID).parent.attribute("width"));
+		groupHeight = parseInt(document.all(controlID).parent.attribute("height"));	
+	} else if (document.all(controlID).parent.elementName == "xforms:case") { // 스위치일 경우
+		groupWidth = parseInt(document.all(controlID).parent.parent.attribute("width"));
+		groupHeight = parseInt(document.all(controlID).parent.parent.attribute("height"));	
+	}
+	
+	if(type == "width"){
+
+		var controlLeft = document.all(controlID).attribute("left");
+		controlLeft = controlLeft.substring(0,controlLeft.length-2);
+		document.all(controlID).attribute("width") = (groupWidth-controlLeft) + "px";
+
+	}else if(type == "height"){
+
+		var controlTop = document.all(controlID).attribute("top");
+		controlTop = controlTop.substring(0,controlTop.length-2);
+		document.all(controlID).attribute("height") = (groupHeight-controlTop) + "px";
+		
+	}else if(type == null || type == "") {
+
+		var controlLeft = document.all(controlID).attribute("left");
+		controlLeft = controlLeft.substring(0,controlLeft.length-2);
+		document.all(controlID).attribute("width") = (groupWidth-controlLeft) + "px";
+
+		var controlTop = document.all(controlID).attribute("top");
+		controlTop = controlTop.substring(0,controlTop.length-2);
+		document.all(controlID).attribute("height") = (groupHeight-controlTop) + "px";
+	}
+	
+} catch(e) { model.alert(getFormID() + " => init => controlResize => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드에서 변환할 언어 리스트 가져오기
+//================================================================
+function gridGetLang() 
+{ try{
+	var obj = document.controls ;
+	var gridStr = "" ;
+	for (var i=0; i<obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:datagrid") { // // gridSetLang() 같이 수정
+			var rowHeader = obj.item(i).attribute("rowheader");
+			for(var k=0; k<obj.item(i).cols; k++) {
+				var str = obj.item(i).valueMatrix(0,k) ;
+				if (rowHeader != null && rowHeader != "") {
+					str = obj.item(i).valueMatrix(0,k+1) ;
+				}
+				if ((str != null) && (str != "")) {
+					gridStr += "▤" + str ;
+					var langkey = obj.item(i).children.item(7+k).attribute("langkey");
+					if(langkey != null && langkey != "") {
+						gridStr += langkey;
+					}
+				}	
+			}
+		} 	
+	} 
+	gridStr = gridStr.substring(1, gridStr.length);
+	model.setValue("/root/cmdSendLang/gridStr", gridStr);
+} catch(e) { model.alert(getFormID() + " => init => gridGetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드에 변환된 언어 정보 설정하기
+//================================================================
+function gridSetLang() 
+{ try{
+	var obj = document.controls ;
+	var gridStr = model.getValue("/root/msgBuff/changeLang/gridStr");
+	var gridList = gridStr.split("▤");
+	var index =  0 ;
+	for (var i=0; i<obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:datagrid") { // gridGetLang() 같이 수정
+			for(var k=0; k<obj.item(i).cols; k++) {
+				var str = obj.item(i).valueMatrix(0,k) ;
+				if ((str != null) && (str != "")) {
+					obj.item(i).valueMatrix(0,k) = gridList[index++] ;
+				}
+			}
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => init => gridSetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 콤보 변환할 언어 가져오기
+//================================================================
+function comboGetLang() 
+{ try{
+	var obj = document.controls ;
+	var comboStr = "";
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:select1") {  // comboSetLang() 같이 수정
+			try {
+				var comboID = document.all(obj.item(i).attribute("id"));	//컨트롤의 ID를 얻는다.
+				var comboNode = "";
+				var comboNode = comboID.children.item(4).children.item(0).attribute("nodeset"); //select컨트롤의 instance를 얻는다.
+				var label = comboID.children.item(4).children.item(0).children.item(0).attribute("ref");		//select컨트롤의 label 값을 얻는다.
+				var node = instance1.selectNodes(comboNode); // item 노드
+				
+				for(var j = 1; j <= node.length; j++) {
+					var str = model.getValue(comboNode+"["+j+"]/"+label);//node.item(i).childnodes.item(0).text ;
+					var langkey = model.getValue(comboNode+"["+j+"]/langkey");
+					if ((str != null) && (str != "")) {
+						comboStr += "▤" + str ;
+						if(langkey != null && langkey != "") {
+							comboStr += langkey;
+						}
+					}
+				}
+			} catch(e) {}
+		}
+	}
+	comboStr = comboStr.substring(1, comboStr.length);
+	model.setValue("/root/cmdSendLang/comboStr", comboStr);
+} catch(e) { model.alert(getFormID() + " => init => comboGetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 콤보 변환된 언어 설정하기
+//================================================================
+function comboSetLang()
+{ try{
+	var obj = document.controls ;
+	var comStr = model.getValue("/root/msgBuff/changeLang/comboStr");
+	var comboList = comStr.split("▤");
+	var index =  0 ;
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:select1") { // comboGetLang() 같이 수정
+			try {
+				var comboID = document.all(obj.item(i).attribute("id"));
+				var comboNode = comboID.children.item(4).children.item(0).attribute("nodeset");
+				var label = comboID.children.item(4).children.item(0).children.item(0).attribute("ref");
+				var node = instance1.selectNodes(comboNode);
+				for(var j = 1; j <= node.length; j++) {
+					var str = model.getValue(comboNode+"["+j+"]/"+label);
+					if ((str != null) && (str != "")) {
+						model.setValue(comboNode+"["+j+"]/"+label,comboList[index++]);
+					}
+				}
+				comboID.refresh();
+			} catch(e) {}
+		}	
+	}
+
+} catch(e) { model.alert(getFormID() + " => init => comboSetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 언어 변환할 캡션 정보 가져오기
+//================================================================
+function capGetLang()
+{ try{
+	var obj = document.controls ;
+	var capStr = "";
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		var parentCtrlEle = obj.item(i).parent.elementName ;
+		if (ctrlEle == "xforms:caption" && parentCtrlEle != "xforms:calendar") {
+			var cap = obj.item(i).text ; // capSetLang() 같이 수정
+			var langkey = obj.item(i).attribute("langkey");
+			if ((cap != null) && (cap != "")) {
+				capStr += "▤" + cap ;
+				if(langkey != null && langkey != "") {
+					capStr += langkey;
+				}
+			}
+		}
+	}
+	capStr = capStr.substring(1, capStr.length);
+	model.setValue("/root/cmdSendLang/capStr", capStr);
+} catch(e) { model.alert(getFormID() + " => init => capGetLang => " + e, "ComMate DEBUG"); return false; }}
+//================================================================
+// ComMate: 변환된 캡션 언어 설정하기
+//================================================================
+function capSetLang()
+{ try{
+	var obj = document.controls ;
+	var capStr = model.getValue("/root/msgBuff/changeLang/capStr");
+	var capList = capStr.split("▤");
+	var index =  0 ;
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		var parentCtrlEle = obj.item(i).parent.elementName ;
+		if (ctrlEle == "xforms:caption" && parentCtrlEle != "xforms:calendar") {
+			var cap = obj.item(i).text ; // capGetLang() 같이 수정
+			if ((cap != null) && (cap != "")) {
+				obj.item(i).text = capList[index++];
+			}
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => init => capSetLang => " + e, "ComMate DEBUG"); return false; }}
+//================================================================
+// ComMate: 버튼 정보 언어변환정보 MDB로 저장
+//================================================================	
+function btnGetLang()
+{ try{
+	var obj = document.controls ;
+	var btnStr = "";
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:button") {
+			var btn = obj.item(i).text ; // btnSetLang() 같이 수정
+			var langkey = obj.item(i).attribute("langkey");
+			if ((btn != null) && (btn != "")) {
+				btnStr += "▤" + btn ;
+				if(langkey != null && langkey != "") {
+					btnStr += langkey;
+				}
+			}
+		}
+	}
+	btnStr = btnStr.substring(1, btnStr.length);
+	model.setValue("/root/cmdSendLang/btnStr", btnStr);
+} catch(e) { model.alert(getFormID() + " => init => btnGetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 버튼 MDB 정보에서 넘어온 변수에 따라 언어 변환
+//================================================================
+function btnSetLang()
+{ try{
+	var obj = document.controls ;
+	var btnStr = model.getValue("/root/msgBuff/changeLang/btnStr");
+	var btnList = btnStr.split("▤");
+	var index =  0 ;
+	for(var i = 0; i < obj.length; i++) {
+		var ctrlEle = obj.item(i).elementName ;
+		if (ctrlEle == "xforms:button") {
+			var btn = obj.item(i).text ; //  btnGetLang() 같이 수정
+			if ((btn != null) && (btn != "")) {
+				obj.item(i).text = btnList[index++];
+			}
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => init => btnSetLang => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: MDB 정보 갖고 와서 Grid 재구성
+//================================================================	
+function initSetGrid() 
+{ try{ // MDB 정보 갖고 와서 Grid 재구성
+	var userID = "";
+	var formID = getFormID(); 
+	var mdbDir = model.getValue("/root/setValue/mdbDir");
+	var isMainBoard = "N" ;
+	try {
+		isMainBoard = model.getValue(root.boardInfo.isMainBoard) ;
+	} catch(e) {}	  
+	if (isMainBoard == "Y") { // 메인 보드라면 main 로 접속
+		window.vbScript.vbSetGridInfo(userID, "main", mdbDir); 
+	} else {  // 메인 보드가 아니라면 formID 로 접속
+		window.vbScript.vbSetGridInfo(userID, formID, mdbDir);
+	}
+} catch(e) { model.alert(getFormID() + " => init => initSetGrid => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: MDB 정보에서 넘어온 변수에 따라 그리드 화경 설정
+//================================================================	
+function setGridInfo(gridID, colRef, colSize,Hidden)
+{ try{
+     var colSizeList = colSize.split(",");
+     var colRefList = colRef.split(",");
+     var hiddenList = Hidden.split(",");
+     for(var i = 0; i<colRefList.length-1; i++) {
+     	if (colRefList[i] != document.all(gridID).colAttribute(i,"ref") ) {
+	      for(var j = i+1; j<colRefList.length; j++) {
+		       if(colRefList[i] == document.all(gridID).colAttribute(j,"ref")) {
+			        document.all(gridID).colMove(i, j, "before", false);
+			        break;
+       			}
+      		}
+     	}
+     }
+     for(i = 0; i<colSizeList.length; i++) {
+      		document.all(gridID).colWidth(i) = colSizeList[i];
+      		if(hiddenList[i] == "1") {
+	      		document.all(gridID).colHidden(i) = true;
+      		}
+     }
+     // document.all(gridID).gridToInstance(); 
+} catch(e) { model.alert(getFormID() + " => init => setGridInfo => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드 환경 MDB로 저장
+//================================================================	
+function saveGridInfo() 
+{ try{
+	var gridList = model.getValue("/root/cmdPageGridList").split(",");
+	var isSave = 0 ;  // 저장 여부 확인
+       for(var index=1; index < gridList.length; index++) { // ,그리드 수만큼 반복 설정
+       		var colRef = ""; 
+		var colSize = "";
+		var hidden = "";
+		   try{
+		          for(var i = 0; i < document.all(gridList[index]).cols; i++) { // 그리드 열의 수만큼 반복
+		           	    colRef += document.all(gridList[index]).colAttribute(i,"ref");
+		                   colSize += String(document.all(gridList[index]).colWidth(i));
+		                   hidden += document.all(gridList[index]).colHidden(i);
+			           if (i != document.all(gridList[index]).cols-1) {
+				            colRef += ",";
+				            colSize += ",";
+				            hidden += ",";
+			           }
+		          }
+		          // MDB 로 저장하는 VB 스크립트 함수 호출
+		          var mdbDir = model.getValue("/root/setValue/mdbDir");
+			  var userID = getUserID();
+			  var formID = getFormID();
+
+			  var isMainBoard = "N" ;
+			  try {
+			  	isMainBoard = model.getValue(root.boardInfo.isMainBoard) ;
+			  } catch(e) {}
+			 if (isMainBoard == "Y") { // 메인 게시판일 경우
+			       	window.vbScript.vbSaveGridInfo(userID, "main", gridList[index], colRef, colSize,mdbDir,hidden);
+			 } else { // 메인 게시판이 아닐 경우
+				window.vbScript.vbSaveGridInfo(userID, formID, gridList[index], colRef, colSize,mdbDir,hidden);
+			 }
+		         isSave = 1 ; // 정상 저장
+		} catch(e) { 
+		   	  isSave = 0 ;  // 저장 시 오류 발생
+		}
+	}
+	if (isSave == 1) {
+		alertBox("현재 페이지의 사용자 환경을 저장하였습니다.");
+	} else {
+		errAlert("사용자 환경을 저장하지 못하였습니다. \n\n잠시 후 다시 시도해보십시오.");
+	}
+	
+} catch(e) { model.alert(getFormID() + " => init => saveGridInfo => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드 환경 초기화
+//================================================================	
+function initMdbGridInfo() 
+{ try{
+	var gridList = model.getValue("/root/cmdPageGridList").split(",");
+	var isInit = 0 ;  // 초기화 여부 확인
+       for(var index=1; index < gridList.length; index++) { // ,그리드 수만큼 반복 설정
+		  try{
+		          // MDB 로 저장하는 VB 스크립트 함수 호출
+		          var mdbDir = model.getValue("/root/setValue/mdbDir");
+			  var userID = getUserID();
+			  var formID = getFormID();
+	
+			  var isMainBoard = "N" ;
+			  try {
+			  	isMainBoard = model.getValue(root.boardInfo.isMainBoard) ;
+			  } catch(e) {}
+
+			 if (isMainBoard == "Y") { // 메인 게시판일 경우
+	 			 var mdbDir = model.getValue("/root/setValue/mdbDir");
+			       	window.vbScript.vbInitMdbGridInfo(userID, "main", gridList[index], mdbDir);
+			 } else { // 메인 게시판이 아닐 경우
+				 var mdbDir = model.getValue("/root/setValue/mdbDir");
+				window.vbScript.vbInitMdbGridInfo(userID, formID, gridList[index], mdbDir);
+			 }
+		         isInit = 1 ; // 정상 저장
+		} catch(e) { 
+		   	  isInit = 0 ;  // 저장 시 오류 발생
+		}
+	}
+	var gridList = model.getValue("/root/cmdPageGridList").split(",");
+	for (var i=1; i<gridList.length; i++) {
+		model.refresh();
+	}
+	if (isInit == 1) {
+		var isLoad = yesAlert("현재 페이지의 사용자 환경을 초기화하였습니다.\n\n초기화한 페이지를 다시 로딩하시겠습니까?");
+		if (isLoad == 1) {
+			window.reload();
+		}
+	} else {
+		errAlert("사용자 환경을 초기화하지 못하였습니다. \n\n잠시 후 다시 시도해보십시오.");
+	}
+	
+} catch(e) { model.alert(getFormID() + " => init => initMdbGridInfo => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드 데이타 존재 여부 확인
+//================================================================	
+function haveGridData(gridID) 
+{ try{ // 그리드 데이터가 있는지 확인 없다면 창 띄우기
+
+	var rows = document.all(gridID).rows;
+	if ((rows == 1) || ((rows == 2) && document.all(gridID).isSubtotal(1) == true )){
+		var gridWidth = parseInt(document.all(gridID).attribute("width"));
+		var gridHeight = parseInt(document.all(gridID).attribute("height"));
+		var gridLeft = parseInt(document.all(gridID).attribute("left"));
+		var gridTop = parseInt(document.all(gridID).attribute("top"));
+		var parentObj = document.all(gridID).parent ;
+		var noDataObj = parentObj.createChild("xforms:caption","id:cap"+gridID) ;
+		noDataObj.attribute("style") = "width:200px; height:50px;" ;
+		
+		var noDataLeft = parseInt(gridLeft + (gridWidth-parseInt(noDataObj.attribute("width")))/2);
+		var noDataTop = parseInt(gridTop + (gridHeight-parseInt(noDataObj.attribute("height")))/2);
+		noDataObj.attribute("style") = "left:"+noDataLeft+"px; top:"+noDataTop+"px;" ;
+		noDataObj.attribute("style") = "background-color:#ffffff;border-style:solid;vertical-align:middle;"		
+		noDataObj.text = "   ※ 검색된 데이터가 없습니다.";		
+	} else {
+		var parentObj = document.all(gridID).parent ;
+		try { parentObj.removeChild("cap"+gridID); } catch(e) {}
+	} 
+} catch(e) { model.alert(getFormID() + " => init => haveGridData => " + e, "ComMate DEBUG"); return false; }}
+
+//================================================================
+// ComMate: 그리드 데이타 존재 여부 확인
+//================================================================	
+function setGridHeader() 
+{ try{ // 그리드 데이터가 있는지 확인 없다면 창 띄우기
+
+} catch(e) { model.alert(getFormID() + " => init => setGridHeader => " + e, "ComMate DEBUG"); return false; }}
+			]]>
+		</script>
+		<script type="vbscript">
+			<![CDATA[
+'==================================================================
+' 넘겨온 그리드 정보를 MDB에 저장
+'==================================================================
+Function vbSaveGridInfo(userID, formID, gridID, colRef, colSize,mdbDir,hidden) 
+'window.javaScript.alert("ddd")
+      Set DbCon=CreateObject("ADODB.Connection")  'mdb를 사용할 때 
+      DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+      Set DbRec=CreateObject("ADODB.Recordset")  ' DbRec.CursorType=1 
+
+     dim check
+     check = 0
+     
+     DbRec.Open "SELECT uid FROM GridInfo WHERE userID = '"&userID&"' AND formID = '"&formID&"' AND gridID = '"&gridID&"'", DbCon
+     if not DbRec.EOF then
+         check = 1
+         uid = Cint(DbRec("uid"))
+     end if
+     DbRec.Close	'mdb 닫기
+     
+     if(check = 0) then
+     		DbRec.Open "INSERT INTO GridInfo (userID, formID, gridID,colRef,colSize,Hidden) values('"&userID&"', '"&formID&"','"&gridID&"','"&colRef&"','"&colSize&"','"&hidden&"')" , DbCon 
+     else 
+      		DbRec.Open "UPDATE GridInfo SET colRef = '"&colRef&"', colSize = '"&colSize&"', Hidden = '"&hidden&"' where uid = "&uid, Dbcon
+     end if
+End Function
+
+'==================================================================
+' 넘겨온 그리드 정보를 MDB 에서 삭제
+'==================================================================
+Function vbInitMdbGridInfo(userID, formID, gridID, mdbDir) 
+'window.javaScript.alert("ddd")
+      Set DbCon=CreateObject("ADODB.Connection")  'mdb를 사용할 때 
+      DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+      Set DbRec=CreateObject("ADODB.Recordset")  ' DbRec.CursorType=1 
+  
+     DbRec.Open "DELETE FROM GridInfo WHERE userID = '"&userID&"' AND formID = '"&formID&"' AND gridID = '"&gridID&"'", DbCon
+      
+End Function
+
+'**********************************************************
+' MDB 에서 그리드 환경 설정 얻기
+'**********************************************************
+Function vbSetGridInfo(userID, formID,mdbDir)
+     Set DbCon=CreateObject("ADODB.Connection") 'mdb를 사용할 때 
+     DbCon.Open("PROVIDER=Microsoft.Jet.OLEDB.4.0;DATA SOURCE="&mdbDir) 
+     
+     Set DbRec=CreateObject("ADODB.Recordset") 
+     DbRec.CursorType=1
+     dim i
+     i = 0
+     
+     DbRec.Open "SELECT gridID, colRef, colSize,Hidden FROM GridInfo WHERE userID = '"&userID&"' AND formID = '"&formID&"'", DbCon
+     while not DbRec.EOF
+     		window.javaScript.setGridInfo CStr(DbRec("gridID")), CStr(DbRec("colRef")), CStr(DbRec("colSize")), CStr(DbRec("Hidden"))
+	        DbRec.moveNext
+     wend
+     DbRec.Close
+End Function
+
+
+		   ]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body idprefix="init_"/>
+</xhtml:html>

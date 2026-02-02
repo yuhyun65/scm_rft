@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: 공문서 보기 :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<formData>
+						<send1>
+							<uid/>
+							<QueryKind/>
+						</send1>
+					</formData>
+					<output>
+						<data>
+							<subject/>
+							<userid/>
+							<writer/>
+							<content/>
+							<fileuid/>
+							<date/>
+							<uid/>
+							<formID/>
+							<editPermit/>
+							<delPermit/>
+							<QueryKind/>
+							<filegrid>
+								<item>
+									<filename/>
+								</item>
+							</filegrid>
+							<sessionid/>
+							<isAdmin/>
+							<cust/>
+							<GUMAEKIND/>
+							<custuid/>
+							<state/>
+						</data>
+					</output>
+					<sendFiles>
+						<item/>
+					</sendFiles>
+					<msgFiles>
+					</msgFiles>
+					<temp/>
+					<printPop>
+						<subject/>
+						<writer/>
+						<content/>
+						<getdate/>
+					</printPop>
+					<doSaveFile>cancel</doSaveFile>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+				function mateInit() {
+					var fileUid = model.getValue("/root/output/data/fileuid");
+											
+					if (fileUid > 0 ) {		
+						model.setValue("/root/sendFiles/item", "-");
+						upload("TrustAODoc","get", fileUid);
+						viewFile("datagrid1");
+						
+						model.makeValue("/root/output/data/savefilelist", model.getValue("/root/msgFiles/savefilelist"));
+						model.makeValue("/root/output/data/orifilelist", model.getValue("/root/msgFiles/orifilelist"));
+						model.makeValue("/root/output/data/address", model.getValue("/root/msgFiles/address"));						
+					}else {
+						model.copyNode("/root/msgFiles", "/root/msgFiles");
+					}
+					datagrid1.refresh();							
+										
+					var editPermit = model.getValue("/root/output/data/editPermit");
+					var delPermit = model.getValue("/root/output/data/delPermit");
+					
+					if (model.getValue("/root/output/data/userid").toLowerCase( ) == model.getValue("/root/output/data/sessionid").toLowerCase( )) {
+//					    ||  model.getValue("/root/output/data/isAdmin") == "Y") {
+//					    	if (model.getValue("/root/output/data/userid").toLowerCase( ) == model.getValue("/root/output/data/sessionid").toLowerCase( )) 
+//						    	button5.visible = false;
+					    	
+						if(editPermit == "Y")
+							button3.visible = true;			
+						if(delPermit == "Y")						
+							button1.visible = true;			
+					}	
+					model.makeNode("/root/output/data/cust");
+					model.makeNode("/root/output/data/GUMAEKIND");
+				}				
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body scroll="autovscroll">
+		<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; color:#000000; "/>
+		<group id="view" style="left:20px; top:20px; width:495px; height:490px; color:#000000; border-color:#999999; border-style:solid; ">
+			<output id="output4" ref="/root/output/data/date" style="left:334px; top:64px; width:145px; height:25px; text-align:right; "/>
+			<button id="button1" visibility="hidden" style="left:294px; top:459px; width:55px; height:20px; ">
+				<caption>삭제</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						
+						var YorN =  yesAlert("삭제하시겠습니까?");
+						if(YorN == 1) {
+													
+							model.setValue("/root/formData/send1/uid", model.getValue("/root/output/data/uid"));
+							model.setValue("/root/formData/send1/QueryKind", "del");
+							model.copyNode("/root/sendBuff", "/root/formData/send1");
+							
+							sendBuffInit();
+							sendBuffAdd("uid", model.getValue("/root/formData/send1/uid"));
+							submit("sp_SCM_TrustAODoc", "Delete");
+															
+							var fileUid = model.getValue("/root/output/data/fileuid");
+							if (fileUid != "0") {
+								model.setValue("/root/sendFiles/item", "-");
+								upload("TrustAODoc", "del", fileUid);
+							}	
+													
+							try {
+								parent.datagrid1.deleteRow(parent.datagrid1.mouseRow);
+								parent.model.removenode("/root/msgBuff/GridList/item[" + parent.datagrid1.mouseRow + "]"); 
+							}catch(e) 
+							{
+								
+							}
+							window.close();
+						}
+						else
+							return false;
+					]]>
+				</script>
+			</button>
+			<button id="button2" navindex="1" style="left:424px; top:459px; width:55px; height:20px; ">
+				<caption>닫기</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+			<button id="button3" visibility="hidden" style="left:359px; top:459px; width:55px; height:20px; ">
+				<caption>수정</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[			
+					
+						model.setValue("/root/output/data/QueryKind", "mod");
+						window.load("AODocSendWrite.xrw", "replace" ,"WriteFrm", "left:200px; top:100px;width:550;height:550;resize:false;", "/root/output/data", "/root/formData/send1/item");
+																	
+					]]>
+				</script>
+			</button>
+			<line id="line1" style="x1:-1px; y1:54px; x2:493px; y2:54px; border-color:#999999; "/>
+			<line id="line2" style="x1:-1px; y1:449px; x2:493px; y2:449px; border-color:#999999; "/>
+			<output id="output2" ref="/root/output/data/writer" style="left:14px; top:65px; width:190px; height:25px; "/>
+			<datagrid id="datagrid1" nodeset="/root/output/data/filegrid/item" caption="File" colsep="^" colwidth="463, 100" extendlastcol="scroll" mergecellsfixedrows="bycolrec" rowsep="|" data.focus-rect="hidden" style="left:14px; top:319px; width:465px; height:122px; ">
+				<col ref="filename"/>
+				<script type="javascript" ev:event="ondblclick">
+					<![CDATA[
+					
+						var selFile = datagrid1.mouseRow;
+						downFile("datagrid1", selFile);
+						
+					]]>
+				</script>
+			</datagrid>
+			<output id="output1" ref="/root/output/data/subject" style="left:14px; top:20px; width:465px; height:25px; "/>
+			<textarea id="textarea2" ref="/root/output/data/content" editable="false" style="left:14px; top:94px; width:465px; height:215px; vertical-align:top; "/>
+			<button id="button4" style="left:14px; top:459px; width:55px; height:20px; ">
+				<caption>출력</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var subject = model.getValue("/root/output/data/subject");
+						var writer = model.getValue("/root/output/data/writer"); 
+						var content = model.getValue("/root/output/data/content");
+						var getdate = model.getValue("/root/output/data/date");
+						
+						model.setValue("/root/printPop/subject", subject);
+						model.setValue("/root/printPop/writer", writer);
+						model.setValue("/root/printPop/content", content);
+						model.setValue("/root/printPop/getdate", getdate);
+						
+						window.load("../xrwReport/boardPop.xrw", "modeless", "", "left:200px; top:0px;width:930;height:740;resize:false;", "/root/printPop", "/root") ;	
+					]]>
+				</script>
+			</button>
+			<upload id="upload1" nodeset="/root/sendFiles/item" style="left:459px; top:419px; width:20px; height:20px; "/>
+			<button id="button5" navindex="1" visibility="hidden" style="left:74px; top:459px; width:55px; height:20px; ">
+				<caption>확인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						var sState = model.getValue("/root/output/data/state");
+						if (sState=="3") {
+							model.alert("이미 접수확인하셨습니다.");
+							return false;
+						} else {
+							var YorN = yesAlert("접수확인하시겠습니까?");
+							
+							if (YorN == 1) {							
+								sendBuffInit();
+								sendBuffAdd("custuid", model.getValue("/root/output/data/custuid"));
+																				
+								submit("sp_SCM_TrustAODoc", "TakeCFMUpd");
+							}else
+								return false;
+							
+							window.close();
+						}
+					]]>
+				</script>
+			</button>
+		</group>
+	</xhtml:body>
+</xhtml:html>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+
+//==================================================
+// (주) 컴퓨터메이트 - 공통 이벤트 처리
+//***************************************************
+// ComMate: 초기 로딩 공통 이벤트
+//***************************************************
+function xforms_model_destruct() {
+	var formID = getFormID() ;
+	if (formID != "comMain") return;
+	var isClose = event_xforms_model_destruct() ;
+	if (isClose == false)
+		event.stopPropagation();
+}
+function event_xforms_model_destruct() // 공통 폼 종료 이벤트
+{ try { 
+	var notRemoveCnt = deleteFolder("C:\\ComMate\\temp", "yes");
+	if (notRemoveCnt == 0)
+		return true;									
+	else
+		return false;
+} catch(e) { model.alert(getFormID() + " => event => xforms_model_destructe => " + e, "ComMate DEBUG"); return false; }}
+
+function xforms_model_construct_done() {
+	event_xforms_model_construct_done() ;
+	event.stopPropagation();
+}
+
+function event_xforms_model_construct_done() // 공통 초기 로딩 이벤트
+{ try { 
+	
+	var formID = getFormID() ;
+	if (formID != "comLogin" && formID != "comMain") { // 공통 호출 함수
+		try { mateSetGrid(); } catch(e) {} 
+		try {  setTitle(); } catch(e) {} // 페이지 타이틀 설정
+		try {  copyUserInfo(); } catch(e) {} // 세션, 권한, MDB 정보 복사
+		try { 	setControls() ; } catch(e) {} // 버튼 배경 설정 및 그리드 환경 MDB 로부터 불러오기
+		try { 	pageResize(); } catch(e) {} // 페이지 사이즈 조절 ( 페이지 내부 존재 )
+	} 
+	try { 	addGridCol(); setSubtotal(); ascSubtotal(); } catch(e) {} // 로딩 서브토탈 함수 설정
+	try { 	mateInit();  } catch(e) { alertBox(e.toString()); } // 각 페이지의 초기화 함수 호출
+} catch(e) { model.alert(getFormID() + " => event => xforms_model_construct_done => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 초기 로딩 공통 이벤트
+//***************************************************
+function xforms_rebuild() // 공통 초기 로딩 이벤트
+{ try { 
+	haveGridData(event.target);
+	event.stopPropagation();
+	
+} catch(e) { model.alert(getFormID() + " => event => xforms_rebuild => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 키 누를 때 발생하는 이벤트 ( Help 창 띄울 때 사용 )
+//***************************************************
+function onkeydown() 
+{ try { 
+	
+	if(event.altKey == 1) {
+		if(event.keyCode == 115) {
+			if(event.currentTarget == "html") {
+				var formID = getFormID();
+				if (formID.indexOf("help") != -1) { // 헬프 창이라면 ...
+					if(isClose == 1) {
+						var isClose = yesAlert("Help 창을 닫으시겠습니까? \n\n작업 중인 데이터는 사라집니다.");
+						window.close();
+					}
+				}
+			}
+		}
+	} 
+	
+	if(event.keyCode == 113) { // F2 키를 눌렀을 때
+		var target = event.currentTarget ;
+		var eleName = "" ;
+		try {
+			eleName = document.all(target).elementName ;
+		} catch(e) {}
+		if (eleName == "xforms:datagrid") { // 그리드 일때
+			document.all(target).editCell();
+		}
+	}
+} catch(e) { model.alert(getFormID() + " => event => onkeydown => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 마우스 누를 때 일어나는 이벤트
+//***************************************************
+function onmousedown()
+{ try {
+	var target = event.ptarget.parent ;
+	try {
+		if(target.elementName != "xforms:datagrid") {
+			var viewSource = model.getValue("/root/setValue/viewSource") ;
+			if (viewSource == "N") { 
+				window.showPopupMenu(false);
+			} else {
+				window.setPopupMenu(false);
+			}
+		}
+	}catch (e) {
+		var viewSource = model.getValue("/root/setValue/viewSource") ;
+		if (viewSource == "N") {
+			window.showPopupMenu(false);
+		} else {
+			window.setPopupMenu(false);
+		}
+	}
+	var gridID = event.currentTarget;
+	var eleName = "" ;
+	try {
+		eleName = document.all(gridID).elementName ;
+	} catch(e) {}
+	//alert(gridID.elementName);
+	
+	if (eleName == "xforms:datagrid") { // 그리드 일 때
+
+		var excelFlag = model.getValue("/root/cmdExcelFlag");
+		var rows = document.all(gridID).rows;
+		if(event.button == 1 && excelFlag == 1) { // 마우스 클릭 엑셀 저장
+			var filename = window.fileDialog("save","",true,"","xls","Excel Files(*.xls)|*.xls");
+
+			if(filename != "")
+			{
+				document.all(gridID).saveExcel(filename, "sheetname:Transaction;colhiddenextend:true;");
+				var check = yesAlert("엑셀파일을 열겠습니까??");
+				if(rows != 1 && check == 1) {
+					try {	
+						window.exec("excel.exe" , '\"'+filename+ '\"');
+					}catch(e) {
+						alertBox("엑셀을 열수 없습니다");
+					}
+				}
+			}
+			model.setValue("/root/cmdExcelFlag",0);
+		} else if (event.button == 3 || event.button == 1) { // 마우스 오른쪽 팝업 디자인
+			document.all(gridID).explorerbar = "sortshowmove";
+			window.showPopupMenu(true);
+			mousePopup(gridID);
+		}
+	} 
+} catch(e) { model.alert(getFormID() + " => event => onmousedown => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 그리드 소팅 이벤트
+//***************************************************
+function onaftersort()
+{ try {
+	document.all(event.target).gridToInstance();
+	event.stopPropagation();
+} catch(e) { model.alert(getFormID() + " => event => onaftersort => " + e, "ComMate DEBUG"); return false; }}
+//***************************************************
+// ComMate: 파일업로드시 발생하는 이벤트
+//***************************************************
+function upload_ext_error()
+{ try { 
+	var uploadFileExt = model.getValue("/root/setValue/uploadFileExt");
+	alertBox("허용된 파일 포멧이 아닙니다. ( 허용된 파일 포멧: "+uploadFileExt+" )");
+	delUploadErrFiles(event) ;
+	event.stopPropagation();
+
+} catch(e) { model.alert(getFormID() + " => event => upload_ext_error => " + e, "ComMate DEBUG"); return false; }}
+function upload_filecount_error()
+{ try { 
+	var uploadFileCount = model.getValue("/root/setValue/uploadFileCount");
+	alertBox("업로드 파일 수는  "+ uploadFileCount +" 를 초과할 수 없습니다.");
+	delUploadErrFiles(event) ;
+	event.stopPropagation();
+
+} catch(e) { model.alert(getFormID() + " => event => upload_filecount_error => " + e, "ComMate DEBUG"); return false; }}
+function upload_filesize_error()
+{ try { 
+
+	var uploadFileSize = model.getValue("/root/setValue/uploadFileSize");
+	alertBox("업로드 파일 용량은 "+ uploadFileSize +" 를 초과할 수 없습니다. ");
+	delUploadErrFiles(event) ;
+	event.stopPropagation();
+	
+} catch(e) { model.alert(getFormID() + " => event => upload_filesize_error => " + e, "ComMate DEBUG"); return false; }}
+
+function delUploadErrFiles(event)
+{ try { 
+	var uploadNodeset = document.all(event.target).attribute("nodeset") ;
+	var nodesetList= uploadNodeset.split("/");
+	var gridNodeset = uploadNodeset.replace("/"+nodesetList[nodesetList.length-1], "");
+	var obj = document.controls ;
+	for (var i=0; i<obj.length; i++) {
+		if (obj.item(i).elementName == "xforms:datagrid") {
+			if (obj.item(i).attribute("nodeset") == gridNodeset) {
+				obj.item(i).removeRow();
+				break;
+			}
+		}		
+	}
+} catch(e) { model.alert(getFormID() + " => event => delUploadErrFiles => " + e, "ComMate DEBUG"); return false; }}
+
+//***************************************************
+// ComMate: 소팅 전 이벤트 
+//***************************************************
+function onbeforesort()
+{ try {
+	var gridID = event.currentTarget;
+	var row = document.all(gridID).row;
+	var col = document.all(gridID).col;
+	if(document.all(gridID).fixedcellcheckbox(row,col) == true) { //캡션 영역에 check박스 일때 sort기능 없에기..
+		document.all(gridID).explorerbar = "move";
+	}
+	//makeGridNode(gridID);
+	event.stopPropagation();
+
+} catch(e) { model.alert(getFormID() + " => event => onbeforesort => " + e, "ComMate DEBUG"); return false; }}
+
+
+//***************************************************
+// ComMate: 사용자 입력 특수 문자 제한하기
+//***************************************************
+//function xforms_value_changed()
+//{ try { 
+//	
+//	var formValue = "" ;
+//	try {
+//		formValue = document.all(event.target).value ;
+//	} catch(e) {
+//		var gridID = "" ;
+//		if (event.ptarget.parent.elementName == "xforms:datagrid") {
+//			gridID = event.ptarget.parent ;
+//		} else {
+//			gridID = event.ptarget.parent.parent ;
+//		}
+//		var row = document.all(gridID).row;
+//		var col = document.all(gridID).col;
+//		formValue = document.all(gridID).valueMatrix(row, col) ;
+//	}
+//	if (formValue != null && formValue != "") { // 해당 셀에 값이 있을 때
+//		if (formValue.toString().search("'") != -1) {
+//			alert("문자열에 ' 를 포함할 수 없습니다. ");
+//			document.all(event.target).value = replaceAll(document.all(event.target).value, "'", "") ;
+//		} 
+//		if (formValue.toString().search("▤") != -1) {
+//			alert("문자열에 ▤ 를 포함할 수 없습니다. ");
+//			document.all(event.target).value = replaceAll(document.all(event.target).value, "▤", "") ;
+//		} 
+//		if (formValue.toString().search("▥") != -1) {
+//			alert("문자열에 ▥ 를 포함할 수 없습니다. ");
+//			document.all(event.target).value = replaceAll(document.all(event.target).value, "▥", "") ;
+//		} 
+//		if (formValue.toString().search("<") != -1) {
+//			alert("문자열에 < 를 포함할 수 없습니다. ");
+//			document.all(event.target).value = replaceAll(document.all(event.target).value, "<", "") ;
+//		} 
+//		if (formValue.toString().search(">") != -1) {
+//			alert("문자열에 > 를 포함할 수 없습니다. ");
+//			document.all(event.target).value = replaceAll(document.all(event.target).value, ">", "") ;
+//		} 
+//	}
+//
+//	//event.stopPropagation();
+//} catch(e) { model.alert(getFormID() + " => event => xforms_value_changed => " + e, "ComMate DEBUG"); return false; }}
+
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body idprefix="TFEvent_"/>
+</xhtml:html>

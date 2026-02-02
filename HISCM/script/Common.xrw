@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: MATE-ERP :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+				</root>
+			</instance>
+		</model>
+	</xhtml:head>
+	<xhtml:body idprefix="common_">
+		<import id="common_import1" src="instance.xrw" style="left:40px; top:25px; width:60px; height:55px; border-color:#ff6600; border-style:solid; "/>
+		<import id="common_import2" src="function.xrw" style="left:130px; top:25px; width:60px; height:55px; border-color:#ff6600; border-style:solid; "/>
+		<import id="common_import3" src="init.xrw" style="left:220px; top:25px; width:60px; height:55px; border-color:#ff6600; border-style:solid; "/>
+		<import id="common_import4" src="event.xrw" style="left:305px; top:25px; width:60px; height:55px; border-color:#ff6600; border-style:solid; "/>
+	</xhtml:body>
+</xhtml:html>

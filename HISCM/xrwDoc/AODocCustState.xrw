@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.w3.org/2002/01/xforms" xmlns:ev="http://www.w3.org/2001/xml-events">
+	<xhtml:head>
+		<xhtml:title>::: 공문서 진행상태 :::</xhtml:title>
+		<model id="model1">
+			<instance id="instance1">
+				<root xmlns="">
+					<gridData>
+						<grid1>
+							<item>
+								<CUSTCD/>
+								<CUSTNM/>
+								<READYN/>
+								<CFMYN/>
+							</item>
+						</grid1>
+					</gridData>
+					<formData>
+						<send1>
+							<uid/>
+						</send1>
+					</formData>
+				</root>
+			</instance>
+		</model>
+		<script type="javascript">
+			<![CDATA[
+			function mateInit() { // 초기 로딩
+				var uid = model.getValue("/root/formData/send1/uid");
+
+				sendBuffInit();					
+				sendBuffAdd("uid", uid);
+				submit("sp_SCM_TrustAODoc", "CustState");
+				model.copyNode("/root/gridData/grid1", "/root/msgBuff/data");
+				datagrid1.refresh();
+			}
+			]]>
+		</script>
+	</xhtml:head>
+	<xhtml:body>
+		<group id="group1" style="left:0px; top:0px; width:295px; height:335px; ">
+			<import id="import1" src="../script/Common.xrw" style="left:0px; top:0px; width:0px; height:0px; "/>
+			<datagrid id="datagrid1" nodeset="/root/gridData/grid1/item" caption="거래처^거래처^읽음^접수" colsep="^" colwidth="67, 159, 40, 40" explorerbar="sortshowmove" mergecellsfixedrows="bycolrec" rowsep="|" selectionmode="byrow" style="left:10px; top:10px; width:275px; height:290px; ">
+				<col ref="CUSTCD" style="text-align:left; "/>
+				<col ref="CUSTNM" style="text-align:left; "/>
+				<col ref="READYN"/>
+				<col ref="CFMYN" visibility="hidden"/>
+			</datagrid>
+			<button id="button5" navindex="6" style="left:229px; top:305px; width:55px; height:20px; ">
+				<caption>확인</caption>
+				<script type="javascript" ev:event="onclick">
+					<![CDATA[
+						window.close();
+					]]>
+				</script>
+			</button>
+		</group>
+	</xhtml:body>
+</xhtml:html>
