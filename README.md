@@ -50,6 +50,29 @@ powershell -ExecutionPolicy Bypass -File .\scripts\agentic-update-step.ps1 -RunD
 powershell -ExecutionPolicy Bypass -File .\scripts\agentic-validate-run.ps1 -RunDir .\agentic\runs\<run_id>
 ```
 
+## GitHub 운영 표준 (설계서 5장 반영)
+- 브랜치 규칙: `feature/*`, `fix/*`, `chore/*`
+- PR 필수 섹션: `변경 범위`, `리스크`, `테스트 결과`, `롤백 영향`
+- CI 필수 게이트:
+  - build
+  - unit/integration test
+  - contract test
+  - lint/static analysis
+  - SAST + secret + dependency scan
+  - migration dry-run
+  - smoke test
+
+로컬에서 CI 게이트를 사전 실행하려면:
+```powershell
+make ci-build
+make ci-test
+make ci-contract
+make ci-lint
+make ci-security
+make ci-migration
+make ci-smoke
+```
+
 ## 기본 접속 정보
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`

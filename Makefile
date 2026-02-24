@@ -1,4 +1,4 @@
-.PHONY: dev-up dev-down dev-down-v check-prereqs agentic-new-run agentic-validate-run
+.PHONY: dev-up dev-down dev-down-v check-prereqs agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
@@ -17,3 +17,24 @@ agentic-new-run:
 
 agentic-validate-run:
 	powershell -ExecutionPolicy Bypass -File .\scripts\agentic-validate-run.ps1 -RunDir $(RUN_DIR)
+
+ci-build:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate build
+
+ci-test:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate unit-integration-test
+
+ci-contract:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate contract-test
+
+ci-lint:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate lint-static-analysis
+
+ci-security:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate security-scan
+
+ci-migration:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate migration-dry-run
+
+ci-smoke:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate smoke-test

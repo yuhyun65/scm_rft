@@ -1,0 +1,46 @@
+name: pr-policy
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  branch_and_template_policy:
+    name: branch/template policy
+    runs-on: windows-latest
+    steps:
+      - name: Validate branch naming
+        shell: pwsh
+        run: |
+          $branch = "${{ github.head_ref }}"
+          if ($branch -notmatch '^(feature|fix|chore)\/[a-zA-Z0-9._\/-]+$') {
+            throw "Branch name policy violation: $branch"
+          }
+          Write-Host "[OK] branch naming policy passed: $branch"
+
+      - name: Validate PR required sections
+        shell: pwsh
+        run: |
+          $body = @"
+          ${{ github.event.pull_request.body }}
+          "@
+
+          $required = @(
+            "## 변경 범위",
+            "## 리스크",
+            "## 테스트 결과",
+            "## 롤백 영향"
+          )
+
+          foreach ($section in $required) {
+            if ($body -notmatch [regex]::Escape($section)) {
+              throw "PR body missing required section: $section"
+            }
+          }
+
+          Write-Host "[OK] PR template required sections found."

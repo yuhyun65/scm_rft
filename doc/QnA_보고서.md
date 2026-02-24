@@ -238,5 +238,36 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - Agentic AI 적용환경 관련 변경사항을 브랜치에 커밋 후 원격으로 푸시.
   - 기존 PR(`#1`)에 최신 커밋 반영.
 
+### Q25. 설계서 5장 기준 GitHub 운영 표준 반영 요청
+- 사용자 프롬프트:
+  - "다음은 scm_rft_design.md의 5. GitHub 운영 표준을 반영해줘"
+- Codex 답변(결과):
+  - GitHub 운영 표준을 저장소에 반영:
+    - PR 템플릿 강화: `변경 범위`, `리스크`, `테스트 결과`, `롤백 영향` 섹션 추가
+    - PR 정책 워크플로 추가: `.github/workflows/pr-policy.yml`
+      - 브랜치 네이밍(`feature/*`, `fix/*`, `chore/*`) 검사
+      - PR 본문 필수 섹션 검사
+    - CI 게이트 워크플로 추가: `.github/workflows/ci-gates.yml`
+      - build
+      - unit/integration test
+      - contract test
+      - lint/static analysis
+      - SAST + secret + dependency scan
+      - migration dry-run
+      - smoke test
+    - 로컬/CI 공통 게이트 스크립트 추가: `scripts/ci-run-gate.ps1`
+    - migration dry-run 기본 스크립트 추가: `migration/scripts/dry-run.ps1`
+    - Makefile/README에 게이트 실행 명령 반영
+  - 로컬 검증:
+    - `ci-run-gate` 주요 게이트 실행 성공(build/test/lint는 현재 Gradle 프로젝트 미구성으로 skip 처리)
+    - `smoke-test`에서 `docker compose config`와 Agentic run 검증 성공
+
+### Q26. GitHub 운영 표준 반영 변경사항 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - GitHub 운영 표준 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
+  - 기존 PR(`#1`)에 최신 커밋 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

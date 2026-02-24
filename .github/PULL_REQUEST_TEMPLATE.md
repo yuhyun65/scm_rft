@@ -1,6 +1,18 @@
 ## Summary
 - 
 
+## 변경 범위
+- 
+
+## 리스크
+- 
+
+## 테스트 결과
+- 
+
+## 롤백 영향
+- 
+
 ## Agentic AI Loop
 - [ ] Architect 완료 (ADR + OpenAPI 초안)
 - [ ] Build 완료 (구현 + 마이그레이션 코드)
@@ -19,3 +31,5 @@
 ## Validation
 - [ ] `powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1`
 - [ ] `powershell -ExecutionPolicy Bypass -File .\scripts\agentic-validate-run.ps1 -RunDir <run_dir>`
+- [ ] `powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate build`
+- [ ] `powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate unit-integration-test`

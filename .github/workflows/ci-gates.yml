@@ -1,0 +1,132 @@
+name: ci-gates
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: write
+
+jobs:
+  build:
+    name: build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Run build gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate build
+
+  unit_integration_test:
+    name: unit/integration test
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Run unit/integration gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate unit-integration-test
+
+  contract_test:
+    name: contract test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run contract gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate contract-test
+
+  lint_static_analysis:
+    name: lint/static analysis
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Run lint/static gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate lint-static-analysis
+
+  sast_secret_dependency_scan:
+    name: SAST + secret + dependency scan
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dependency review
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/dependency-review-action@v4
+
+      - name: Initialize CodeQL
+        if: ${{ hashFiles('services/**/*.java', 'services/**/*.js', 'services/**/*.ts') != '' }}
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java,javascript
+
+      - name: Autobuild
+        if: ${{ hashFiles('services/**/*.java', 'services/**/*.js', 'services/**/*.ts') != '' }}
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        if: ${{ hashFiles('services/**/*.java', 'services/**/*.js', 'services/**/*.ts') != '' }}
+        uses: github/codeql-action/analyze@v3
+
+      - name: Run secret scan gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate security-scan
+
+  migration_dry_run:
+    name: migration dry-run
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run migration dry-run gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate migration-dry-run
+
+  smoke_test:
+    name: smoke test
+    runs-on: windows-latest
+    needs:
+      - build
+      - unit_integration_test
+      - contract_test
+      - lint_static_analysis
+      - sast_secret_dependency_scan
+      - migration_dry_run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run smoke gate
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate smoke-test
