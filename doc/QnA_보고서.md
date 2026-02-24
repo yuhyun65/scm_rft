@@ -199,5 +199,12 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `scripts/check-prereqs.ps1` 개선(잠금 버전 대비 검증)
     - 검증 결과: Java/Node/Gradle/Docker Compose 모두 잠금 버전과 일치.
 
+### Q22. PR 생성 진행 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 브랜치 `feature/to-be-dev-env-bootstrap`에서 `main` 대상으로 PR 생성 완료.
+  - PR URL: `https://github.com/yuhyun65/scm_rft/pull/1`
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
