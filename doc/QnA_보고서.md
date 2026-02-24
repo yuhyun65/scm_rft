@@ -153,5 +153,51 @@
   - `doc/scm_rft_design.md`와 `doc/QnA_보고서.md` 변경사항을 커밋.
   - 원격 저장소 `origin(main)`으로 푸시 완료.
 
+### Q19. TO-BE 개발환경 제안 기준으로 개발환경 재구축 요청
+- 사용자 프롬프트:
+  - "scm_rft_design.md 파일의 내용중 3. 신규 시스템 최적 개발환경(TO-BE) 제안에 따라 개발환경을 다시 구축해줘"
+- Codex 답변(결과):
+  - TO-BE 기준의 로컬 개발환경 골격을 신규 구축:
+    - 저장소 구조 추가: `services/`, `shared/`, `infra/`, `migration/`, `runbooks/`, `scripts/`
+    - 로컬 인프라 추가: `docker-compose.yml`(SQL Server, Redis, RabbitMQ, Loki, Prometheus, Grafana, Tempo)
+    - 관측 설정 추가: `infra/observability/*`
+    - 실행 스크립트 추가: `scripts/check-prereqs.ps1`, `scripts/dev-up.ps1`, `scripts/dev-down.ps1`
+    - 문서/가이드 갱신: `README.md`, `runbooks/local-dev-runbook.md`
+  - 구성 검증:
+    - `docker compose config` 정상 통과
+    - 사전점검 결과: Docker/Compose/Node/Gradle 감지, Java는 17로 확인(목표는 21)
+    - `scripts/dev-up.ps1` 실행 시 Docker Desktop daemon 미기동으로 중단됨(스크립트에 명확한 에러 안내 반영)
+
+### Q20. 브랜치 기반 개발 요청
+- 사용자 프롬프트:
+  - "브랜치 레포를 만들어서 개발을 진행하고 싶어"
+- Codex 답변(결과):
+  - 전용 개발 브랜치 생성 완료: `feature/to-be-dev-env-bootstrap`
+  - 이후 개발환경 재구축 작업을 해당 브랜치에서 진행하도록 전환.
+
+### Q21. Docker 재실행/`dev-up`/Java21 업그레이드/버전 고정/커밋푸시 요청
+- 사용자 프롬프트:
+  - "다음 진행해줘
+
+Docker Desktop 실행 후 dev-up.ps1 재실행
+Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
+이 변경사항을 브랜치에 커밋/푸"
+- Codex 답변(결과):
+  - Docker Desktop 실행 후 `scripts/dev-up.ps1` 재실행 완료.
+  - 로컬 인프라 기동 확인:
+    - `sqlserver`, `redis`, `rabbitmq`, `loki`, `prometheus`, `grafana`, `tempo` 모두 `Up` 상태.
+  - `tempo` 권한 오류 보정:
+    - `docker-compose.yml`에서 `tempo`에 `user: "0:0"` 적용 및 볼륨 경로를 `/var/tempo`로 변경.
+    - `infra/observability/tempo/tempo.yaml`의 storage 경로를 `/var/tempo/*`로 정정.
+  - Java 21 업그레이드 완료:
+    - Temurin JDK 21 설치(`C:\\Users\\CMN-091\\.jdks\\jdk-21.0.10+7`)
+    - 사용자 환경변수 `JAVA_HOME`를 JDK 21로 설정.
+  - 버전 고정 정책 적용:
+    - `toolchain.lock.json` 추가(Java/Node/Gradle/Docker Compose 고정 버전 정의)
+    - `.java-version`, `.nvmrc`, `.node-version` 추가
+    - `scripts/use-toolchain.ps1` 추가(잠금 버전 세션 적용/영구 반영)
+    - `scripts/check-prereqs.ps1` 개선(잠금 버전 대비 검증)
+    - 검증 결과: Java/Node/Gradle/Docker Compose 모두 잠금 버전과 일치.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
