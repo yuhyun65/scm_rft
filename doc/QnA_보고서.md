@@ -334,5 +334,46 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 7장 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
   - 기존 PR(`#1`)에 최신 커밋 반영.
 
+### Q31. 설계서 8장(즉시 실행 체크리스트) 반영 요청
+- 사용자 프롬프트:
+  - "scm_rft_design.md의 8. 즉시 실행 체크리스트 반영해줘"
+- Codex 답변(결과):
+  - 문서와 자산 상태를 점검한 뒤 8장 반영 작업에 착수.
+  - 확인 결과:
+    - 체크리스트 1/2/4 관련 자산은 이미 저장소에 존재
+    - 체크리스트 3(OpenAPI/Flyway)과 5(리허설 일정 명시)는 보강 필요 상태
+
+### Q32. 현재 작업폴더 확인 요청
+- 사용자 프롬프트:
+  - "현재 작업폴더가 c:\\Users\\CMN-091\\projects\\scm_rft로 알고 있는데 확인해줘"
+- Codex 답변(결과):
+  - 터미널에서 `Get-Location`으로 확인.
+  - 실제 작업 경로는 `C:\\Users\\CMN-091\\projects\\SCM_RFT`로 확인(인식과 동일).
+
+### Q33. 8장 반영 작업 계속 진행 요청
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - `doc/scm_rft_design.md`를 v1.3으로 갱신하고 `8.1 구현 반영 자산` 섹션 추가.
+  - 체크리스트 3번 반영:
+    - OpenAPI 계약 초안 추가:
+      - `shared/contracts/auth.openapi.yaml`
+      - `shared/contracts/member.openapi.yaml`
+      - `shared/contracts/order-lot.openapi.yaml`
+    - Flyway baseline 추가:
+      - `migration/flyway/README.md`
+      - `migration/flyway/V1__baseline.sql`
+  - 체크리스트 5번 반영:
+    - 리허설 일정/Go-NoGo 기준 문서 추가:
+      - `runbooks/cutover-rehearsal-schedule.md`
+  - Q&A 누적 정책에 따라 본 이력(Q31~Q33)을 `QnA_보고서.md`에 이어서 반영.
+
+### Q34. 8장 반영 결과 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 체크리스트 8 반영 변경사항과 Q&A 갱신분을 브랜치에 커밋.
+  - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

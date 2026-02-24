@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: SCM Order-Lot Service API
+  version: 0.1.0
+  description: Order and lot query contract for cutover baseline.
+servers:
+  - url: /api/order-lot
+paths:
+  /v1/orders/{orderNo}/lots:
+    get:
+      summary: List lots by order number
+      operationId: listLotsByOrder
+      parameters:
+        - in: path
+          name: orderNo
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lots listed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Lot"
+  /v1/lots/{lotNo}:
+    get:
+      summary: Get lot detail
+      operationId: getLot
+      parameters:
+        - in: path
+          name: lotNo
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lot detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lot"
+        "404":
+          description: Lot not found
+components:
+  schemas:
+    Lot:
+      type: object
+      required: [lotNo, orderNo, quantity, status]
+      properties:
+        lotNo:
+          type: string
+        orderNo:
+          type: string
+        quantity:
+          type: number
+          format: double
+        status:
+          type: string

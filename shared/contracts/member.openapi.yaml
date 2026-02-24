@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: SCM Member Service API
+  version: 0.1.0
+  description: Supplier/member lookup and profile management contract.
+servers:
+  - url: /api/member
+paths:
+  /v1/members/{memberId}:
+    get:
+      summary: Get member by id
+      operationId: getMember
+      parameters:
+        - in: path
+          name: memberId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Member found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "404":
+          description: Member not found
+  /v1/members:
+    get:
+      summary: Search members
+      operationId: searchMembers
+      parameters:
+        - in: query
+          name: keyword
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Member"
+components:
+  schemas:
+    Member:
+      type: object
+      required: [memberId, memberName, status]
+      properties:
+        memberId:
+          type: string
+        memberName:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]

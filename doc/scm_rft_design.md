@@ -1,7 +1,7 @@
 # SCM_RFT Big-Bang 리팩토링 설계서
 
 - 문서명: `scm_rft_design`
-- 버전: v1.2
+- 버전: v1.3
 - 작성일: 2026-02-24
 - 기준: AS-IS 시스템 분석 보고서 + 개발환경 분석/개선안
 
@@ -177,3 +177,26 @@ SCM_RFT/
 3. OpenAPI 계약서와 Flyway baseline 작성
 4. CI 파이프라인(빌드/테스트/보안/이관 dry-run) 활성화
 5. 컷오버 리허설 일정과 Go/No-Go 기준 확정
+
+### 8.1 구현 반영 자산
+- 체크리스트 1(버전 고정):
+  - `toolchain.lock.json`
+  - `.java-version`, `.nvmrc`, `.node-version`
+  - `scripts/use-toolchain.ps1`, `scripts/check-prereqs.ps1`
+- 체크리스트 2(로컬 실행):
+  - `docker-compose.yml`
+  - `scripts/dev-up.ps1`, `scripts/dev-down.ps1`
+- 체크리스트 3(OpenAPI/Flyway):
+  - `shared/contracts/auth.openapi.yaml`
+  - `shared/contracts/member.openapi.yaml`
+  - `shared/contracts/order-lot.openapi.yaml`
+  - `migration/flyway/README.md`
+  - `migration/flyway/V1__baseline.sql`
+- 체크리스트 4(CI 활성화):
+  - `.github/workflows/ci-gates.yml`
+  - `scripts/ci-run-gate.ps1`
+  - `migration/scripts/dry-run.ps1`
+- 체크리스트 5(리허설/Go-NoGo):
+  - `runbooks/bigbang-rehearsal-runbook.md`
+  - `runbooks/cutover-checklist.md`
+  - `runbooks/cutover-rehearsal-schedule.md`

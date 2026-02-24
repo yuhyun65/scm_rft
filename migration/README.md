@@ -10,7 +10,7 @@
 ## 권장 구조
 ```text
 migration/
-  baseline/
+  flyway/
   scripts/
   verify/
   reports/
@@ -24,3 +24,7 @@ migration/
   - `powershell -ExecutionPolicy Bypass -File .\migration\verify\validate-migration.ps1`
 - Sample config:
   - `migration/verify/config.sample.json`
+
+## Baseline
+- Flyway baseline:
+  - `migration/flyway/V1__baseline.sql`

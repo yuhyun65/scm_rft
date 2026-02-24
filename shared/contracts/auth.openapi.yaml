@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: SCM Auth Service API
+  version: 0.1.0
+  description: Authentication and session management contract.
+servers:
+  - url: /api/auth
+paths:
+  /v1/sessions:
+    post:
+      summary: Create authenticated session
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required: [loginId, password]
+      properties:
+        loginId:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+    LoginResponse:
+      type: object
+      required: [accessToken, expiresAt]
+      properties:
+        accessToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
