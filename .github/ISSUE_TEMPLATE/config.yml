@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Roadmap Guide
+    url: https://github.com/yuhyun65/scm_rft/blob/main/doc/roadmap/README.md
+    about: Follow section 7 roadmap sequence before creating issues.

@@ -100,6 +100,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\restore-db.ps1 -Database MES_
 - gateway 격리 정책 템플릿:
   - `infra/gateway/policies/cutover-isolation.yaml`
 
+## 권장 추진 순서 운영 (설계서 7장 반영)
+- 단계 문서:
+  - `doc/roadmap/phase-1-foundation.md`
+  - `doc/roadmap/phase-2-auth-member-gateway.md`
+  - `doc/roadmap/phase-3-orderlot-file.md`
+  - `doc/roadmap/phase-4-remaining-domains.md`
+  - `doc/roadmap/phase-5-rehearsal-cutover.md`
+- 진행 보드:
+  - `doc/roadmap/progress.json`
+- 진행 리포트:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\roadmap-report.ps1
+```
+
 ## 기본 접속 정보
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`

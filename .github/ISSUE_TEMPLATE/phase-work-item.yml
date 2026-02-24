@@ -1,0 +1,53 @@
+name: phase-work-item
+description: work item aligned to roadmap phase sequence
+title: "[phase] "
+labels:
+  - phase
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - phase-1-foundation
+        - phase-2-auth-member-gateway
+        - phase-3-orderlot-file
+        - phase-4-remaining-domains
+        - phase-5-rehearsal-cutover
+    validations:
+      required: true
+
+  - type: input
+    id: service
+    attributes:
+      label: Service/Area
+      placeholder: auth/member/gateway/order-lot/file/board...
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: clearly define what this item changes
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      value: |
+        - [ ] contract or ADR updated
+        - [ ] tests/verification executed
+        - [ ] runbook or report updated
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and Rollback Impact
+      description: include rollback considerations
+    validations:
+      required: true

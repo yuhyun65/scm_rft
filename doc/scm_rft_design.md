@@ -157,6 +157,20 @@ SCM_RFT/
 4. Board/QualityDoc/Inventory/Report 구현 및 통합
 5. 이관 리허설 3회 이상 후 Big-Bang 컷오버
 
+### 7.1 구현 반영 자산
+- 단계별 실행 문서:
+  - `doc/roadmap/phase-1-foundation.md`
+  - `doc/roadmap/phase-2-auth-member-gateway.md`
+  - `doc/roadmap/phase-3-orderlot-file.md`
+  - `doc/roadmap/phase-4-remaining-domains.md`
+  - `doc/roadmap/phase-5-rehearsal-cutover.md`
+- 진행 현황 소스:
+  - `doc/roadmap/progress.json`
+- 진행 점검 스크립트:
+  - `scripts/roadmap-report.ps1`
+- GitHub 이슈 템플릿:
+  - `.github/ISSUE_TEMPLATE/phase-work-item.yml`
+
 ## 8. 즉시 실행 체크리스트
 1. 개발 표준 버전 고정(Java/Node/Gradle/Docker)
 2. 로컬 Compose + dev bootstrap 스크립트 완성

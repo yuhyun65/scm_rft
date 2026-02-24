@@ -305,5 +305,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 6장 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
   - 기존 PR(`#1`)에 최신 커밋 반영.
 
+### Q29. 설계서 7장(권장 추진 순서) 반영 요청
+- 사용자 프롬프트:
+  - "scm_rft_design.md의 7. 권장 추진 순서 반영해줘"
+- Codex 답변(결과):
+  - 7장을 실행 가능한 운영체계로 반영:
+    - 단계 문서 추가:
+      - `doc/roadmap/phase-1-foundation.md`
+      - `doc/roadmap/phase-2-auth-member-gateway.md`
+      - `doc/roadmap/phase-3-orderlot-file.md`
+      - `doc/roadmap/phase-4-remaining-domains.md`
+      - `doc/roadmap/phase-5-rehearsal-cutover.md`
+      - `doc/roadmap/README.md`
+    - 진행 보드/리포트 추가:
+      - `doc/roadmap/progress.json`
+      - `scripts/roadmap-report.ps1`
+    - GitHub 이슈 템플릿 추가:
+      - `.github/ISSUE_TEMPLATE/phase-work-item.yml`
+      - `.github/ISSUE_TEMPLATE/config.yml`
+    - README/Makefile/설계서에 7장 운영 명령/연결 반영
+  - 검증:
+    - `scripts/roadmap-report.ps1` 실행 성공(phase별 진행률 출력 확인)
+
+### Q30. 7장 반영 변경사항 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 7장 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
+  - 기존 PR(`#1`)에 최신 커밋 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

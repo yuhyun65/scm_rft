@@ -1,7 +1,10 @@
-.PHONY: dev-up dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore
+.PHONY: dev-up dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
+
+roadmap-report:
+	powershell -ExecutionPolicy Bypass -File .\scripts\roadmap-report.ps1
 
 dev-up:
 	powershell -ExecutionPolicy Bypass -File .\scripts\dev-up.ps1
