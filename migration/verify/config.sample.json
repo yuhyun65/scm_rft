@@ -1,0 +1,33 @@
+{
+  "countChecks": [
+    {
+      "name": "sample_order_count",
+      "source": 1000,
+      "target": 1000
+    }
+  ],
+  "sumChecks": [
+    {
+      "name": "sample_order_amount",
+      "source": 123456.78,
+      "target": 123456.78,
+      "tolerance": 0.01
+    }
+  ],
+  "sampleChecks": [
+    {
+      "name": "sample_record_hash",
+      "sourceValue": "ABC123",
+      "targetValue": "ABC123"
+    }
+  ],
+  "fileExistenceChecks": [
+    {
+      "name": "sample_upload_files",
+      "rootPath": ".",
+      "files": [
+        "README.md"
+      ]
+    }
+  ]
+}

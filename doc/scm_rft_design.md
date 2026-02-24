@@ -131,6 +131,25 @@ SCM_RFT/
 - API Gateway 수준의 트래픽/장애 격리 정책
 - 즉시 롤백 가능한 DB 스냅샷/백업 체계
 
+### 6.3 구현 반영 자산
+- staging 리허설 환경:
+  - `docker-compose.staging.yml`
+  - `scripts/staging-up.ps1`, `scripts/staging-down.ps1`
+- 이관 재실행/검증:
+  - `migration/scripts/dry-run.ps1` (state 기반 resume 지원)
+  - `migration/verify/validate-migration.ps1`
+  - `migration/verify/config.sample.json`
+- 컷오버 운영 통제:
+  - `infra/observability/grafana/provisioning/*`
+  - `infra/observability/grafana/dashboards/bigbang-cutover-overview.json`
+  - `infra/gateway/policies/cutover-isolation.yaml`
+- 백업/복구:
+  - `scripts/backup-db.ps1`, `scripts/restore-db.ps1`
+  - `migration/backups/`
+- 런북:
+  - `runbooks/bigbang-rehearsal-runbook.md`
+  - `runbooks/cutover-operations-runbook.md`
+
 ## 7. 권장 추진 순서
 1. 저장소 골격/템플릿/CI 게이트 구축
 2. Auth/Member + Gateway 우선 구현

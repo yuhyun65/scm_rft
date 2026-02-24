@@ -1,117 +1,122 @@
-name: scm-rft-dev
+name: scm-rft-staging
 
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: scm-sqlserver
+    container_name: scm-stg-sqlserver
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}
       TZ: ${TZ:-Asia/Seoul}
     ports:
-      - "1433:1433"
+      - "11433:1433"
     volumes:
-      - sqlserver-data:/var/opt/mssql
-      - ./migration/backups:/var/opt/mssql/backup
+      - sqlserver-staging-data:/var/opt/mssql
+      - ./migration/backups/staging:/var/opt/mssql/backup
     networks:
-      - scm-net
+      - scm-staging-net
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4g
 
   redis:
     image: redis:7.2-alpine
-    container_name: scm-redis
+    container_name: scm-stg-redis
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
-      - redis-data:/data
+      - redis-staging-data:/data
     networks:
-      - scm-net
+      - scm-staging-net
 
   rabbitmq:
     image: rabbitmq:3.13-management
-    container_name: scm-rabbitmq
+    container_name: scm-stg-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-scm}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-scm1234}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-scm_stage}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-scm_stage_1234}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "25673:5672"
+      - "35672:15672"
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-staging-data:/var/lib/rabbitmq
     networks:
-      - scm-net
+      - scm-staging-net
 
   loki:
     image: grafana/loki:2.9.8
-    container_name: scm-loki
+    container_name: scm-stg-loki
     command: ["-config.file=/etc/loki/loki-config.yaml"]
     ports:
-      - "3100:3100"
+      - "13100:3100"
     volumes:
       - ./infra/observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
-      - loki-data:/loki
+      - loki-staging-data:/loki
     networks:
-      - scm-net
+      - scm-staging-net
 
   prometheus:
     image: prom/prometheus:v2.51.2
-    container_name: scm-prometheus
+    container_name: scm-stg-prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
     ports:
-      - "9090:9090"
+      - "19090:9090"
     volumes:
       - ./infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
+      - prometheus-staging-data:/prometheus
     networks:
-      - scm-net
+      - scm-staging-net
 
   tempo:
     image: grafana/tempo:2.6.1
-    container_name: scm-tempo
+    container_name: scm-stg-tempo
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     user: "0:0"
     ports:
-      - "3200:3200"
-      - "4317:4317"
-      - "4318:4318"
+      - "13200:3200"
+      - "14317:4317"
+      - "14318:4318"
     volumes:
       - ./infra/observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
-      - tempo-data:/var/tempo
+      - tempo-staging-data:/var/tempo
     networks:
-      - scm-net
+      - scm-staging-net
 
   grafana:
     image: grafana/grafana:latest
-    container_name: scm-grafana
+    container_name: scm-stg-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       TZ: ${TZ:-Asia/Seoul}
     ports:
-      - "3000:3000"
+      - "13000:3000"
     depends_on:
       - loki
       - prometheus
       - tempo
     volumes:
-      - grafana-data:/var/lib/grafana
+      - grafana-staging-data:/var/lib/grafana
       - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
-      - scm-net
+      - scm-staging-net
 
 networks:
-  scm-net:
+  scm-staging-net:
     driver: bridge
 
 volumes:
-  sqlserver-data:
-  redis-data:
-  rabbitmq-data:
-  loki-data:
-  prometheus-data:
-  tempo-data:
-  grafana-data:
+  sqlserver-staging-data:
+  redis-staging-data:
+  rabbitmq-staging-data:
+  loki-staging-data:
+  prometheus-staging-data:
+  tempo-staging-data:
+  grafana-staging-data:

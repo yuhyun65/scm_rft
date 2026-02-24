@@ -14,4 +14,13 @@ migration/
   scripts/
   verify/
   reports/
+  backups/
 ```
+
+## Dry-Run and Validation
+- Dry-run:
+  - `powershell -ExecutionPolicy Bypass -File .\migration\scripts\dry-run.ps1`
+- Validation:
+  - `powershell -ExecutionPolicy Bypass -File .\migration\verify\validate-migration.ps1`
+- Sample config:
+  - `migration/verify/config.sample.json`

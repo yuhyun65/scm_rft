@@ -1,4 +1,4 @@
-.PHONY: dev-up dev-down dev-down-v check-prereqs agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke
+.PHONY: dev-up dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
@@ -11,6 +11,15 @@ dev-down:
 
 dev-down-v:
 	powershell -ExecutionPolicy Bypass -File .\scripts\dev-down.ps1 -RemoveVolumes
+
+staging-up:
+	powershell -ExecutionPolicy Bypass -File .\scripts\staging-up.ps1
+
+staging-down:
+	powershell -ExecutionPolicy Bypass -File .\scripts\staging-down.ps1
+
+staging-down-v:
+	powershell -ExecutionPolicy Bypass -File .\scripts\staging-down.ps1 -RemoveVolumes
 
 agentic-new-run:
 	powershell -ExecutionPolicy Bypass -File .\scripts\agentic-new-run.ps1 -IssueId $(ISSUE_ID) -Service $(SERVICE)
@@ -38,3 +47,18 @@ ci-migration:
 
 ci-smoke:
 	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate smoke-test
+
+migrate-dry-run:
+	powershell -ExecutionPolicy Bypass -File .\migration\scripts\dry-run.ps1
+
+migrate-validate:
+	powershell -ExecutionPolicy Bypass -File .\migration\verify\validate-migration.ps1
+
+rehearsal-run:
+	powershell -ExecutionPolicy Bypass -File .\scripts\rehearsal-run.ps1
+
+db-backup:
+	powershell -ExecutionPolicy Bypass -File .\scripts\backup-db.ps1 -Database $(DB)
+
+db-restore:
+	powershell -ExecutionPolicy Bypass -File .\scripts\restore-db.ps1 -Database $(DB) -BackupFile $(BACKUP_FILE)

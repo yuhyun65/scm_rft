@@ -73,6 +73,33 @@ make ci-migration
 make ci-smoke
 ```
 
+## Big-Bang 전환 대응 환경 (설계서 6장 반영)
+- staging 리허설 환경 실행:
+```powershell
+Copy-Item .env.staging.example .env.staging
+powershell -ExecutionPolicy Bypass -File .\scripts\staging-up.ps1
+```
+
+- 리허설 자동 시퀀스(스테이징 기동 + 백업 + dry-run + 검증):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\rehearsal-run.ps1
+```
+
+- migration dry-run + 정합성 검증:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\migration\scripts\dry-run.ps1
+powershell -ExecutionPolicy Bypass -File .\migration\verify\validate-migration.ps1
+```
+
+- 백업/복구 스크립트:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\backup-db.ps1 -Database MES_HI
+powershell -ExecutionPolicy Bypass -File .\scripts\restore-db.ps1 -Database MES_HI -BackupFile <backup_file>
+```
+
+- gateway 격리 정책 템플릿:
+  - `infra/gateway/policies/cutover-isolation.yaml`
+
 ## 기본 접속 정보
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`

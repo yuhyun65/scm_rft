@@ -7,6 +7,7 @@ Thumbs.db
 # Env files
 .env
 .env.local
+.env.staging
 
 # Logs
 *.log
@@ -29,3 +30,12 @@ logs/
 # Docker volumes/cache
 .docker/
 tmp/
+
+# Backup artifacts
+migration/backups/*.bak
+migration/backups/staging/*.bak
+
+# Migration generated reports
+migration/reports/*.md
+migration/reports/*.state.json
+!migration/reports/README.md

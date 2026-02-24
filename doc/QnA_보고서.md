@@ -269,5 +269,41 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - GitHub 운영 표준 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
   - 기존 PR(`#1`)에 최신 커밋 반영.
 
+### Q27. 설계서 6장(Big-Bang 전환 대응 환경 요구사항) 반영 요청
+- 사용자 프롬프트:
+  - "다음은 scm_rft_design.md의 6. Big-Bang 전환 대응 환경 요구사항을 반영해줘"
+- Codex 답변(결과):
+  - 6장 요구사항을 실행 가능한 자산으로 반영:
+    - staging 리허설 환경:
+      - `docker-compose.staging.yml`
+      - `scripts/staging-up.ps1`, `scripts/staging-down.ps1`
+      - `.env.staging.example`
+    - 이관 재실행/검증:
+      - `migration/scripts/dry-run.ps1`(state 파일 기반 resume 지원)
+      - `migration/verify/validate-migration.ps1`
+      - `migration/verify/config.sample.json`
+      - `scripts/rehearsal-run.ps1`
+    - 관측/게이트웨이/백업:
+      - Grafana provisioning + cutover dashboard
+      - `infra/gateway/policies/cutover-isolation.yaml`
+      - `scripts/backup-db.ps1`, `scripts/restore-db.ps1`
+      - `migration/backups/` 구조 추가
+    - 운영 문서:
+      - `runbooks/bigbang-rehearsal-runbook.md`
+      - `runbooks/cutover-operations-runbook.md`
+      - README/Makefile/설계서(6.3 구현 자산) 갱신
+  - 검증:
+    - `docker compose -f docker-compose.yml config` 성공
+    - `docker compose -f docker-compose.staging.yml config` 성공
+    - migration dry-run / validation / rehearsal-run(옵션) 성공
+    - staging 환경 실제 기동(`staging-up`) 및 종료(`staging-down`) 성공
+
+### Q28. 6장 반영 변경사항 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 6장 반영 변경사항을 브랜치에 커밋 후 원격으로 푸시.
+  - 기존 PR(`#1`)에 최신 커밋 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

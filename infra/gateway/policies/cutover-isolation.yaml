@@ -1,0 +1,49 @@
+policyVersion: 1
+name: cutover-isolation
+
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 2
+    backoffMs: 200
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: true
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://auth:8081
+    rateLimitRps: 80
+  - id: member
+    path: /api/member/**
+    target: http://member:8082
+    rateLimitRps: 80
+  - id: order-lot
+    path: /api/order-lot/**
+    target: http://order-lot:8085
+    rateLimitRps: 60
+    writeProtection:
+      enabledDuringCutover: true
+      methods: [POST, PUT, DELETE, PATCH]
+  - id: file
+    path: /api/file/**
+    target: http://file:8087
+    rateLimitRps: 40
+
+cutoverSwitches:
+  blockLegacyWrites: true
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: true
+    httpStatus: 503

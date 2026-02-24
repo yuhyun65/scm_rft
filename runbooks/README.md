@@ -1,8 +1,11 @@
 # Runbooks
 
-운영 및 컷오버 절차 문서를 관리합니다.
+Operational procedures for cutover, rollback, rehearsal, and local/dev operations.
 
-## 포함 문서
-- 컷오버 체크리스트
-- 롤백 플레이북
-- 장애 대응 절차
+## Included
+- `bigbang-rehearsal-runbook.md`
+- `cutover-operations-runbook.md`
+- `cutover-checklist.md`
+- `rollback-playbook.md`
+- `security-checklist.md`
+- `test-report.md`
