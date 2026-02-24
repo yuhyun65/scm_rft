@@ -99,5 +99,59 @@
   - 백업 폴더 `C:\\Users\\CMN-091\\projects\\SCM_RFT\\legacy.git` 삭제 완료.
   - 삭제 후 저장소 정상 상태 유지 확인.
 
+### Q13. 이후 진행 건의 Q&A 누적 기록 요청
+- 사용자 프롬프트:
+  - "지금부터는 진행상황을 프롬프트와 답변(결과) 한쌍이 진행되면 QnA_보고서.md에 계속해서 내용을 추가해줘"
+- Codex 답변(결과):
+  - 본 요청/응답 쌍부터 `QnA_보고서.md`에 누적 기록을 계속 추가하기로 반영.
+
+### Q14. AS-IS 분석 기반 Big-Bang 리팩토링 설계서 작성 요청
+- 사용자 프롬프트:
+  - "이 내용을 기반으로 codex+agentic ai를 적용한 빅뱅방식의 scm 리팩토링 설계서(scm_rft_design)를 작성해줘"
+- Codex 답변(결과):
+  - `doc/scm_rft_design.md` 설계서 신규 작성 완료.
+  - 포함 내용: 목표/범위, TO-BE 서비스 아키텍처, 서비스-DB-SP 매핑, 보안 개선, Big-Bang 이관/컷오버/롤백, Agentic AI 운영모델, GitHub/CI 규칙, 리스크 대응, 실행 로드맵.
+
+### Q15. 기존 개발환경 분석 및 신규 최적 개발환경 제안 요청
+- 사용자 프롬프트:
+  - "기존 시스템의 개발환경을 분석하고 새로 개발하는 시스템의 최적 개발 환경을 제안해줘"
+- Codex 답변(결과):
+  - 기존 환경 분석 요약:
+    - JSP/Servlet + XRW/ActiveX + SQL Server SP 중심 구조, 단일 컨트롤러 패턴
+    - 빌드 도구 부재(`pom.xml`, `build.gradle` 없음), 수동 의존성(`WEB-INF/jar`) 관리
+    - 하드코딩 설정/구형 실행환경 의존(Windows/IE/로컬 MDB/ActiveX)
+  - 신규 최적 환경 제안 요약:
+    - `Java 21 + Spring Boot 3.x + Gradle` 표준화
+    - `React+TypeScript` 기반 웹 표준 UI로 ActiveX 제거
+    - Docker Compose 로컬 스택(SQL Server/Redis/메시지브로커/관측성) + GitHub Actions CI 게이트
+    - Codex+Agentic AI 역할 분리(Architect/Build/Test/Security/Release)로 1인 개발 생산성 극대화
+    - Big-Bang 컷오버 대비 이관 리허설/롤백 자동화 환경 선구축
+
+### Q16. 개발환경 분석/제안 내용을 `scm_rtf_design.md`에 반영 요청
+- 사용자 프롬프트:
+  - "이 내용을 scm_rtf_design.md에 반영해줘"
+- Codex 답변(결과):
+  - `doc/scm_rtf_design.md`를 v1.2로 갱신.
+  - 반영 항목:
+    - AS-IS 개발환경 분석 강화(기술구조, 개발/배포 방식, 보안/운영/생산성 리스크)
+    - TO-BE 최적 개발환경 구체화(표준 런타임, 로컬 Compose, 저장소 구조, 테스트/보안/이관 체계)
+    - Codex+Agentic AI 추진 체계 및 GitHub CI 게이트 명확화
+    - Big-Bang 리허설/컷오버 환경 요구사항 및 즉시 실행 체크리스트 추가
+
+### Q17. 파일명 정정(`scm_rft_design.md`) 및 오기 파일 삭제 요청
+- 사용자 프롬프트:
+  - " scm_rtf_design.md가 아니라  scm_rft_design.md가 맞는 파일입니다. scm_rft_design.md 내용을 반영하고 scm_rtf_design.md는 삭제해줘"
+- Codex 답변(결과):
+  - `doc/scm_rft_design.md`를 최신 설계 내용(v1.2)으로 갱신 반영.
+  - 문서명 표기를 `scm_rft_design`으로 정정.
+  - 오기 파일 `doc/scm_rtf_design.md` 삭제 완료.
+
+### Q18. 커밋/푸시 진행 확인
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `doc/scm_rft_design.md`와 `doc/QnA_보고서.md` 변경사항을 커밋.
+  - 원격 저장소 `origin(main)`으로 푸시 완료.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
