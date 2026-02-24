@@ -50,5 +50,54 @@
   - 리스크: 하드코딩된 DB 정보, 동적 쿼리 조립 경로, 구형 보안 방식(MD5 계열/평문 전달 흔적), 테스트/빌드 자동화 부재.
   - 결론: 도메인 분해 가능성은 있으나 보안·운영·호환성 리스크가 높아 전환 전 표준화(계약/API/테스트/컷오버 준비)가 선행되어야 함.
 
+### Q7. QnA_보고서.md 저장 요청 및 저장 경로 변경
+- 사용자 프롬프트:
+  - "QnA_보고서.md를 저장해줘"
+  - "저장경로를 알려줘"
+  - "C:\\Users\\CMN-091\\projects\\SCM_RFT\\doc에 저장"
+- Codex 답변(결과):
+  - Q&A 보고서를 지정 경로에 저장 완료.
+  - 최종 저장 파일: `C:\\Users\\CMN-091\\projects\\SCM_RFT\\doc\\QnA_보고서.md`
+
+### Q8. 원격 저장소 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "원격저장소에 커밋/푸시해줘"
+  - "예"
+- Codex 답변(결과):
+  - 별도 worktree를 사용해 안전하게 커밋/푸시 수행.
+  - 커밋: `c398873` (`docs: add QnA report markdown`)
+  - 푸시 대상: GitLab `origin/main`
+
+### Q9. GitLab 저장소를 GitHub로 복사하고 연결 해제
+- 사용자 프롬프트:
+  - "https://gitlab.computermate.co.kr/mate/legacy.git를 https://github.com/yuhyun65/scm_rft로 복사해주고 연결를 끊어줘"
+- Codex 답변(결과):
+  - GitLab 기준 이력을 GitHub로 강제 동기화(`main` forced update).
+  - `origin`(GitLab) 원격 제거 완료.
+  - 원격 검증 결과 `github`만 남음.
+
+### Q10. 임시 worktree 정리
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 임시 worktree `C:\\Users\\CMN-091\\projects\\SCM_RFT\\legacy-wt` 제거 완료.
+  - worktree 목록에 bare 저장소만 남도록 정리.
+
+### Q11. SCM_RFT를 기본 개발 저장소로 동기화 설정
+- 사용자 프롬프트:
+  - "이제 모든 개발은 c:\\Users\\CMN-091\\projects\\SCM_RFT와 로컬 C:\\Users\\CMN-091\\projects\\SCM_RFT 저장소를 도아기화해서 진행할 수 있도록 해줘"
+- Codex 답변(결과):
+  - `SCM_RFT` 폴더를 일반 Git 저장소로 초기화.
+  - `origin`을 GitHub(`https://github.com/yuhyun65/scm_rft.git`)로 연결.
+  - `main` 브랜치를 `origin/main`과 동기화/추적 상태로 설정.
+  - 상태 확인: `## main...origin/main` (clean)
+
+### Q12. 백업 저장소 폴더 삭제
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 백업 폴더 `C:\\Users\\CMN-091\\projects\\SCM_RFT\\legacy.git` 삭제 완료.
+  - 삭제 후 저장소 정상 상태 유지 확인.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
