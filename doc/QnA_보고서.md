@@ -206,5 +206,37 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 브랜치 `feature/to-be-dev-env-bootstrap`에서 `main` 대상으로 PR 생성 완료.
   - PR URL: `https://github.com/yuhyun65/scm_rft/pull/1`
 
+### Q23. 설계서 4장 기준 Agentic AI 적용환경 구축 요청
+- 사용자 프롬프트:
+  - "다음은 scm_rft_design.md의 4. Codex + Agentic AI 적용 추진 체계에 따라 Agentic AI 적용환경을 만들어줘"
+- Codex 답변(결과):
+  - Agentic AI 운영 환경을 저장소에 신규 구축:
+    - `agentic/` 디렉터리 신설 (`agents.yaml`, `prompts/*`, `templates/*`, `runs/.gitkeep`)
+    - 에이전트 루프(Architect/Build/Test/Security/Migration/Release) 정의 및 산출물 계약 반영
+    - 실행 스크립트 추가:
+      - `scripts/agentic-new-run.ps1`
+      - `scripts/agentic-update-step.ps1`
+      - `scripts/agentic-validate-run.ps1`
+    - PR 템플릿/CI 스모크 워크플로 추가:
+      - `.github/PULL_REQUEST_TEMPLATE.md`
+      - `.github/workflows/agentic-run-smoke.yml`
+    - 산출물 기본 저장소 추가:
+      - `doc/adr/README.md`
+      - `shared/contracts/README.md`
+      - `migration/reports/README.md`
+      - `runbooks/cutover-checklist.md`, `runbooks/rollback-playbook.md`, `runbooks/release-note.md`, `runbooks/security-checklist.md`, `runbooks/test-report.md`
+    - README/Makefile에 Agentic 명령 반영
+  - 검증:
+    - `agentic-new-run.ps1` 실행 성공
+    - `agentic-update-step.ps1` 실행 성공
+    - `agentic-validate-run.ps1` 실행 성공
+
+### Q24. Agentic AI 적용환경 변경사항 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - Agentic AI 적용환경 관련 변경사항을 브랜치에 커밋 후 원격으로 푸시.
+  - 기존 PR(`#1`)에 최신 커밋 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

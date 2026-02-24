@@ -34,6 +34,22 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev-up.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\dev-down.ps1
 ```
 
+## Agentic AI 실행
+1. run 생성
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\agentic-new-run.ps1 -IssueId SCM-001 -Service auth
+```
+
+2. 단계 상태 업데이트
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\agentic-update-step.ps1 -RunDir .\agentic\runs\<run_id> -Agent architect -Status done -Notes "ADR/OpenAPI 초안 완료"
+```
+
+3. run 산출물 검증
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\agentic-validate-run.ps1 -RunDir .\agentic\runs\<run_id>
+```
+
 ## 기본 접속 정보
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`
@@ -60,3 +76,4 @@ SCM_RFT/
 - `doc/scm_rft_design.md`
 - `doc/QnA_보고서.md`
 - `toolchain.lock.json`
+- `agentic/README.md`

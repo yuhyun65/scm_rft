@@ -1,0 +1,93 @@
+schema_version: 1
+project: scm_rft
+owner: developer
+
+loop:
+  - architect
+  - build
+  - test
+  - security
+  - migration
+  - release
+
+agents:
+  architect:
+    role: "서비스 경계/계약/API 정의"
+    prompt: "agentic/prompts/architect.md"
+    inputs:
+      - "doc/scm_rft_design.md"
+      - "HISCM/프로시저/*.sql"
+      - "services/*/README.md"
+    outputs:
+      - "doc/adr/*.md"
+      - "shared/contracts/*.openapi.yaml"
+    done_criteria:
+      - "도메인 경계와 책임이 중복 없이 정리됨"
+      - "OpenAPI 초안 작성 완료"
+
+  build:
+    role: "서비스/이관 코드 구현"
+    prompt: "agentic/prompts/build.md"
+    inputs:
+      - "shared/contracts/*.openapi.yaml"
+      - "doc/adr/*.md"
+    outputs:
+      - "services/**"
+      - "migration/scripts/**"
+    done_criteria:
+      - "설계 계약과 코드 구현 일치"
+      - "기본 실행/빌드 가능"
+
+  test:
+    role: "계약/통합/회귀 테스트 강화"
+    prompt: "agentic/prompts/test.md"
+    inputs:
+      - "services/**"
+      - "shared/contracts/*.openapi.yaml"
+    outputs:
+      - "services/**/src/test/**"
+      - "runbooks/test-report.md"
+    done_criteria:
+      - "단위/통합/계약 테스트 실행 가능"
+      - "실패 테스트 원인/조치 기록"
+
+  security:
+    role: "비밀정보/취약점/인증 흐름 점검"
+    prompt: "agentic/prompts/security.md"
+    inputs:
+      - "services/**"
+      - "docker-compose.yml"
+    outputs:
+      - "runbooks/security-checklist.md"
+    done_criteria:
+      - "비밀정보 하드코딩 없음"
+      - "인증/인가 흐름 점검 결과 기록"
+
+  migration:
+    role: "이관 시나리오/정합성 검증 자동화"
+    prompt: "agentic/prompts/migration.md"
+    inputs:
+      - "migration/**"
+      - "HISCM/프로시저/*.sql"
+    outputs:
+      - "migration/reports/*.md"
+      - "migration/verify/**"
+    done_criteria:
+      - "Dry-run 절차 문서화"
+      - "정합성 검증 항목 명시"
+
+  release:
+    role: "컷오버 런북/릴리즈노트 생성"
+    prompt: "agentic/prompts/release.md"
+    inputs:
+      - "runbooks/**"
+      - "migration/reports/*.md"
+      - "runbooks/test-report.md"
+      - "runbooks/security-checklist.md"
+    outputs:
+      - "runbooks/cutover-checklist.md"
+      - "runbooks/rollback-playbook.md"
+      - "runbooks/release-note.md"
+    done_criteria:
+      - "Go/No-Go 기준 명시"
+      - "롤백 조건/절차 명시"

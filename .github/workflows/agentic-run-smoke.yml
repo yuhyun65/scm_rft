@@ -1,0 +1,27 @@
+name: agentic-run-smoke
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "agentic/**"
+      - "scripts/agentic-*.ps1"
+      - ".github/workflows/agentic-run-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create agentic run
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\scripts\agentic-new-run.ps1 -IssueId CI-SMOKE -Service auth -RunId CI-SMOKE-RUN -OutputRoot .agentic-ci
+
+      - name: Validate agentic run
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\scripts\agentic-validate-run.ps1 -RunDir .\.agentic-ci\CI-SMOKE-RUN
