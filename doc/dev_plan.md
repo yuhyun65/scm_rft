@@ -13,36 +13,39 @@
 - `doc/roadmap/progress.json` 및 실행 스크립트 기준
 
 ### 1.2 종합 판정
-- 상태: `기반 구축 완료, 본개발 착수 직전`
+- 상태: `기반 구축 완료, 본개발 착수 진행 중`
 - 요약:
   - Phase 1(저장소/표준/자동화) 완료
-  - Phase 2~5(서비스 구현/통합/리허설/컷오버) 미착수
+  - Phase 2(서비스 골격/계약/ADR) 착수
+  - Phase 3~5(핵심도메인 구현/리허설/컷오버) 미착수
 
 ### 1.3 목적별 달성도
 
 | 설계서 목적 | 현재 상태 | 달성도(평가) | 근거 |
 |---|---|---:|---|
-| Big-Bang 방식 MSA 전환 | 미착수(구현 전) | 10% | `services/*` 실코드 부재(README 중심), 계약 초안 일부만 존재 |
-| 개발환경 표준화/품질 자동화/보안 기본값 선행 | 기반 완료 | 75% | toolchain lock, dev/staging compose, CI gate workflow, dry-run/검증 스크립트 구축 |
-| 개발자+Codex+Agentic AI 체계 운영 | 프레임워크 구축 완료, 운영 미착수 | 60% | `agentic/*` 및 스크립트 준비 완료, `agentic/runs` 실운영 산출물 없음 |
+| Big-Bang 방식 MSA 전환 | 초기 구현 착수 | 25% | 8개 서비스 Gradle/Spring Boot 골격 + 계약 초안 완성, 도메인 로직은 미구현 |
+| 개발환경 표준화/품질 자동화/보안 기본값 선행 | 기반 완료 | 80% | toolchain lock, dev/staging compose, CI gate workflow, dry-run/검증 스크립트, Gradle 멀티모듈 구축 |
+| 개발자+Codex+Agentic AI 체계 운영 | 프레임워크 구축 완료, 운영 시작 | 65% | `agentic/*` 준비 완료, ADR/계약/리허설 증적 템플릿까지 구축 |
 
 ### 1.4 완료된 핵심 자산
 - 표준 런타임/버전 고정: `toolchain.lock.json`, `.java-version`, `.nvmrc`, `.node-version`
+- 서비스 빌드 골격: `settings.gradle`, `build.gradle`, `gradlew*`, `services/*/build.gradle`
+- 서비스 실행 골격: `services/*/src/main/*`(8개 서비스), `services/*/src/test/*`
 - 로컬/스테이징 환경: `docker-compose.yml`, `docker-compose.staging.yml`, `scripts/dev-*.ps1`, `scripts/staging-*.ps1`
 - GitHub 운영 표준: PR 템플릿, PR 정책, CI 게이트 워크플로
 - 이관/검증/복구: `migration/scripts/dry-run.ps1`, `migration/verify/*`, `scripts/backup-db.ps1`, `scripts/restore-db.ps1`
 - 리허설/컷오버 런북: `runbooks/*`
-- 즉시실행 체크리스트 보강: OpenAPI 초안 + Flyway baseline + 리허설 일정 문서
+- 즉시실행 체크리스트 보강: OpenAPI 8개 도메인 초안 + Flyway baseline + 리허설 일정/증적 문서
 
-### 1.5 주요 갭(완료 전 필수)
-- 서비스 코드/빌드 체계 미구축:
-  - Gradle wrapper/프로젝트 구조 없음
-  - CI build/test/lint 게이트가 실코드 기준으로는 아직 실효성 제한
-- 도메인별 API 계약 미완:
-  - `file`, `board`, `quality-doc`, `inventory`, `report` 계약 미작성
-- ADR/아키텍처 의사결정 로그 미작성
-- 이관 매핑(AS-IS SP/테이블 -> TO-BE API/DB) 상세 명세 및 검증 리포트 미완
-- 리허설 3회 실적/Go-NoGo 서명 이력 미존재
+### 1.5 주요 갭 구현 가능화(완료 전 필수)
+
+| 갭 항목 | 구현 반영 자산 | 즉시 실행 명령 | 남은 완료 조건 |
+|---|---|---|---|
+| 서비스 코드/빌드 체계 미구축 | `settings.gradle`, `build.gradle`, `gradlew*`, `services/*/build.gradle`, `services/*/src/*` | `.\gradlew.bat build`, `.\gradlew.bat :services:auth:bootRun` | 도메인별 실제 비즈니스 로직/통합 테스트 채우기 |
+| 도메인별 API 계약 미완 | `shared/contracts/*.openapi.yaml`(8개 도메인 초안 완성) | `make ci-contract` | 계약을 AS-IS SP 입출력과 1:1로 정교화 |
+| ADR 미작성 | `doc/adr/ADR-001-auth-member-gateway.md` | Agentic Architect run으로 ADR-002+ 생성 | 도메인별 핵심 의사결정 ADR 누적 |
+| 이관 매핑/검증 리포트 미완 | `migration/mapping/legacy-sp-to-target-mapping.md`, `migration/templates/validation-report-template.md`, `scripts/new-migration-report.ps1` | `powershell -File .\scripts\new-migration-report.ps1 -RehearsalId R1` | 실제 데이터 기준 validation report 3회 이상 축적 |
+| 리허설 실적/Go-NoGo 서명 이력 미존재 | `runbooks/rehearsals/rehearsal-record-template.md`, `runbooks/go-nogo-signoff.md`, `scripts/new-rehearsal-record.ps1` | `powershell -File .\scripts\new-rehearsal-record.ps1 -RehearsalId R1` | R1~R3 실적 문서 + 최종 서명 완료 |
 
 ## 2. 최종 완료(Definition of Done)
 
@@ -150,8 +153,8 @@
 | W6~W7 | Phase 5 완료 | 리허설 3회 증적, Go/No-Go 승인, 컷오버 준비 완료 |
 
 ## 6. 즉시 실행 액션 (다음 작업 우선순위)
-1. Gradle 멀티모듈 골격 생성(`services/auth`, `services/member`부터)
-2. `file.openapi.yaml` 포함 누락 계약서 작성 시작
-3. ADR-001(인증/회원/게이트웨이) 작성
-4. CI 게이트를 `skip 없는 실제 실행` 기준으로 전환
-5. `progress.json`을 실제 완료 상태(체크리스트 8 반영분 포함)로 업데이트
+1. Auth/Member 비즈니스 API(로그인/회원조회) 실제 로직 구현 및 테스트 케이스 확장
+2. Gateway 정책을 Auth/Member 토큰 검증 흐름과 연결
+3. OrderLot/File 이관 매핑표를 컬럼 단위로 상세화하고 검증 SQL 추가
+4. `new-rehearsal-record.ps1`, `new-migration-report.ps1`로 R1 증적 파일 생성 및 초안 채우기
+5. CI 보안/품질 게이트에서 정적분석 규칙(예: Checkstyle/SpotBugs) 추가 적용

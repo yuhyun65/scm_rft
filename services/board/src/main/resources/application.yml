@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: board
+server:
+  port: 8083

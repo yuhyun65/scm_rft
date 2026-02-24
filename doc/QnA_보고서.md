@@ -391,5 +391,56 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - `doc/dev_plan.md` 신규 파일과 `doc/QnA_보고서.md` 업데이트 내용을 브랜치에 커밋.
   - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
 
+### Q37. dev_plan 1.5 주요 갭의 실제 구현 가능화 요청
+- 사용자 프롬프트:
+  - "dev_plan.md의 1.5 주요 갭(완료 전 필수)을 실제 구현이 가능하도록 만들어줘"
+- Codex 답변(결과):
+  - 서비스 코드/빌드 체계 갭 보완:
+    - Gradle 멀티모듈 골격 추가:
+      - `settings.gradle`, `build.gradle`, `gradlew`, `gradlew.bat`, `gradle/wrapper/*`
+      - `services/*/build.gradle`
+    - 8개 서비스 Spring Boot 최소 실행 골격 추가:
+      - `services/*/src/main/java/*Application.java`
+      - `services/*/src/main/java/*HealthController.java`
+      - `services/*/src/main/resources/application.yml`
+      - `services/*/src/test/java/*ApplicationTests.java`
+  - 도메인 계약 갭 보완:
+    - 누락 OpenAPI 계약 추가:
+      - `shared/contracts/file.openapi.yaml`
+      - `shared/contracts/board.openapi.yaml`
+      - `shared/contracts/quality-doc.openapi.yaml`
+      - `shared/contracts/inventory.openapi.yaml`
+      - `shared/contracts/report.openapi.yaml`
+  - ADR 갭 보완:
+    - `doc/adr/ADR-001-auth-member-gateway.md`
+    - `doc/adr/ADR-002-orderlot-file-first.md`
+  - 이관 매핑/검증 리포트 갭 보완:
+    - `migration/mapping/legacy-sp-to-target-mapping.md`
+    - `migration/templates/validation-report-template.md`
+    - `scripts/new-migration-report.ps1`
+  - 리허설/Go-NoGo 증적 갭 보완:
+    - `runbooks/rehearsals/rehearsal-record-template.md`
+    - `runbooks/rehearsals/README.md`
+    - `runbooks/go-nogo-signoff.md`
+    - `scripts/new-rehearsal-record.ps1`
+  - 운영 문서/명령 동기화:
+    - `doc/dev_plan.md` 1.5를 “구현 가능화 테이블”로 개편
+    - `doc/roadmap/progress.json` 진행률 갱신(phase-2/3 in_progress)
+    - `README.md`, `Makefile`, `services/README.md`, `migration/README.md`, `runbooks/README.md`, `runbooks/cutover-checklist.md`, `shared/contracts/README.md` 갱신
+  - 검증 결과:
+    - `contract-test` 통과 (8개 OpenAPI 검증)
+    - `build` 게이트 통과 (8개 서비스 bootJar 포함)
+    - `unit-integration-test` 게이트 통과
+    - `lint-static-analysis` 게이트 통과
+    - `smoke-test` 게이트 통과
+    - `roadmap-report` 기준: phase-2 67%, phase-3 33%로 반영
+
+### Q38. 1.5 구현 가능화 반영 결과 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 1.5 구현 가능화 관련 코드/문서/스크립트 변경사항을 브랜치에 커밋.
+  - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

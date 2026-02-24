@@ -1,4 +1,4 @@
-.PHONY: dev-up dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore
+.PHONY: dev-up dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore gradle-build gradle-test run-auth run-member new-rehearsal-record new-migration-report
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
@@ -65,3 +65,21 @@ db-backup:
 
 db-restore:
 	powershell -ExecutionPolicy Bypass -File .\scripts\restore-db.ps1 -Database $(DB) -BackupFile $(BACKUP_FILE)
+
+gradle-build:
+	.\gradlew.bat build
+
+gradle-test:
+	.\gradlew.bat test
+
+run-auth:
+	.\gradlew.bat :services:auth:bootRun
+
+run-member:
+	.\gradlew.bat :services:member:bootRun
+
+new-rehearsal-record:
+	powershell -ExecutionPolicy Bypass -File .\scripts\new-rehearsal-record.ps1 -RehearsalId $(REHEARSAL_ID)
+
+new-migration-report:
+	powershell -ExecutionPolicy Bypass -File .\scripts\new-migration-report.ps1 -RehearsalId $(REHEARSAL_ID)

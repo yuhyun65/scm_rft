@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-02-24T17:30:00",
+  "updated_at": "2026-02-24T19:10:00",
   "phases": [
     {
       "id": "phase-1",
@@ -15,19 +15,19 @@
     {
       "id": "phase-2",
       "title": "Auth/Member + Gateway first",
-      "status": "planned",
+      "status": "in_progress",
       "items": [
-        { "name": "auth/member OpenAPI and ADR", "done": false },
-        { "name": "gateway route policy baseline", "done": false },
+        { "name": "auth/member OpenAPI and ADR", "done": true },
+        { "name": "gateway route policy baseline", "done": true },
         { "name": "contract and smoke pass", "done": false }
       ]
     },
     {
       "id": "phase-3",
       "title": "OrderLot + File core domain",
-      "status": "planned",
+      "status": "in_progress",
       "items": [
-        { "name": "order-lot/file OpenAPI and ADR", "done": false },
+        { "name": "order-lot/file OpenAPI and ADR", "done": true },
         { "name": "critical flow smoke scenarios", "done": false },
         { "name": "migration mapping and report", "done": false }
       ]

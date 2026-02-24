@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: SCM File Service API
+  version: 0.1.0
+  description: File metadata and attachment handling contract.
+servers:
+  - url: /api/file
+paths:
+  /v1/files:
+    post:
+      summary: Register uploaded file metadata
+      operationId: registerFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileRegisterRequest"
+      responses:
+        "201":
+          description: File metadata registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileMetadata"
+  /v1/files/{fileId}:
+    get:
+      summary: Get file metadata
+      operationId: getFile
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: File metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileMetadata"
+        "404":
+          description: File not found
+components:
+  schemas:
+    FileRegisterRequest:
+      type: object
+      required: [domainKey, originalName, storagePath]
+      properties:
+        domainKey:
+          type: string
+        originalName:
+          type: string
+        storagePath:
+          type: string
+    FileMetadata:
+      type: object
+      required: [fileId, domainKey, originalName, storagePath]
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        domainKey:
+          type: string
+        originalName:
+          type: string
+        storagePath:
+          type: string

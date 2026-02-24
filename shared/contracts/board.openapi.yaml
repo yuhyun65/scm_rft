@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: SCM Board Service API
+  version: 0.1.0
+  description: Notice and board posting contract.
+servers:
+  - url: /api/board
+paths:
+  /v1/posts:
+    get:
+      summary: List posts
+      operationId: listPosts
+      responses:
+        "200":
+          description: Post list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Post"
+  /v1/posts/{postId}:
+    get:
+      summary: Get post detail
+      operationId: getPost
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+components:
+  schemas:
+    Post:
+      type: object
+      required: [postId, title, writer, createdAt]
+      properties:
+        postId:
+          type: string
+        title:
+          type: string
+        writer:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

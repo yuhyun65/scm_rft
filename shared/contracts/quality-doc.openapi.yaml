@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: SCM Quality Document Service API
+  version: 0.1.0
+  description: Quality document query and acknowledgement contract.
+servers:
+  - url: /api/quality-doc
+paths:
+  /v1/documents:
+    get:
+      summary: List quality documents
+      operationId: listQualityDocuments
+      responses:
+        "200":
+          description: Document list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/QualityDocument"
+  /v1/documents/{documentId}/ack:
+    post:
+      summary: Acknowledge a quality document
+      operationId: acknowledgeDocument
+      parameters:
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Acknowledged
+components:
+  schemas:
+    QualityDocument:
+      type: object
+      required: [documentId, title, issuedAt]
+      properties:
+        documentId:
+          type: string
+        title:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time

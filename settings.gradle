@@ -1,0 +1,10 @@
+rootProject.name = "scm-rft"
+
+include(":services:auth")
+include(":services:member")
+include(":services:board")
+include(":services:quality-doc")
+include(":services:order-lot")
+include(":services:inventory")
+include(":services:file")
+include(":services:report")

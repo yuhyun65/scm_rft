@@ -5,6 +5,7 @@
 - [ ] 보안 점검 승인
 - [ ] 이관 리허설 승인
 - [ ] 운영 공지 준비
+- [ ] `runbooks/go-nogo-signoff.md` 서명 완료
 
 ## Execution
 - [ ] 레거시 쓰기 차단

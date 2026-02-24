@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: SCM Report Service API
+  version: 0.1.0
+  description: Print/report generation contract.
+servers:
+  - url: /api/report
+paths:
+  /v1/reports/{reportType}:
+    post:
+      summary: Generate report
+      operationId: generateReport
+      parameters:
+        - in: path
+          name: reportType
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "202":
+          description: Report generation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportJob"
+  /v1/reports/jobs/{jobId}:
+    get:
+      summary: Get report job status
+      operationId: getReportJobStatus
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportJob"
+components:
+  schemas:
+    ReportJob:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [QUEUED, RUNNING, COMPLETED, FAILED]
+        outputPath:
+          type: string

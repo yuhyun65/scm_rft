@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: SCM Inventory Service API
+  version: 0.1.0
+  description: Inventory balance and movement contract.
+servers:
+  - url: /api/inventory
+paths:
+  /v1/items/{itemCode}/balance:
+    get:
+      summary: Get inventory balance
+      operationId: getInventoryBalance
+      parameters:
+        - in: path
+          name: itemCode
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Inventory balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryBalance"
+  /v1/movements:
+    get:
+      summary: List inventory movements
+      operationId: listInventoryMovements
+      responses:
+        "200":
+          description: Movement list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/InventoryMovement"
+components:
+  schemas:
+    InventoryBalance:
+      type: object
+      required: [itemCode, quantity]
+      properties:
+        itemCode:
+          type: string
+        quantity:
+          type: number
+          format: double
+    InventoryMovement:
+      type: object
+      required: [movementId, itemCode, quantity, movedAt]
+      properties:
+        movementId:
+          type: string
+        itemCode:
+          type: string
+        quantity:
+          type: number
+          format: double
+        movedAt:
+          type: string
+          format: date-time

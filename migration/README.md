@@ -11,6 +11,8 @@
 ```text
 migration/
   flyway/
+  mapping/
+  templates/
   scripts/
   verify/
   reports/
@@ -28,3 +30,11 @@ migration/
 ## Baseline
 - Flyway baseline:
   - `migration/flyway/V1__baseline.sql`
+
+## Mapping and Templates
+- legacy-to-target mapping draft:
+  - `migration/mapping/legacy-sp-to-target-mapping.md`
+- validation report template:
+  - `migration/templates/validation-report-template.md`
+- report creation helper:
+  - `powershell -ExecutionPolicy Bypass -File .\scripts\new-migration-report.ps1 -RehearsalId R1`

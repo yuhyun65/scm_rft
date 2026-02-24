@@ -9,3 +9,5 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `rollback-playbook.md`
 - `security-checklist.md`
 - `test-report.md`
+- `go-nogo-signoff.md`
+- `rehearsals/rehearsal-record-template.md`

@@ -10,3 +10,8 @@ Agentic Architect 단계에서 작성하는 OpenAPI 계약을 저장합니다.
 - `auth.openapi.yaml`
 - `member.openapi.yaml`
 - `order-lot.openapi.yaml`
+- `file.openapi.yaml`
+- `board.openapi.yaml`
+- `quality-doc.openapi.yaml`
+- `inventory.openapi.yaml`
+- `report.openapi.yaml`

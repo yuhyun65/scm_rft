@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: quality-doc
+server:
+  port: 8084

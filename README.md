@@ -73,6 +73,13 @@ make ci-migration
 make ci-smoke
 ```
 
+서비스 빌드/실행(Gradle 멀티모듈):
+```powershell
+.\gradlew.bat build
+.\gradlew.bat :services:auth:bootRun
+.\gradlew.bat :services:member:bootRun
+```
+
 ## Big-Bang 전환 대응 환경 (설계서 6장 반영)
 - staging 리허설 환경 실행:
 ```powershell
@@ -83,6 +90,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\staging-up.ps1
 - 리허설 자동 시퀀스(스테이징 기동 + 백업 + dry-run + 검증):
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\rehearsal-run.ps1
+```
+
+- 리허설/검증 증적 파일 생성:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\new-rehearsal-record.ps1 -RehearsalId R1
+powershell -ExecutionPolicy Bypass -File .\scripts\new-migration-report.ps1 -RehearsalId R1
 ```
 
 - migration dry-run + 정합성 검증:
