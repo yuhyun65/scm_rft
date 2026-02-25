@@ -3,3 +3,8 @@
 - 역할: 출력/리포트 도메인
 - 기본 포트: `8088`
 - 기술 기준: Java 21, Spring Boot 3.x, Gradle 8.x
+- API:
+  - `POST /api/report/v1/jobs`
+  - `GET /api/report/v1/jobs/{jobId}`
+- 저장 테이블:
+  - `dbo.report_jobs`
