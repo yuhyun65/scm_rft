@@ -792,3 +792,15 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - base: `feature/to-be-dev-env-bootstrap`
   - 이슈 연계:
     - `#12`에 PR 링크/구현 범위 코멘트 등록
+
+### Q64. PR #13 리뷰/머지 진행
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - PR 상태 확인:
+    - `#13` 상태 `OPEN`, `MERGEABLE`, 차단 리뷰 없음
+  - PR 머지 완료:
+    - PR: `https://github.com/yuhyun65/scm_rft/pull/13`
+    - merge commit: `0cb02e5590658b9dd4b98f145198097432aedf10`
+  - 이슈 정리:
+    - `#12` 수동 종료 완료
