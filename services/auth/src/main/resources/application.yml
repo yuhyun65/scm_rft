@@ -15,7 +15,7 @@ spring:
 scm:
   auth:
     jwt:
-      secret: ${SCM_AUTH_JWT_SECRET:scm-rft-default-jwt-secret-key-change-me-2026}
+      secret: ${SCM_AUTH_JWT_SECRET}
       issuer: ${SCM_AUTH_JWT_ISSUER:scm-auth}
       access-token-expiration-seconds: ${SCM_AUTH_ACCESS_TOKEN_EXP_SECONDS:1800}
     login:

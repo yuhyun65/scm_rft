@@ -33,4 +33,15 @@ class JwtAuthTokenProviderTests {
     assertThat(verification.active()).isFalse();
     assertThat(verification.subject()).isNull();
   }
+
+  @Test
+  void rejectTokenWhenExpirationEqualsVerificationTime() {
+    JwtAuthTokenProvider provider = new JwtAuthTokenProvider(SECRET, "scm-auth", 1);
+    Instant issuedAt = Instant.now();
+    IssuedAccessToken issued = provider.issueToken("member01", List.of("USER"), issuedAt);
+
+    TokenVerification verification = provider.verifyToken(issued.accessToken(), issued.expiresAt());
+
+    assertThat(verification.active()).isFalse();
+  }
 }

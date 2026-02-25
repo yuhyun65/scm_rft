@@ -75,7 +75,7 @@ public class JwtAuthTokenProvider {
           .getPayload();
 
       Date expiration = claims.getExpiration();
-      if (expiration == null || expiration.toInstant().isBefore(verifyTime)) {
+      if (expiration == null || !expiration.toInstant().isAfter(verifyTime)) {
         return TokenVerification.inactive();
       }
 
@@ -105,4 +105,3 @@ public class JwtAuthTokenProvider {
         .toList();
   }
 }
-
