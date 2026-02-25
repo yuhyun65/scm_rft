@@ -594,3 +594,26 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - SCM-203 준비 반영 커밋/푸시:
     - 브랜치: `feature/scm-203-auth-member-mvp`
     - 커밋: `e19a866`
+### Q51. SCM-203 구현 즉시 진행 승인
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `feature/scm-203-auth-member-mvp`에서 SCM-203 골격 구현 진행.
+  - Auth 구현:
+    - `login`, `token verify` 컨트롤러/DTO 추가
+    - `AuthService`, `JwtAuthTokenProvider(HS256)`, `AuthExceptionHandler` 추가
+    - 환경변수/설정 반영(`SCM_AUTH_JWT_SECRET`, issuer, 만료시간)
+  - Member 구현:
+    - `get member by id`, `search members` 컨트롤러/서비스/리포지토리 골격 추가
+    - 공통 에러 응답/예외 핸들러 추가
+  - Gateway 구현:
+    - Auth introspection 연동용 `AuthVerificationClient` 추가
+    - `GatewayRouteConfiguration`에 인증 필터 연결(`/api/auth/v1/tokens/verify` 호출, fail-closed)
+    - 설정 반영(`GATEWAY_AUTH_VERIFY_URI`, timeout)
+  - 테스트/검증:
+    - `build`, `unit-integration-test`, `contract-test`, `smoke-test` 게이트 통과
+    - 단위테스트 추가: JWT provider, Member service validation
+  - 브랜치/PR:
+    - 커밋: `b0e6d6f`
+    - PR: `#7` `https://github.com/yuhyun65/scm_rft/pull/7` (OPEN)
+    - 이슈 `#6`은 PR과 연결된 상태로 OPEN 유지
