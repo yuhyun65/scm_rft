@@ -6,10 +6,10 @@ info:
 servers:
   - url: /api/auth
 paths:
-  /v1/sessions:
+  /v1/login:
     post:
-      summary: Create authenticated session
-      operationId: createSession
+      summary: Login and issue access token
+      operationId: login
       requestBody:
         required: true
         content:
@@ -18,13 +18,30 @@ paths:
               $ref: "#/components/schemas/LoginRequest"
       responses:
         "200":
-          description: Session created
+          description: Login success
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
+  /v1/tokens/verify:
+    post:
+      summary: Verify access token (introspection style)
+      operationId: verifyToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyTokenRequest"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyTokenResponse"
 components:
   schemas:
     LoginRequest:
@@ -39,10 +56,47 @@ components:
           minLength: 1
     LoginResponse:
       type: object
-      required: [accessToken, expiresAt]
+      required: [accessToken, tokenType, expiresIn, expiresAt, memberId, roles]
       properties:
         accessToken:
           type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          format: int64
+          minimum: 1
+        expiresAt:
+          type: string
+          format: date-time
+        memberId:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    VerifyTokenRequest:
+      type: object
+      required: [accessToken]
+      properties:
+        accessToken:
+          type: string
+    VerifyTokenResponse:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+        subject:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        issuedAt:
+          type: string
+          format: date-time
         expiresAt:
           type: string
           format: date-time

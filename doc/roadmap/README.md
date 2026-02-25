@@ -19,3 +19,6 @@ This directory operationalizes section 7 of `doc/scm_rft_design.md`.
   - `doc/roadmap/scm-201-p0-scenarios.md`
   - `doc/adr/ADR-003-gateway-runtime-selection.md`
   - `doc/adr/ADR-004-shared-db-domain-schema-strategy.md`
+- `SCM-203` pre-implementation lock:
+  - `doc/roadmap/scm-203-scope-lock.md`
+  - `doc/adr/ADR-005-auth-token-policy-and-gateway-validation.md`

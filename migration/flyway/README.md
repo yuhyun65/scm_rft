@@ -6,6 +6,9 @@ Big-Bang 전환 초기 기준 스키마를 관리합니다.
 - 파일명: `V<version>__<description>.sql`
 - 현재 baseline: `V1__baseline.sql`
 - core domains: `V2__core_domains.sql`
+- auth/member lookup index baseline: `V3__auth_member_lookup_indexes.sql`
+- auth credential schema: `V4__auth_credentials.sql`
+- member search tuning indexes: `V5__member_search_tuning_indexes.sql`
 
 ## 적용 원칙
 - SQL Server 기준으로 작성

@@ -21,6 +21,15 @@ management:
 gateway:
   policy:
     path: ${GATEWAY_POLICY_PATH:infra/gateway/policies/cutover-isolation.yaml}
+  auth:
+    verify-uri: ${GATEWAY_AUTH_VERIFY_URI:http://localhost:8081/api/auth/v1/tokens/verify}
+    verify-timeout-ms: ${GATEWAY_AUTH_VERIFY_TIMEOUT_MS:1500}
+    circuit-breaker:
+      sliding-window-size: ${GATEWAY_AUTH_CB_SLIDING_WINDOW_SIZE:20}
+      minimum-number-of-calls: ${GATEWAY_AUTH_CB_MIN_CALLS:10}
+      failure-rate-threshold: ${GATEWAY_AUTH_CB_FAILURE_RATE_THRESHOLD:50}
+      wait-duration-in-open-state-ms: ${GATEWAY_AUTH_CB_WAIT_OPEN_MS:10000}
+      permitted-number-of-calls-in-half-open-state: ${GATEWAY_AUTH_CB_HALF_OPEN_CALLS:3}
   cutover:
     emergency-stop:
       enabled: ${GATEWAY_EMERGENCY_STOP_ENABLED:false}

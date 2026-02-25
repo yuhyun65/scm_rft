@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
+import kr.co.computermate.scmrft.gateway.auth.AuthVerificationClient;
+import kr.co.computermate.scmrft.gateway.auth.TokenVerificationResult;
 import kr.co.computermate.scmrft.gateway.policy.GatewayPolicyDocument;
 import kr.co.computermate.scmrft.gateway.policy.GatewayPolicyLoader;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +20,11 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -59,7 +63,8 @@ public class GatewayRouteConfiguration {
       RouteLocatorBuilder builder,
       GatewayPolicyDocument policy,
       RedisRateLimiter rateLimiter,
-      KeyResolver keyResolver
+      KeyResolver keyResolver,
+      AuthVerificationClient authVerificationClient
   ) {
     var routes = builder.routes();
     int connectTimeout = policy.getDefaults().getConnectTimeoutMs();
@@ -78,6 +83,7 @@ public class GatewayRouteConfiguration {
                   filters.retry(config -> config.setRetries(retries));
                 }
 
+                filters.filter(authVerificationFilter(route.getId(), authVerificationClient));
                 filters.filter(writeProtectionFilter(route, policy.getCutoverSwitches().isBlockLegacyWrites()));
                 filters.setResponseHeader("X-SCM-Gateway-Route", route.getId());
                 return filters;
@@ -132,6 +138,62 @@ public class GatewayRouteConfiguration {
       }
       return chain.filter(exchange);
     };
+  }
+
+  private GatewayFilter authVerificationFilter(
+      String routeId,
+      AuthVerificationClient authVerificationClient
+  ) {
+    if (!requiresAuthentication(routeId)) {
+      return (exchange, chain) -> chain.filter(exchange);
+    }
+
+    return (exchange, chain) -> {
+      if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+        return chain.filter(exchange);
+      }
+
+      String bearerToken = extractBearerToken(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
+      if (bearerToken == null) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
+      }
+
+      return authVerificationClient.verify(bearerToken)
+          .flatMap(result -> {
+            if (result.status() == TokenVerificationResult.VerificationStatus.ACTIVE) {
+              ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate();
+              if (result.subject() != null && !result.subject().isBlank()) {
+                requestBuilder.header("X-Auth-Subject", result.subject());
+              }
+              if (result.roles() != null && !result.roles().isEmpty()) {
+                requestBuilder.header("X-Auth-Roles", String.join(",", result.roles()));
+              }
+              return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
+            }
+
+            HttpStatus status = result.status() == TokenVerificationResult.VerificationStatus.UNAVAILABLE
+                ? HttpStatus.SERVICE_UNAVAILABLE
+                : HttpStatus.UNAUTHORIZED;
+            exchange.getResponse().setStatusCode(status);
+            return exchange.getResponse().setComplete();
+          });
+    };
+  }
+
+  private boolean requiresAuthentication(String routeId) {
+    return routeId == null || !routeId.equalsIgnoreCase("auth");
+  }
+
+  private String extractBearerToken(String authorizationHeader) {
+    if (authorizationHeader == null || authorizationHeader.isBlank()) {
+      return null;
+    }
+    if (!authorizationHeader.toLowerCase(Locale.ROOT).startsWith("bearer ")) {
+      return null;
+    }
+    String token = authorizationHeader.substring(7).trim();
+    return token.isEmpty() ? null : token;
   }
 
   private HttpMethod toHttpMethodOrNull(String method) {
