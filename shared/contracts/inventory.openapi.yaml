@@ -6,62 +6,177 @@ info:
 servers:
   - url: /api/inventory
 paths:
-  /v1/items/{itemCode}/balance:
+  /v1/balances:
     get:
-      summary: Get inventory balance
-      operationId: getInventoryBalance
+      summary: Search inventory balances
+      operationId: searchInventoryBalances
       parameters:
-        - in: path
+        - in: query
           name: itemCode
-          required: true
           schema:
             type: string
+            maxLength: 100
+        - in: query
+          name: warehouseCode
+          schema:
+            type: string
+            maxLength: 50
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
       responses:
         "200":
-          description: Inventory balance
+          description: Inventory balance search result
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InventoryBalance"
+                $ref: "#/components/schemas/SearchInventoryBalancesResponse"
+        "400":
+          description: Invalid query parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryError"
   /v1/movements:
     get:
-      summary: List inventory movements
-      operationId: listInventoryMovements
+      summary: Search inventory movements
+      operationId: searchInventoryMovements
+      parameters:
+        - in: query
+          name: itemCode
+          schema:
+            type: string
+            maxLength: 100
+        - in: query
+          name: warehouseCode
+          schema:
+            type: string
+            maxLength: 50
+        - in: query
+          name: movementType
+          schema:
+            type: string
+            enum: [IN, OUT, ADJUST]
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
       responses:
         "200":
-          description: Movement list
+          description: Movement search result
           content:
             application/json:
               schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/InventoryMovement"
+                $ref: "#/components/schemas/SearchInventoryMovementsResponse"
+        "400":
+          description: Invalid query parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryError"
 components:
   schemas:
     InventoryBalance:
       type: object
-      required: [itemCode, quantity]
+      required: [itemCode, warehouseCode, quantity, updatedAt]
       properties:
         itemCode:
           type: string
+        warehouseCode:
+          type: string
         quantity:
           type: number
-          format: double
+          format: decimal
+        updatedAt:
+          type: string
+          format: date-time
     InventoryMovement:
       type: object
-      required: [movementId, itemCode, quantity, movedAt]
+      required: [movementId, itemCode, warehouseCode, movementType, quantity, movedAt]
       properties:
         movementId:
           type: string
+          format: uuid
         itemCode:
           type: string
+        warehouseCode:
+          type: string
+        movementType:
+          type: string
+          enum: [IN, OUT, ADJUST]
         quantity:
           type: number
-          format: double
+          format: decimal
+        referenceNo:
+          type: string
         movedAt:
+          type: string
+          format: date-time
+    SearchInventoryBalancesResponse:
+      type: object
+      required: [items, total, page, size]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryBalance"
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+    SearchInventoryMovementsResponse:
+      type: object
+      required: [items, total, page, size]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryMovement"
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+    InventoryError:
+      type: object
+      required: [code, message, path, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        timestamp:
           type: string
           format: date-time
