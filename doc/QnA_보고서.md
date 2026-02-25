@@ -554,3 +554,43 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - SCM-203 진입:
     - 워크트리 생성: `C:\Users\CMN-091\projects\SCM_RFT_scm203`
     - 브랜치 생성/푸시: `feature/scm-203-auth-member-mvp`
+### Q49. SCM-203 착수/브랜치 정리 전 사전 검토·준비사항 요청
+- 사용자 프롬프트:
+  - "다음으로 바로 진행하기 위해 사전에 검토 또는 준비사항을 정리해줘\n\nSCM-203에서 Auth 토큰 발급/검증 + Member 조회 API 골격부터 구현 시작\n머지 완료된 feature/scm-202-*, feature/scm-205-* 브랜치 정리(원격/로컬 삭제)"
+- Codex 답변(결과):
+  - SCM-203 착수 전 체크리스트를 구현/테스트/게이트/리스크 기준으로 순서화해 제시.
+  - 브랜치 정리는 worktree 연결 해제 -> 로컬 삭제 -> 원격 삭제 순서로 안전 절차를 제시.
+  - 현재 상태 확인:
+    - `feature/scm-203-auth-member-mvp` 작업 브랜치 존재
+    - `feature/scm-202-gateway-runtime`, `feature/scm-205-db-integration-baseline` 원격 브랜치 존재(정리 대상)
+### Q50. SCM-203 사전 준비 체크리스트 점검/보완 실행 요청
+- 사용자 프롬프트:
+  - "다음의 사전 준비 체크리스트 (바로 실행 순서)에 따라 점검하고 준비가 않된 부분은 해결해줘."
+- Codex 답변(결과):
+  - 1) 기준선 고정 확인
+    - `feature/to-be-dev-env-bootstrap` 원격 동기화 상태 확인(0/0)
+    - Open 이슈는 `#6`만 유지 확인
+    - 구현 준비 변경은 `feature/scm-203-auth-member-mvp`에서만 반영
+  - 2) API 계약 고정
+    - `shared/contracts/auth.openapi.yaml`: `login`, `token verify` 엔드포인트 확정
+    - `shared/contracts/member.openapi.yaml`: `member by id`, `member search` 확정 및 검색 파라미터/응답 스키마 보강
+  - 3) 토큰 정책 확정
+    - 신규 ADR: `doc/adr/ADR-005-auth-token-policy-and-gateway-validation.md`
+    - 정책: JWT HS256, 30분 만료, 필수 클레임(`sub`,`roles`,`iat`,`exp`), Gateway는 auth introspection(`/api/auth/v1/tokens/verify`) 단일안 채택
+  - 4) DB/마이그레이션 선확인 및 보완
+    - `V1__baseline.sql`, `V2__core_domains.sql` 확인
+    - 신규 추가: `migration/flyway/V3__auth_member_lookup_indexes.sql` (members/auth_sessions 조회 인덱스 + FK)
+    - `migration/flyway/README.md`에 V3 반영
+  - 5) SCM-203 구현 골격 범위 잠금
+    - 신규 문서: `doc/roadmap/scm-203-scope-lock.md`
+    - `doc/roadmap/README.md`에 SCM-203 잠금 아티팩트 링크 반영
+  - 6) 게이트 고정 및 실행
+    - `build`, `unit-integration-test`, `contract-test`, `smoke-test` 실행 통과
+  - 7) 머지 완료 브랜치 정리
+    - worktree 제거: `SCM_RFT_scm202`, `SCM_RFT_scm205`
+    - 로컬 브랜치 삭제: `feature/scm-202-gateway-runtime`, `feature/scm-205-db-integration-baseline`
+    - 원격 브랜치 삭제: 동일 2개 브랜치 삭제 완료
+    - 현재 원격 유지 브랜치: `feature/scm-203-auth-member-mvp`
+  - SCM-203 준비 반영 커밋/푸시:
+    - 브랜치: `feature/scm-203-auth-member-mvp`
+    - 커밋: `e19a866`
