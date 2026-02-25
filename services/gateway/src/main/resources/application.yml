@@ -21,6 +21,9 @@ management:
 gateway:
   policy:
     path: ${GATEWAY_POLICY_PATH:infra/gateway/policies/cutover-isolation.yaml}
+  auth:
+    verify-uri: ${GATEWAY_AUTH_VERIFY_URI:http://localhost:8081/api/auth/v1/tokens/verify}
+    verify-timeout-ms: ${GATEWAY_AUTH_VERIFY_TIMEOUT_MS:1500}
   cutover:
     emergency-stop:
       enabled: ${GATEWAY_EMERGENCY_STOP_ENABLED:false}

@@ -11,6 +11,14 @@ spring:
     baseline-on-migrate: true
     locations: ${SCM_FLYWAY_LOCATIONS:filesystem:./migration/flyway}
     table: ${SCM_FLYWAY_TABLE:flyway_schema_history}
+
+scm:
+  auth:
+    jwt:
+      secret: ${SCM_AUTH_JWT_SECRET:scm-rft-default-jwt-secret-key-change-me-2026}
+      issuer: ${SCM_AUTH_JWT_ISSUER:scm-auth}
+      access-token-expiration-seconds: ${SCM_AUTH_ACCESS_TOKEN_EXP_SECONDS:1800}
+
 server:
   port: 8081
 management:
