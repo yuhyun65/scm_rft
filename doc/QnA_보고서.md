@@ -530,3 +530,27 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
+
+### Q48. SCM-202/SCM-205 병행 실행 및 PR 머지 후 SCM-203 진입 요청
+- 사용자 프롬프트:
+  - "다음을 바로 실행해줘\n\nSCM-202 Issue/브랜치 생성 후 gateway 모듈부터 구현\n동시에 SCM-205 Issue/브랜치 생성 후 DB 표준화 착수\n두 PR merge 후 SCM-203로 진입"
+- Codex 답변(결과):
+  - GitHub Issue 생성:
+    - `#3` `[SCM-202] Add gateway runtime service with route controls`
+    - `#2` `[SCM-205] Standardize datasource, flyway, and persistence baseline`
+    - `#6` `[SCM-203] Auth/Member MVP + Gateway 토큰 검증 연동`
+  - SCM-202 구현 및 PR:
+    - 브랜치: `feature/scm-202-gateway-runtime`
+    - 커밋: `8bfbdd6`
+    - PR: `#4` (머지 완료)
+  - SCM-205 구현 및 PR:
+    - 브랜치: `feature/scm-205-db-integration-baseline`
+    - 커밋: `ba13328`
+    - 변경: 서비스 공통 DB 의존성(data-jdbc/flyway/sqlserver/h2), 8개 서비스 datasource/flyway 표준 설정, `.env*` 표준 변수, `shared/persistence/README.md`
+    - 검증: `build`, `unit-integration-test`, `smoke-test` 게이트 통과
+    - PR: `#5` (머지 완료)
+  - 기준 브랜치 동기화:
+    - `feature/to-be-dev-env-bootstrap`를 원격 최신으로 fast-forward
+  - SCM-203 진입:
+    - 워크트리 생성: `C:\Users\CMN-091\projects\SCM_RFT_scm203`
+    - 브랜치 생성/푸시: `feature/scm-203-auth-member-mvp`
