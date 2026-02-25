@@ -27,5 +27,8 @@ public class AuthApiException extends RuntimeException {
   public static AuthApiException unauthorized(String message) {
     return new AuthApiException(HttpStatus.UNAUTHORIZED, "AUTH_UNAUTHORIZED", message);
   }
-}
 
+  public static AuthApiException locked(String message) {
+    return new AuthApiException(HttpStatus.LOCKED, "AUTH_ACCOUNT_LOCKED", message);
+  }
+}

@@ -18,6 +18,9 @@ scm:
       secret: ${SCM_AUTH_JWT_SECRET:scm-rft-default-jwt-secret-key-change-me-2026}
       issuer: ${SCM_AUTH_JWT_ISSUER:scm-auth}
       access-token-expiration-seconds: ${SCM_AUTH_ACCESS_TOKEN_EXP_SECONDS:1800}
+    login:
+      max-failed-attempts: ${SCM_AUTH_LOGIN_MAX_FAILED_ATTEMPTS:5}
+      lock-minutes: ${SCM_AUTH_LOGIN_LOCK_MINUTES:15}
 
 server:
   port: 8081
