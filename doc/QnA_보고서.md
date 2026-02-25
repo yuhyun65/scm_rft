@@ -627,3 +627,27 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - Gateway는 verify timeout은 있으나 verify 호출 자체의 circuit-breaker 정책 미적용
     - Member 검색은 `%keyword%` + OR 조건으로 인덱스 효율이 낮을 수 있음
   - 즉시 착수 기준(DoD), 필수 SQL/설정/테스트 항목, 성능 검증 포인트를 함께 제시.
+### Q53. 권장 실행 순서(1.Auth DB 전환, 2.Gateway CB/timeout, 3.Member 튜닝) 즉시 실행 요청
+- 사용자 프롬프트:
+  - "권장 실행 순서에 따라 실행해줘\n\n1.Auth DB 전환 \n2.Gateway CB/timeout 정책 적용 \n3.Member 튜닝 및 V5 반영"
+- Codex 답변(결과):
+  - 1) Auth DB 전환 구현
+    - `AuthService`를 하드코딩 비밀번호 방식에서 DB credential 검증으로 전환
+    - 신규: `AuthCredentialRepository`, `AuthCredentialEntity`, `AuthSecurityConfiguration(BCrypt PasswordEncoder)`
+    - 로그인 실패 누적/잠금 정책 반영(최대 실패횟수/잠금분)
+    - 마이그레이션 추가: `migration/flyway/V4__auth_credentials.sql`
+  - 2) Gateway 인증필터 timeout/circuit-breaker 정책 적용
+    - `AuthVerificationClient`에 circuit-breaker(`authVerify`) 적용, 4xx는 inactive 처리, 장애는 unavailable 처리
+    - 신규: `GatewayResilienceConfiguration` (타임아웃/CB 세부 설정값 외부화)
+    - 설정 반영: `services/gateway/src/main/resources/application.yml`, `.env*`
+  - 3) Member 검색 튜닝 + V5 반영
+    - `MemberRepository` 검색 SQL 분리/최적화(키워드 없는 경우와 있는 경우 분리, CTE/UNION 기반)
+    - 마이그레이션 추가: `migration/flyway/V5__member_search_tuning_indexes.sql`
+    - Flyway 문서 반영: `migration/flyway/README.md`
+  - 검증:
+    - `build`, `unit-integration-test`, `contract-test`, `smoke-test` 통과
+    - 추가 확인: `migration-dry-run` 통과
+  - 브랜치/PR 반영:
+    - 브랜치: `feature/scm-203-auth-member-mvp`
+    - 커밋: `540754b`
+    - PR: `#7` (`https://github.com/yuhyun65/scm_rft/pull/7`)에 푸시 반영
