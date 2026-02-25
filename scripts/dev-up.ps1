@@ -1,5 +1,6 @@
 param(
-  [switch]$Build
+  [switch]$Build,
+  [switch]$WithGateway
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,6 +45,21 @@ try {
   Write-Host "- Loki       : http://localhost:3100"
   Write-Host "- Tempo      : http://localhost:3200"
   Write-Host "- RabbitMQ   : http://localhost:15672"
+
+  if ($WithGateway) {
+    $gatewayBuildFile = Join-Path $root "services\\gateway\\build.gradle"
+    if (-not (Test-Path $gatewayBuildFile)) {
+      throw "Gateway module not found. expected: $gatewayBuildFile"
+    }
+
+    Write-Host "[INFO] Starting gateway with gradle bootRun in a new terminal..."
+    Start-Process powershell -ArgumentList @(
+      "-NoExit",
+      "-Command",
+      "Set-Location '$root'; .\gradlew.bat :services:gateway:bootRun"
+    ) | Out-Null
+    Write-Host "- Gateway    : http://localhost:8080"
+  }
 }
 finally {
   Pop-Location
