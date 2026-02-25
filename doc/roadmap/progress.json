@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-02-24T19:10:00",
+  "updated_at": "2026-02-25T09:45:00",
   "phases": [
     {
       "id": "phase-1",
@@ -17,6 +17,7 @@
       "title": "Auth/Member + Gateway first",
       "status": "in_progress",
       "items": [
+        { "name": "p0 scenarios and architecture lock", "done": true },
         { "name": "auth/member OpenAPI and ADR", "done": true },
         { "name": "gateway route policy baseline", "done": true },
         { "name": "contract and smoke pass", "done": false }

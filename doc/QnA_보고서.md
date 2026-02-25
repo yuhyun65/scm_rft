@@ -497,5 +497,36 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - `doc/roadmap/issue-pr-templates-2.1.md` 신규 문서와 관련 문서 갱신분을 브랜치에 커밋.
   - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
 
+### Q45. 2.1 제품/기능 구현 착수 가능 여부 확인 요청
+- 사용자 프롬프트:
+  - "이제 dev_plan.md의 2.1 제품/기능 구현을 해도될까요?"
+- Codex 답변(결과):
+  - 착수 가능(Go)으로 판단.
+  - 단, 즉시 8도메인 병렬 구현이 아니라 `SCM-201 -> SCM-202 -> SCM-203/204` 순서로 진행할 것을 권고.
+
+### Q46. 2.1 구현 착수 지시
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `SCM-201` 산출물 구현 착수.
+  - 신규 작성:
+    - `doc/roadmap/scm-201-p0-scenarios.md` (P0 입력/출력/오류코드 고정)
+    - `doc/adr/ADR-003-gateway-runtime-selection.md`
+    - `doc/adr/ADR-004-shared-db-domain-schema-strategy.md`
+  - 문서 반영:
+    - `doc/roadmap/README.md` (SCM-201 산출물 링크)
+    - `doc/dev_plan.md` 2.1 기준 문서 참조 추가
+    - `doc/roadmap/progress.json` 업데이트(phase-2 75%)
+  - 검증:
+    - `scripts/roadmap-report.ps1` 실행 성공
+  - Q&A 누적 정책에 따라 본 요청/결과(Q45~Q46) 반영.
+
+### Q47. SCM-201 반영 결과 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `SCM-201` 관련 신규 문서(시나리오/ADR)와 로드맵/계획 업데이트, Q&A 누적 반영분을 브랜치에 커밋.
+  - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.

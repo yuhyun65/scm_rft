@@ -53,6 +53,8 @@
 - 8개 서비스(auth/member/board/quality-doc/order-lot/inventory/file/report) 실행 가능
 - API Gateway 정책으로 인증/권한/격리/긴급차단 적용 가능
 - 핵심 사용자 시나리오(P0) end-to-end 통과
+- 기준 시나리오 문서: `doc/roadmap/scm-201-p0-scenarios.md`
+- 기준 아키텍처 의사결정: `doc/adr/ADR-003-gateway-runtime-selection.md`, `doc/adr/ADR-004-shared-db-domain-schema-strategy.md`
 
 ## 2.2 품질/보안 완료
 - CI 7개 게이트 전부 `skip 없이` 통과
