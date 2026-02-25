@@ -29,6 +29,11 @@ Copy-Item .env.example .env
 powershell -ExecutionPolicy Bypass -File .\scripts\dev-up.ps1
 ```
 
+Gateway까지 함께 실행하려면:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\dev-up.ps1 -WithGateway
+```
+
 4. 로컬 통합 인프라 중지
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\dev-down.ps1
@@ -76,6 +81,7 @@ make ci-smoke
 서비스 빌드/실행(Gradle 멀티모듈):
 ```powershell
 .\gradlew.bat build
+.\gradlew.bat :services:gateway:bootRun
 .\gradlew.bat :services:auth:bootRun
 .\gradlew.bat :services:member:bootRun
 ```

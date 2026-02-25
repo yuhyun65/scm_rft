@@ -1,6 +1,7 @@
 rootProject.name = "scm-rft"
 
 include(":services:auth")
+include(":services:gateway")
 include(":services:member")
 include(":services:board")
 include(":services:quality-doc")
