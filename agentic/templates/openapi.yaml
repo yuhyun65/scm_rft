@@ -3,7 +3,7 @@ info:
   title: "<service> API"
   version: "0.1.0"
 servers:
-  - url: "http://localhost:8080"
+  - url: "http://localhost:18080"
 paths:
   /health:
     get:
@@ -19,3 +19,4 @@ paths:
                   status:
                     type: string
                     example: UP
+
