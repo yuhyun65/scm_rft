@@ -817,3 +817,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 착수 준비 코멘트 등록:
     - 이슈 코멘트: `https://github.com/yuhyun65/scm_rft/issues/14#issuecomment-3957337019`
     - 범위 고정: Inventory 조회 API + Report Job 생성/조회 API + 표준 게이트 검증
+
+### Q66. SCM-209(Inventory+Report MVP) 구현 진행
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 구현 반영(`feature/scm-209-inventory-report-mvp`):
+    - Inventory API:
+      - `GET /api/inventory/v1/balances`
+      - `GET /api/inventory/v1/movements`
+    - Report API:
+      - `POST /api/report/v1/jobs`
+      - `GET /api/report/v1/jobs/{jobId}`
+    - 계층 구현:
+      - inventory/report 각각 Controller/Service/Repository/ExceptionHandler 추가
+    - 계약 보강:
+      - `shared/contracts/inventory.openapi.yaml`
+      - `shared/contracts/report.openapi.yaml`
+    - 테스트 추가:
+      - inventory/report 서비스 테스트 + 리포지토리 통합 테스트
+  - 검증 결과:
+    - `:services:inventory:test :services:report:test` 통과
+    - `ci-run-gate.ps1 -Gate contract-test` 통과
+    - `ci-run-gate.ps1 -Gate unit-integration-test` 통과
+    - `ci-run-gate.ps1 -Gate smoke-test` 통과
+    - `ci-run-gate.ps1 -Gate build` 통과
+  - 커밋/PR:
+    - 커밋: `dc10c0d` (`feat(scm-209): implement inventory and report mvp apis`)
+    - PR: `#15` `feat(scm-209): implement inventory and report p0 mvp apis`
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/15`
+  - 이슈 연계:
+    - `#14` 진행 코멘트 등록: `https://github.com/yuhyun65/scm_rft/issues/14#issuecomment-3957417293`
