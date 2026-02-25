@@ -711,3 +711,18 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 스모크 재실행 결과:
     - `scripts/smoke-gateway-auth-member-e2e.ps1` 전체 통과
     - 통과 항목: login, token verify, member search, member by id, 무토큰 401, 잘못된 토큰 401
+
+### Q65. SCM-207 브랜치 PR 생성
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - PR 생성 완료:
+    - PR: `#11`
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/11`
+    - base: `feature/to-be-dev-env-bootstrap`
+    - head: `feature/scm-207-gateway-auth-member-e2e`
+    - title: `test(scm-207): add gateway-routed auth/member e2e smoke`
+  - 본문 반영 항목:
+    - SCM-207 구현 파일 변경 요약
+    - 검증 명령/결과 요약(`smoke-gateway-auth-member-e2e.ps1`, `ci-run-gate.ps1 -Gate smoke-test`)
+    - 이슈 연계: `Refs #10`
