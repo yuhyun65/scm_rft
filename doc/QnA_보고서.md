@@ -741,3 +741,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - Codex 답변(결과):
   - 다음 단계 구현 순서를 Issue/PR 단위 10개 작업으로 분해해, 실행 순서/브랜치/PR 제목/완료조건(DoD) 기준으로 제시.
   - 기준 브랜치는 `feature/to-be-dev-env-bootstrap`로 고정하고, 각 작업은 선행 PR 머지 후 다음 작업으로 진행하도록 의존관계를 명시.
+### Q61. SCM-206 즉시 착수 실행 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `SCM-206` 이슈 생성: `#8` (`[SCM-206] Stabilize gateway on 18080 baseline and deprecation cleanup`)
+  - 작업 브랜치 생성: `feature/scm-206-gateway-18080-baseline`
+  - 반영 커밋:
+    - `chore(gateway): lock 18080 baseline and remove deprecations`
+    - 포함 파일: `build.gradle`, `services/gateway/src/main/resources/application.yml`, `services/gateway/Dockerfile`, `scripts/dev-up.ps1`, `services/README.md`, `agentic/templates/openapi.yaml`, `doc/QnA_보고서.md`
+  - 원격 푸시 완료: `origin/feature/scm-206-gateway-18080-baseline`
+  - PR 생성: `#9` `https://github.com/yuhyun65/scm_rft/pull/9`
+  - 비고:
+    - PR 본문에 `Closes #8` 반영했으나, base가 기본 브랜치가 아니라 GitHub `closingIssuesReferences`에는 표시되지 않음(머지 후 이슈 수동 종료 필요)
