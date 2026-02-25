@@ -754,3 +754,41 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - PR 생성: `#9` `https://github.com/yuhyun65/scm_rft/pull/9`
   - 비고:
     - PR 본문에 `Closes #8` 반영했으나, base가 기본 브랜치가 아니라 GitHub `closingIssuesReferences`에는 표시되지 않음(머지 후 이슈 수동 종료 필요)
+
+### Q62. SCM-208(File API MVP) 구현 진행 요청
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 구현 반영(`feature/scm-208-file-api-mvp`):
+    - File API 추가:
+      - `POST /api/file/v1/files`
+      - `GET /api/file/v1/files/{fileId}`
+    - 계층 구현:
+      - Controller/DTO/ExceptionHandler
+      - Service(도메인키/저장경로 정책 검증 포함)
+      - Repository(`dbo.upload_files` 저장/조회, JdbcClient)
+    - 계약 보강:
+      - `shared/contracts/file.openapi.yaml`에 400/404 에러 응답 스키마 추가
+    - 테스트 추가:
+      - `FileServiceTests`(정상/검증/예외)
+      - `FileRepositoryIntegrationTests`(H2 + `dbo.upload_files` 저장/조회)
+  - 검증 결과:
+    - `:services:file:test` 통과
+    - `build -x test` 통과
+    - `ci-run-gate.ps1 -Gate contract-test` 통과
+    - `ci-run-gate.ps1 -Gate unit-integration-test` 통과
+    - `ci-run-gate.ps1 -Gate smoke-test` 통과(게이트웨이 E2E smoke는 opt-in 설정으로 skip)
+
+### Q63. SCM-208 구현 결과 PR 생성 및 이슈 연계
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - SCM-208 구현 브랜치 커밋/푸시 완료
+    - 브랜치: `feature/scm-208-file-api-mvp`
+    - 커밋: `fa53b48` (`feat(scm-208): implement file metadata api mvp`)
+  - PR 생성:
+    - `#13` `feat(scm-208): implement file metadata and attachment flow mvp`
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/13`
+    - base: `feature/to-be-dev-env-bootstrap`
+  - 이슈 연계:
+    - `#12`에 PR 링크/구현 범위 코멘트 등록

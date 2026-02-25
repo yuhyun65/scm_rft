@@ -23,6 +23,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FileMetadata"
+        "400":
+          description: Invalid request payload or metadata policy violation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileError"
   /v1/files/{fileId}:
     get:
       summary: Get file metadata
@@ -41,8 +47,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FileMetadata"
+        "400":
+          description: Invalid fileId format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileError"
         "404":
           description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileError"
 components:
   schemas:
     FileRegisterRequest:
@@ -51,10 +67,13 @@ components:
       properties:
         domainKey:
           type: string
+          maxLength: 100
         originalName:
           type: string
+          maxLength: 255
         storagePath:
           type: string
+          maxLength: 500
     FileMetadata:
       type: object
       required: [fileId, domainKey, originalName, storagePath]
@@ -68,3 +87,16 @@ components:
           type: string
         storagePath:
           type: string
+    FileError:
+      type: object
+      required: [code, message, path, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
