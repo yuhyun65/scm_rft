@@ -804,3 +804,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - merge commit: `0cb02e5590658b9dd4b98f145198097432aedf10`
   - 이슈 정리:
     - `#12` 수동 종료 완료
+
+### Q65. SCM-209(Inventory+Report MVP) 착수 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 다음 이슈 생성:
+    - `#14` `[SCM-209] Implement inventory and report P0 APIs MVP`
+    - URL: `https://github.com/yuhyun65/scm_rft/issues/14`
+  - 구현 브랜치 생성/원격 푸시:
+    - `feature/scm-209-inventory-report-mvp`
+  - 착수 준비 코멘트 등록:
+    - 이슈 코멘트: `https://github.com/yuhyun65/scm_rft/issues/14#issuecomment-3957337019`
+    - 범위 고정: Inventory 조회 API + Report Job 생성/조회 API + 표준 게이트 검증
