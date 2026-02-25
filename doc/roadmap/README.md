@@ -13,3 +13,5 @@ This directory operationalizes section 7 of `doc/scm_rft_design.md`.
 - source of truth: `progress.json`
 - report command:
   - `powershell -ExecutionPolicy Bypass -File .\scripts\roadmap-report.ps1`
+- issue/pr templates for `2.1`:
+  - `doc/roadmap/issue-pr-templates-2.1.md`

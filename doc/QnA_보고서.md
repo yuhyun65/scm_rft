@@ -473,5 +473,29 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - P0 DB 설계 문서, Flyway V2, 이관 매핑/문서 업데이트, Q&A 누적 반영분을 브랜치에 커밋.
   - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
 
+### Q42. 2.1 달성용 우선순위 계획을 Issue/PR 10개 작업으로 분해 요청
+- 사용자 프롬프트:
+  - "위 계획을 바로 **Issue/PR 단위(10개 작업)로 쪼개서 실행 순서대로 만들어줘"
+- Codex 답변(결과):
+  - `Issue 1개 = PR 1개` 원칙으로 10개 실행 작업을 순서화해 제시.
+  - 각 작업에 목표, 핵심 구현 범위, 완료 기준(DoD), 선행 의존성을 포함해 즉시 착수 가능한 수준으로 분해.
+
+### Q43. Issue/PR 템플릿 생성 진행 확인
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 2.1 달성용 10개 작업을 복사/사용 가능한 GitHub Issue 본문 템플릿 문서로 생성:
+    - `doc/roadmap/issue-pr-templates-2.1.md`
+  - 로드맵 README에 템플릿 문서 링크 추가:
+    - `doc/roadmap/README.md`
+  - Q&A 누적 정책에 따라 본 요청/결과(Q43) 반영.
+
+### Q44. 2.1 Issue/PR 템플릿 문서 반영 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `doc/roadmap/issue-pr-templates-2.1.md` 신규 문서와 관련 문서 갱신분을 브랜치에 커밋.
+  - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
