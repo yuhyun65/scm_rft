@@ -10,10 +10,11 @@
 |---|---|---|---|---|---|
 | `sp_SCM_MemberShip` | auth/member | 로그인, 회원 조회 | `/api/auth/v1/sessions`, `/api/member/v1/members` | `members`, `auth_sessions` | 로그인 성공률, 회원 상태 일치 |
 | `sp_SCM_OrderManager` | order-lot | 납품/LOT/거래명세 | `/api/order-lot/v1/orders/{orderNo}/lots` | `orders`, `order_lots` | 주문/LOT 건수, 수량 합계 |
-| `sp_SCM_StokList` | inventory | 재고 조회 | `/api/inventory/v1/items/{itemCode}/balance` | `inventory_balances`(예정) | 품목별 재고 수량 |
-| `sp_SCM_TrustBoard` | board | 게시글 조회/등록 | `/api/board/v1/posts` | `board_posts`(예정) | 게시글 건수/최근글 일치 |
+| `sp_SCM_StokList` | inventory | 재고 조회 | `/api/inventory/v1/items/{itemCode}/balance` | `inventory_balances`, `inventory_movements` | 품목별 재고 수량 |
+| `sp_SCM_TrustBoard` | board | 게시글 조회/등록 | `/api/board/v1/posts` | `board_posts`, `board_post_attachments` | 게시글 건수/최근글 일치 |
 | `sp_SCM_TrustNotice` | board/report | 공지/출력 | `/api/board/v1/posts`, `/api/report/v1/reports/{type}` | `board_posts`, `report_jobs` | 공지 목록/출력 결과 |
-| `sp_SCM_TrustAODoc` | quality-doc | 품질문서 발행/수신 | `/api/quality-doc/v1/documents` | `quality_documents`(예정) | 문서 건수/상태 일치 |
+| `sp_SCM_TrustAODoc` | quality-doc | 품질문서 발행/수신 | `/api/quality-doc/v1/documents` | `quality_documents`, `quality_document_acks` | 문서 건수/상태 일치 |
+| `sp_SCM_OrderManager`(첨부) | file | 첨부 메타/연계 | `/api/file/v1/files` | `upload_files`, `board_post_attachments` | 파일 메타/경로 일치 |
 | `sp_SCM_HelpPop` | board/member | 헬프성 조회 | `/api/member/v1/members` 등 | 도메인별 조회 테이블 | 조회 결과 샘플 일치 |
 
 ## 작성 규칙

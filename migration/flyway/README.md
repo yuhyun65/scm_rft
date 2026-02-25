@@ -5,6 +5,7 @@ Big-Bang 전환 초기 기준 스키마를 관리합니다.
 ## 파일 규칙
 - 파일명: `V<version>__<description>.sql`
 - 현재 baseline: `V1__baseline.sql`
+- core domains: `V2__core_domains.sql`
 
 ## 적용 원칙
 - SQL Server 기준으로 작성

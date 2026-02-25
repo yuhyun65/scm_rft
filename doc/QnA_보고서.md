@@ -442,5 +442,36 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 1.5 구현 가능화 관련 코드/문서/스크립트 변경사항을 브랜치에 커밋.
   - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
 
+### Q39. 제품/기능 구현 전 DB 스키마 선설계 필요 여부 검토 요청
+- 사용자 프롬프트:
+  - "이작업을 하려면 db 스키마를 먼저 설계해야 하는지 검토해줘"
+- Codex 답변(결과):
+  - 결론: 선설계 필요.
+  - 단, 전체를 한 번에 고정하지 않고 `2.1 P0` 기능 기준 최소 스키마를 먼저 확정하는 방식으로 제안.
+  - 기존 `V1__baseline.sql`이 `auth/member/order-lot/file` 중심이라 `board/quality-doc/inventory/report` 구현에는 부족하므로 `V2` 추가를 권고.
+
+### Q40. P0 기준 구체 설계안/Flyway V2 초안 작성 진행 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - P0 DB 설계 문서 신규 작성:
+    - `doc/db/p0_schema_design.md`
+  - Flyway 코어 도메인 스키마 추가:
+    - `migration/flyway/V2__core_domains.sql`
+    - 포함: `board_posts`, `board_post_attachments`, `quality_documents`, `quality_document_acks`, `inventory_balances`, `inventory_movements`, `report_jobs` + FK/INDEX/CHECK 제약
+  - 이관 매핑 문서 정합화:
+    - `migration/mapping/legacy-sp-to-target-mapping.md` (예정 표기 제거, 신규 테이블 반영)
+  - Flyway 문서 갱신:
+    - `migration/flyway/README.md` (`V2__core_domains.sql` 명시)
+  - 검증:
+    - `migration-dry-run` 게이트 통과(상태파일/검증리포트 생성)
+
+### Q41. P0 스키마/Flyway V2 반영 결과 커밋/푸시 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - P0 DB 설계 문서, Flyway V2, 이관 매핑/문서 업데이트, Q&A 누적 반영분을 브랜치에 커밋.
+  - 원격 `origin/feature/to-be-dev-env-bootstrap`로 푸시해 PR(`#1`)에 반영.
+
 ## 비고
 - 본 문서는 대화 로그를 기반으로 핵심 질의/응답 결과를 압축 정리한 Q&A 보고서임.
