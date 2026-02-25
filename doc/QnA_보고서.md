@@ -1,4 +1,4 @@
-﻿# HISCM 전환 준비 Q&A 보고서
+# HISCM 전환 준비 Q&A 보고서
 
 - 작성일: 2026-02-24
 - 작성자: Codex
@@ -660,4 +660,84 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - GitHub checks 미보고(`gh pr checks 7` 결과 없음) -> 로컬 게이트 증빙 필요
     - `sqlcmd` 미설치 확인
     - Docker Desktop daemon 비기동 상태 확인(성능 측정 환경 준비 필요)
-  - 위 상태를 기준으로 PR 머지 전 점검표와 대량 샘플 데이터 성능 리포트 준비/실행 체크리스트를 정리 제공.
+  - 위 상태를 기준으로 PR 머지 전 점검표와 대량 샘플 데이터 성능 리포트 준비/실행 체크리스트를 정리 제공
+
+### Q55. API 벤치 100% 오류 원인 및 해결방법 설명 요청
+- 사용자 프롬프트:
+  - "API 벤치는 현재 100% 에러로 유효 리포트 미완료(원인: 멤버 서비스 기동 환경/포트 충돌) 이내용은 어떤 문제인지 설명하고 해결방법을 알려줘"
+- Codex 답변(결과):
+  - 원인 진단:
+    - member 서비스 포트 충돌(8082 점유)로 bootRun 실패 이력 존재
+    - .env 로드 스크립트 오타(`Set-Item -Path (env: + $parts[0])`)로 환경변수 주입 실패
+    - member API 예외가 `MEMBER_INTERNAL_ERROR`(500)로 래핑되어 벤치 스크립트에서 전량 오류로 집계
+  - 해결 순서 제시:
+    - 포트 점검/충돌 정리 -> infra 및 DB 준비 -> .env 정상 로드 -> auth/member 재기동 -> 헬스체크/벤치 재실행
+
+### Q56. 권장 순서 실제 실행 요청
+- 사용자 프롬프트:
+  - "해결 방법 (권장 순서)을 진행해줘"
+- Codex 답변(결과):
+  - 실행 결과:
+    - `perf-member-prepare-db.ps1` 실행 성공(V1~V5 적용)
+    - `perf-member-seed.ps1 -RowCount 100000` 실행 성공
+    - DB 검증: `dbo.members` 100,000건 확인
+    - auth/member 재기동 후 포트 확인: 8081(auth), 8082(member) LISTEN
+    - 헬스/API 검증:
+      - `GET /actuator/health` (auth) 정상
+      - `GET /api/member/v1/members?page=0&size=1` 정상(200)
+    - API 벤치 재실행 성공:
+      - `doc/perf/reports/member-api-benchmark-20260225-133330.md`
+      - 시나리오 4종 모두 Error Rate 0% (각 200/200 성공)
+
+
+### Q57. httpd(8080) 유지 + gateway 18080 분리 적용 요청
+- 사용자 프롬프트:
+  - "httpd(8080) 유지 + gateway를 18080으로 분리해줘"
+- Codex 답변(결과):
+  - 반영 내용(작업 저장소 `SCM_RFT`, 작업 브랜치 `feature/to-be-dev-env-bootstrap`):
+    - `services/gateway/src/main/resources/application.yml`의 `server.port`를 `18080`으로 변경
+    - `services/gateway/Dockerfile`의 `EXPOSE`를 `18080`으로 변경
+    - `scripts/dev-up.ps1` Gateway 안내 URL을 `http://localhost:18080`으로 변경
+    - `services/README.md`의 gateway 포트를 `18080`으로 변경
+    - `agentic/templates/openapi.yaml` 서버 URL을 `http://localhost:18080`으로 변경
+  - 동일 반영을 `SCM_RFT_scm203` 워크트리에도 적용해 실행 경로 간 포트 일관성 유지
+  - 검증:
+    - 포트 `8080`은 기존 `httpd`가 계속 점유한 상태 유지 확인
+    - gateway `18080` 분리 설정은 반영되었으나, `gateway bootRun` 시 `ReactiveStringRedisTemplate` 클래스 누락으로 기동 실패(별도 의존성 이슈) 확인
+### Q58. gateway 18080 분리 후 기동 정상화 진행 승인
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 원인 해결:
+    - gateway의 `RedisRateLimiter` 사용 시 필요한 reactive Redis 클래스 누락 이슈 해결
+    - `build.gradle`의 gateway 의존성에 `org.springframework.boot:spring-boot-starter-data-redis-reactive` 추가
+  - 추가 복구:
+    - `build.gradle` 저장 인코딩(BOM)으로 인한 Gradle 파싱 오류를 UTF-8 without BOM으로 복구
+  - 실행 검증:
+    - gateway 기동 성공(`GatewayApplication started`)
+    - `Netty started on port 18080` 확인
+    - `GET http://localhost:18080/actuator/health` 정상 응답(UP)
+    - 포트 공존 확인: `8080=httpd`, `18080=gateway(java)`
+  - 참고 경고(비차단):
+    - Spring Cloud Gateway 스타터/설정 키 일부 deprecation warning 존재(기동에는 영향 없음)
+
+### Q59. Gateway deprecation warning 정리 반영 요청
+- 사용자 프롬프트:
+  - "반영해줘"
+- Codex 답변(결과):
+  - 반영 내용:
+    - gateway 설정 키 변경
+      - `spring.cloud.gateway.httpclient.*` -> `spring.cloud.gateway.server.webflux.httpclient.*`
+    - gateway starter 교체
+      - `spring-cloud-starter-gateway` -> `spring-cloud-starter-gateway-server-webflux`
+    - 위 변경을 `SCM_RFT`, `SCM_RFT_scm203` 모두에 동일 반영
+  - 검증 결과(`SCM_RFT`):
+    - `:services:gateway:bootRun` 정상 기동
+    - `GET http://localhost:18080/actuator/health` 응답 `UP`
+    - 기존 deprecation/properties-migration warning 로그 미검출
+### Q60. 다음 단계 구현 순서의 Issue/PR 10개 분해 요청
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 다음 단계 구현 순서를 Issue/PR 단위 10개 작업으로 분해해, 실행 순서/브랜치/PR 제목/완료조건(DoD) 기준으로 제시.
+  - 기준 브랜치는 `feature/to-be-dev-env-bootstrap`로 고정하고, 각 작업은 선행 PR 머지 후 다음 작업으로 진행하도록 의존관계를 명시.

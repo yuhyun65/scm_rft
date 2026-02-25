@@ -3,14 +3,16 @@ spring:
     name: gateway
   cloud:
     gateway:
-      httpclient:
-        connect-timeout: 2000
-        response-timeout: 5s
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 5s
       default-filters:
         - PreserveHostHeader
 
 server:
-  port: 8080
+  port: 18080
 
 management:
   endpoints:
@@ -25,3 +27,4 @@ gateway:
     emergency-stop:
       enabled: ${GATEWAY_EMERGENCY_STOP_ENABLED:false}
       http-status: ${GATEWAY_EMERGENCY_STOP_STATUS:503}
+
