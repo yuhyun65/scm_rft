@@ -617,3 +617,13 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 커밋: `b0e6d6f`
     - PR: `#7` `https://github.com/yuhyun65/scm_rft/pull/7` (OPEN)
     - 이슈 `#6`은 PR과 연결된 상태로 OPEN 유지
+### Q52. SCM-203 다음 구현(인증 DB 전환/게이트웨이 정책/검색 튜닝) 사전 준비·점검사항 정리 요청
+- 사용자 프롬프트:
+  - "다음을 바로 진행하기 위해 준비할 사항 및 점검할 사항을 검토하여 정리해줘\n\n1. Auth credential 검증을 임시(password)에서 DB 기반으로 전환 \n2. Gateway 인증필터에 timeout/circuit-breaker 세부정책 추가 \n3. Member 검색 쿼리/인덱스 실제 데이터 기준 튜닝"
+- Codex 답변(결과):
+  - 현재 코드 상태를 기준으로 3개 과제의 준비/점검 항목을 실행 순서형 체크리스트로 정리.
+  - 핵심 진단:
+    - Auth는 `AuthService`의 임시 상수 비밀번호 검증(`ACCEPTED_PASSWORD`) 상태
+    - Gateway는 verify timeout은 있으나 verify 호출 자체의 circuit-breaker 정책 미적용
+    - Member 검색은 `%keyword%` + OR 조건으로 인덱스 효율이 낮을 수 있음
+  - 즉시 착수 기준(DoD), 필수 SQL/설정/테스트 항목, 성능 검증 포인트를 함께 제시.
