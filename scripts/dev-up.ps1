@@ -56,7 +56,7 @@ try {
     Start-Process powershell -ArgumentList @(
       "-NoExit",
       "-Command",
-      "Set-Location '$root'; .\gradlew.bat :services:gateway:bootRun"
+      "`$env:GATEWAY_POLICY_PATH='infra/gateway/policies/local-auth-member-e2e.yaml'; Set-Location '$root'; .\gradlew.bat :services:gateway:bootRun"
     ) | Out-Null
     Write-Host "- Gateway    : http://localhost:18080"
   }
