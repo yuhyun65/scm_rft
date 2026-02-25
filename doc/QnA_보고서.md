@@ -661,3 +661,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `sqlcmd` 미설치 확인
     - Docker Desktop daemon 비기동 상태 확인(성능 측정 환경 준비 필요)
   - 위 상태를 기준으로 PR 머지 전 점검표와 대량 샘플 데이터 성능 리포트 준비/실행 체크리스트를 정리 제공.
+### Q62. PR #9 코멘트/머지 및 SCM-207 착수 준비 실행
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - PR #9 처리:
+    - 검증 요약 코멘트 추가: `https://github.com/yuhyun65/scm_rft/pull/9#issuecomment-3956896216`
+    - PR #9 merge 완료(merge commit: `c75169fd7c1bdffccf362f3b12fa0f15de0f192c`)
+  - 이슈 정리:
+    - `#8` 수동 종료 완료(머지 커밋 참조 코멘트 포함)
+  - 다음 단계 준비(SCM-207):
+    - 이슈 생성: `#10` `[SCM-207] Implement gateway-routed auth/member E2E smoke`
+    - 기준 브랜치 최신 동기화: `feature/to-be-dev-env-bootstrap` fast-forward
+    - 작업 브랜치 생성/원격 푸시: `feature/scm-207-gateway-auth-member-e2e`
