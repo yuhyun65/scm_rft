@@ -848,3 +848,15 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - URL: `https://github.com/yuhyun65/scm_rft/pull/15`
   - 이슈 연계:
     - `#14` 진행 코멘트 등록: `https://github.com/yuhyun65/scm_rft/issues/14#issuecomment-3957417293`
+
+### Q67. PR #15 리뷰/머지 진행
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - PR 상태 확인:
+    - `#15` 상태 `OPEN`, `MERGEABLE`, 차단 리뷰 없음
+  - PR 머지 완료:
+    - PR: `https://github.com/yuhyun65/scm_rft/pull/15`
+    - merge commit: `9fe6890e19962288646d1463d2f4efb8020ed989`
+  - 이슈 정리:
+    - `#14` 수동 종료 완료
