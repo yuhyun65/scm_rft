@@ -145,6 +145,23 @@ function Invoke-SmokeTest {
   else {
     Write-Host "[SKIP] smoke-test: agentic scripts not found."
   }
+
+  $gatewayE2ESmoke = Join-Path $repoRoot "scripts/smoke-gateway-auth-member-e2e.ps1"
+  if (-not (Test-Path $gatewayE2ESmoke)) {
+    Write-Host "[SKIP] smoke-test: scripts/smoke-gateway-auth-member-e2e.ps1 not found."
+    return
+  }
+
+  if ($env:SCM_ENABLE_GATEWAY_E2E_SMOKE -eq "1") {
+    & powershell -ExecutionPolicy Bypass -File $gatewayE2ESmoke
+    if ($LASTEXITCODE -ne 0) {
+      throw "[FAIL] smoke-test: gateway auth/member e2e smoke failed."
+    }
+    Write-Host "[OK] smoke-test: gateway auth/member e2e smoke passed."
+  }
+  else {
+    Write-Host "[SKIP] smoke-test: set SCM_ENABLE_GATEWAY_E2E_SMOKE=1 to run gateway auth/member e2e smoke."
+  }
 }
 
 Push-Location $repoRoot

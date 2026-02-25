@@ -1,0 +1,38 @@
+policyVersion: 1
+name: local-auth-member-e2e
+
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 2
+    backoffMs: 200
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: true
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://localhost:8081
+    rateLimitRps: 80
+  - id: member
+    path: /api/member/**
+    target: http://localhost:8082
+    rateLimitRps: 80
+
+cutoverSwitches:
+  blockLegacyWrites: false
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: true
+    httpStatus: 503

@@ -674,3 +674,40 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 이슈 생성: `#10` `[SCM-207] Implement gateway-routed auth/member E2E smoke`
     - 기준 브랜치 최신 동기화: `feature/to-be-dev-env-bootstrap` fast-forward
     - 작업 브랜치 생성/원격 푸시: `feature/scm-207-gateway-auth-member-e2e`
+
+### Q63. SCM-207(gateway-routed auth/member E2E smoke) 실제 구현 진행
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 구현 반영:
+    - 로컬 E2E 게이트웨이 정책 추가: `infra/gateway/policies/local-auth-member-e2e.yaml`
+    - 신규 스모크 스크립트 추가: `scripts/smoke-gateway-auth-member-e2e.ps1`
+      - 흐름: login -> token verify -> member search -> member by id
+      - 실패 케이스: no token(401), invalid token(401)
+      - 데이터 시드: SQL 컨테이너에 `members`, `auth_credentials` 업서트
+      - DB 자동 준비: `MES_HI` DB 보장 + `V1/V4/V5` SQL 적용
+    - 게이트 연동(옵션): `scripts/ci-run-gate.ps1`
+      - `SCM_ENABLE_GATEWAY_E2E_SMOKE=1`일 때만 E2E 스모크 실행
+    - 로컬 실행 표준 반영:
+      - `scripts/dev-up.ps1 -WithGateway`에서 `GATEWAY_POLICY_PATH=infra/gateway/policies/local-auth-member-e2e.yaml` 주입
+      - 문서 업데이트: `runbooks/local-dev-runbook.md`, `services/gateway/README.md`
+  - 실행 점검 결과:
+    - health check(auth/member/gateway) 통과
+    - SQL seed 실행 통과
+    - login 단계 실패(HTTP 상태코드 표시 포함 메시지로 개선)
+    - 원인 안내: auth/member가 shared SQL 설정으로 기동되지 않았거나(기본 H2) seeded credential을 참조하지 않는 런타임 상태
+
+### Q64. runbook 6 절차로 재기동 + gateway local 정책 + E2E 스모크 재실행
+- 사용자 프롬프트:
+  - "바로 해결 실행\n\nrunbook 6번 절차대로 auth/member를 SQL 설정으로 재기동\ngateway를 local-auth-member-e2e.yaml로 기동\nsmoke-gateway-auth-member-e2e.ps1 재실행"
+- Codex 답변(결과):
+  - 실행 내용:
+    - 기존 8081/8082/18080 점유 프로세스 종료 후 재기동
+    - auth/member를 SQL 환경변수(`SCM_DB_URL`, `SCM_DB_USER`, `SCM_DB_PASSWORD`, `SCM_DB_DRIVER`)로 기동
+    - auth에 `SCM_AUTH_JWT_SECRET` 주입 후 기동
+    - gateway를 `GATEWAY_POLICY_PATH=infra/gateway/policies/local-auth-member-e2e.yaml`로 기동
+  - 상태 확인:
+    - auth/member/gateway actuator health 모두 `UP`
+  - 스모크 재실행 결과:
+    - `scripts/smoke-gateway-auth-member-e2e.ps1` 전체 통과
+    - 통과 항목: login, token verify, member search, member by id, 무토큰 401, 잘못된 토큰 401
