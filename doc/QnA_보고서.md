@@ -660,69 +660,97 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - GitHub checks 미보고(`gh pr checks 7` 결과 없음) -> 로컬 게이트 증빙 필요
     - `sqlcmd` 미설치 확인
     - Docker Desktop daemon 비기동 상태 확인(성능 측정 환경 준비 필요)
-  - 위 상태를 기준으로 PR 머지 전 점검표와 대량 샘플 데이터 성능 리포트 준비/실행 체크리스트를 정리 제공.
-### Q62. PR #9 코멘트/머지 및 SCM-207 착수 준비 실행
+  - 위 상태를 기준으로 PR 머지 전 점검표와 대량 샘플 데이터 성능 리포트 준비/실행 체크리스트를 정리 제공
+
+### Q55. API 벤치 100% 오류 원인 및 해결방법 설명 요청
+- 사용자 프롬프트:
+  - "API 벤치는 현재 100% 에러로 유효 리포트 미완료(원인: 멤버 서비스 기동 환경/포트 충돌) 이내용은 어떤 문제인지 설명하고 해결방법을 알려줘"
+- Codex 답변(결과):
+  - 원인 진단:
+    - member 서비스 포트 충돌(8082 점유)로 bootRun 실패 이력 존재
+    - .env 로드 스크립트 오타(`Set-Item -Path (env: + $parts[0])`)로 환경변수 주입 실패
+    - member API 예외가 `MEMBER_INTERNAL_ERROR`(500)로 래핑되어 벤치 스크립트에서 전량 오류로 집계
+  - 해결 순서 제시:
+    - 포트 점검/충돌 정리 -> infra 및 DB 준비 -> .env 정상 로드 -> auth/member 재기동 -> 헬스체크/벤치 재실행
+
+### Q56. 권장 순서 실제 실행 요청
+- 사용자 프롬프트:
+  - "해결 방법 (권장 순서)을 진행해줘"
+- Codex 답변(결과):
+  - 실행 결과:
+    - `perf-member-prepare-db.ps1` 실행 성공(V1~V5 적용)
+    - `perf-member-seed.ps1 -RowCount 100000` 실행 성공
+    - DB 검증: `dbo.members` 100,000건 확인
+    - auth/member 재기동 후 포트 확인: 8081(auth), 8082(member) LISTEN
+    - 헬스/API 검증:
+      - `GET /actuator/health` (auth) 정상
+      - `GET /api/member/v1/members?page=0&size=1` 정상(200)
+    - API 벤치 재실행 성공:
+      - `doc/perf/reports/member-api-benchmark-20260225-133330.md`
+      - 시나리오 4종 모두 Error Rate 0% (각 200/200 성공)
+
+
+### Q57. httpd(8080) 유지 + gateway 18080 분리 적용 요청
+- 사용자 프롬프트:
+  - "httpd(8080) 유지 + gateway를 18080으로 분리해줘"
+- Codex 답변(결과):
+  - 반영 내용(작업 저장소 `SCM_RFT`, 작업 브랜치 `feature/to-be-dev-env-bootstrap`):
+    - `services/gateway/src/main/resources/application.yml`의 `server.port`를 `18080`으로 변경
+    - `services/gateway/Dockerfile`의 `EXPOSE`를 `18080`으로 변경
+    - `scripts/dev-up.ps1` Gateway 안내 URL을 `http://localhost:18080`으로 변경
+    - `services/README.md`의 gateway 포트를 `18080`으로 변경
+    - `agentic/templates/openapi.yaml` 서버 URL을 `http://localhost:18080`으로 변경
+  - 동일 반영을 `SCM_RFT_scm203` 워크트리에도 적용해 실행 경로 간 포트 일관성 유지
+  - 검증:
+    - 포트 `8080`은 기존 `httpd`가 계속 점유한 상태 유지 확인
+    - gateway `18080` 분리 설정은 반영되었으나, `gateway bootRun` 시 `ReactiveStringRedisTemplate` 클래스 누락으로 기동 실패(별도 의존성 이슈) 확인
+### Q58. gateway 18080 분리 후 기동 정상화 진행 승인
 - 사용자 프롬프트:
   - "예"
 - Codex 답변(결과):
-  - PR #9 처리:
-    - 검증 요약 코멘트 추가: `https://github.com/yuhyun65/scm_rft/pull/9#issuecomment-3956896216`
-    - PR #9 merge 완료(merge commit: `c75169fd7c1bdffccf362f3b12fa0f15de0f192c`)
-  - 이슈 정리:
-    - `#8` 수동 종료 완료(머지 커밋 참조 코멘트 포함)
-  - 다음 단계 준비(SCM-207):
-    - 이슈 생성: `#10` `[SCM-207] Implement gateway-routed auth/member E2E smoke`
-    - 기준 브랜치 최신 동기화: `feature/to-be-dev-env-bootstrap` fast-forward
-    - 작업 브랜치 생성/원격 푸시: `feature/scm-207-gateway-auth-member-e2e`
+  - 원인 해결:
+    - gateway의 `RedisRateLimiter` 사용 시 필요한 reactive Redis 클래스 누락 이슈 해결
+    - `build.gradle`의 gateway 의존성에 `org.springframework.boot:spring-boot-starter-data-redis-reactive` 추가
+  - 추가 복구:
+    - `build.gradle` 저장 인코딩(BOM)으로 인한 Gradle 파싱 오류를 UTF-8 without BOM으로 복구
+  - 실행 검증:
+    - gateway 기동 성공(`GatewayApplication started`)
+    - `Netty started on port 18080` 확인
+    - `GET http://localhost:18080/actuator/health` 정상 응답(UP)
+    - 포트 공존 확인: `8080=httpd`, `18080=gateway(java)`
+  - 참고 경고(비차단):
+    - Spring Cloud Gateway 스타터/설정 키 일부 deprecation warning 존재(기동에는 영향 없음)
 
-### Q63. SCM-207(gateway-routed auth/member E2E smoke) 실제 구현 진행
+### Q59. Gateway deprecation warning 정리 반영 요청
+- 사용자 프롬프트:
+  - "반영해줘"
+- Codex 답변(결과):
+  - 반영 내용:
+    - gateway 설정 키 변경
+      - `spring.cloud.gateway.httpclient.*` -> `spring.cloud.gateway.server.webflux.httpclient.*`
+    - gateway starter 교체
+      - `spring-cloud-starter-gateway` -> `spring-cloud-starter-gateway-server-webflux`
+    - 위 변경을 `SCM_RFT`, `SCM_RFT_scm203` 모두에 동일 반영
+  - 검증 결과(`SCM_RFT`):
+    - `:services:gateway:bootRun` 정상 기동
+    - `GET http://localhost:18080/actuator/health` 응답 `UP`
+    - 기존 deprecation/properties-migration warning 로그 미검출
+### Q60. 다음 단계 구현 순서의 Issue/PR 10개 분해 요청
 - 사용자 프롬프트:
   - "예"
 - Codex 답변(결과):
-  - 구현 반영:
-    - 로컬 E2E 게이트웨이 정책 추가: `infra/gateway/policies/local-auth-member-e2e.yaml`
-    - 신규 스모크 스크립트 추가: `scripts/smoke-gateway-auth-member-e2e.ps1`
-      - 흐름: login -> token verify -> member search -> member by id
-      - 실패 케이스: no token(401), invalid token(401)
-      - 데이터 시드: SQL 컨테이너에 `members`, `auth_credentials` 업서트
-      - DB 자동 준비: `MES_HI` DB 보장 + `V1/V4/V5` SQL 적용
-    - 게이트 연동(옵션): `scripts/ci-run-gate.ps1`
-      - `SCM_ENABLE_GATEWAY_E2E_SMOKE=1`일 때만 E2E 스모크 실행
-    - 로컬 실행 표준 반영:
-      - `scripts/dev-up.ps1 -WithGateway`에서 `GATEWAY_POLICY_PATH=infra/gateway/policies/local-auth-member-e2e.yaml` 주입
-      - 문서 업데이트: `runbooks/local-dev-runbook.md`, `services/gateway/README.md`
-  - 실행 점검 결과:
-    - health check(auth/member/gateway) 통과
-    - SQL seed 실행 통과
-    - login 단계 실패(HTTP 상태코드 표시 포함 메시지로 개선)
-    - 원인 안내: auth/member가 shared SQL 설정으로 기동되지 않았거나(기본 H2) seeded credential을 참조하지 않는 런타임 상태
-
-### Q64. runbook 6 절차로 재기동 + gateway local 정책 + E2E 스모크 재실행
-- 사용자 프롬프트:
-  - "바로 해결 실행\n\nrunbook 6번 절차대로 auth/member를 SQL 설정으로 재기동\ngateway를 local-auth-member-e2e.yaml로 기동\nsmoke-gateway-auth-member-e2e.ps1 재실행"
-- Codex 답변(결과):
-  - 실행 내용:
-    - 기존 8081/8082/18080 점유 프로세스 종료 후 재기동
-    - auth/member를 SQL 환경변수(`SCM_DB_URL`, `SCM_DB_USER`, `SCM_DB_PASSWORD`, `SCM_DB_DRIVER`)로 기동
-    - auth에 `SCM_AUTH_JWT_SECRET` 주입 후 기동
-    - gateway를 `GATEWAY_POLICY_PATH=infra/gateway/policies/local-auth-member-e2e.yaml`로 기동
-  - 상태 확인:
-    - auth/member/gateway actuator health 모두 `UP`
-  - 스모크 재실행 결과:
-    - `scripts/smoke-gateway-auth-member-e2e.ps1` 전체 통과
-    - 통과 항목: login, token verify, member search, member by id, 무토큰 401, 잘못된 토큰 401
-
-### Q65. SCM-207 브랜치 PR 생성
+  - 다음 단계 구현 순서를 Issue/PR 단위 10개 작업으로 분해해, 실행 순서/브랜치/PR 제목/완료조건(DoD) 기준으로 제시.
+  - 기준 브랜치는 `feature/to-be-dev-env-bootstrap`로 고정하고, 각 작업은 선행 PR 머지 후 다음 작업으로 진행하도록 의존관계를 명시.
+### Q61. SCM-206 즉시 착수 실행 요청
 - 사용자 프롬프트:
   - "예"
 - Codex 답변(결과):
-  - PR 생성 완료:
-    - PR: `#11`
-    - URL: `https://github.com/yuhyun65/scm_rft/pull/11`
-    - base: `feature/to-be-dev-env-bootstrap`
-    - head: `feature/scm-207-gateway-auth-member-e2e`
-    - title: `test(scm-207): add gateway-routed auth/member e2e smoke`
-  - 본문 반영 항목:
-    - SCM-207 구현 파일 변경 요약
-    - 검증 명령/결과 요약(`smoke-gateway-auth-member-e2e.ps1`, `ci-run-gate.ps1 -Gate smoke-test`)
-    - 이슈 연계: `Refs #10`
+  - `SCM-206` 이슈 생성: `#8` (`[SCM-206] Stabilize gateway on 18080 baseline and deprecation cleanup`)
+  - 작업 브랜치 생성: `feature/scm-206-gateway-18080-baseline`
+  - 반영 커밋:
+    - `chore(gateway): lock 18080 baseline and remove deprecations`
+    - 포함 파일: `build.gradle`, `services/gateway/src/main/resources/application.yml`, `services/gateway/Dockerfile`, `scripts/dev-up.ps1`, `services/README.md`, `agentic/templates/openapi.yaml`, `doc/QnA_보고서.md`
+  - 원격 푸시 완료: `origin/feature/scm-206-gateway-18080-baseline`
+  - PR 생성: `#9` `https://github.com/yuhyun65/scm_rft/pull/9`
+  - 비고:
+    - PR 본문에 `Closes #8` 반영했으나, base가 기본 브랜치가 아니라 GitHub `closingIssuesReferences`에는 표시되지 않음(머지 후 이슈 수동 종료 필요)
