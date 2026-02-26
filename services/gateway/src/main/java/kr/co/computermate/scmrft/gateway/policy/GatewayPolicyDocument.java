@@ -214,8 +214,14 @@ public class GatewayPolicyDocument {
     private String id;
     private String path;
     private String target;
+    private Boolean authRequired;
+    private Integer requestTimeoutMs;
+    private Integer connectTimeoutMs;
+    private Retry retry;
+    private CircuitBreaker circuitBreaker;
     private int rateLimitRps;
     private WriteProtection writeProtection = new WriteProtection();
+    private List<MethodPolicy> methodPolicies = new ArrayList<>();
 
     public String getId() {
       return id;
@@ -241,6 +247,46 @@ public class GatewayPolicyDocument {
       this.target = target;
     }
 
+    public Boolean getAuthRequired() {
+      return authRequired;
+    }
+
+    public void setAuthRequired(Boolean authRequired) {
+      this.authRequired = authRequired;
+    }
+
+    public Integer getRequestTimeoutMs() {
+      return requestTimeoutMs;
+    }
+
+    public void setRequestTimeoutMs(Integer requestTimeoutMs) {
+      this.requestTimeoutMs = requestTimeoutMs;
+    }
+
+    public Integer getConnectTimeoutMs() {
+      return connectTimeoutMs;
+    }
+
+    public void setConnectTimeoutMs(Integer connectTimeoutMs) {
+      this.connectTimeoutMs = connectTimeoutMs;
+    }
+
+    public Retry getRetry() {
+      return retry;
+    }
+
+    public void setRetry(Retry retry) {
+      this.retry = retry;
+    }
+
+    public CircuitBreaker getCircuitBreaker() {
+      return circuitBreaker;
+    }
+
+    public void setCircuitBreaker(CircuitBreaker circuitBreaker) {
+      this.circuitBreaker = circuitBreaker;
+    }
+
     public int getRateLimitRps() {
       return rateLimitRps;
     }
@@ -255,6 +301,80 @@ public class GatewayPolicyDocument {
 
     public void setWriteProtection(WriteProtection writeProtection) {
       this.writeProtection = writeProtection;
+    }
+
+    public List<MethodPolicy> getMethodPolicies() {
+      return methodPolicies;
+    }
+
+    public void setMethodPolicies(List<MethodPolicy> methodPolicies) {
+      this.methodPolicies = methodPolicies;
+    }
+  }
+
+  public static class MethodPolicy {
+    private String id;
+    private List<String> methods = new ArrayList<>();
+    private Integer requestTimeoutMs;
+    private Integer connectTimeoutMs;
+    private Retry retry;
+    private CircuitBreaker circuitBreaker;
+    private Integer rateLimitRps;
+
+    public String getId() {
+      return id;
+    }
+
+    public void setId(String id) {
+      this.id = id;
+    }
+
+    public List<String> getMethods() {
+      return methods;
+    }
+
+    public void setMethods(List<String> methods) {
+      this.methods = methods;
+    }
+
+    public Integer getRequestTimeoutMs() {
+      return requestTimeoutMs;
+    }
+
+    public void setRequestTimeoutMs(Integer requestTimeoutMs) {
+      this.requestTimeoutMs = requestTimeoutMs;
+    }
+
+    public Integer getConnectTimeoutMs() {
+      return connectTimeoutMs;
+    }
+
+    public void setConnectTimeoutMs(Integer connectTimeoutMs) {
+      this.connectTimeoutMs = connectTimeoutMs;
+    }
+
+    public Retry getRetry() {
+      return retry;
+    }
+
+    public void setRetry(Retry retry) {
+      this.retry = retry;
+    }
+
+    public CircuitBreaker getCircuitBreaker() {
+      return circuitBreaker;
+    }
+
+    public void setCircuitBreaker(CircuitBreaker circuitBreaker) {
+      this.circuitBreaker = circuitBreaker;
+    }
+
+    public Integer getRateLimitRps() {
+      return rateLimitRps;
+    }
+
+    public void setRateLimitRps(Integer rateLimitRps) {
+      this.rateLimitRps = rateLimitRps;
     }
   }
 
@@ -334,8 +454,17 @@ public class GatewayPolicyDocument {
     if (defaults == null) {
       defaults = new Defaults();
     }
+    if (defaults.getRetry() == null) {
+      defaults.setRetry(new Retry());
+    }
+    if (defaults.getCircuitBreaker() == null) {
+      defaults.setCircuitBreaker(new CircuitBreaker());
+    }
     if (trafficControl == null) {
       trafficControl = new TrafficControl();
+    }
+    if (trafficControl.getGlobalRateLimit() == null) {
+      trafficControl.setGlobalRateLimit(new GlobalRateLimit());
     }
     if (routes == null) {
       routes = new ArrayList<>();
@@ -343,7 +472,27 @@ public class GatewayPolicyDocument {
     if (cutoverSwitches == null) {
       cutoverSwitches = new CutoverSwitches();
     }
+    if (cutoverSwitches.getEmergencyStop() == null) {
+      cutoverSwitches.setEmergencyStop(new EmergencyStop());
+    }
 
-    routes.removeIf(route -> route == null || Objects.isNull(route.getId()) || Objects.isNull(route.getPath()) || Objects.isNull(route.getTarget()));
+    routes.removeIf(route -> route == null
+        || Objects.isNull(route.getId())
+        || Objects.isNull(route.getPath())
+        || Objects.isNull(route.getTarget()));
+
+    for (RouteRule route : routes) {
+      if (route.getWriteProtection() == null) {
+        route.setWriteProtection(new WriteProtection());
+      }
+      if (route.getMethodPolicies() == null) {
+        route.setMethodPolicies(new ArrayList<>());
+      }
+      route.getMethodPolicies().removeIf(methodPolicy ->
+          methodPolicy == null
+              || methodPolicy.getMethods() == null
+              || methodPolicy.getMethods().isEmpty()
+      );
+    }
   }
 }

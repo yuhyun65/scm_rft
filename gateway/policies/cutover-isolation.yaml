@@ -1,5 +1,5 @@
 policyVersion: 1
-name: cutover-isolation
+name: cutover-isolation-scm212
 
 defaults:
   requestTimeoutMs: 5000
@@ -17,8 +17,8 @@ defaults:
 trafficControl:
   globalRateLimit:
     enabled: true
-    requestsPerSecond: 300
-    burstCapacity: 600
+    requestsPerSecond: 400
+    burstCapacity: 800
 
 routes:
   - id: auth

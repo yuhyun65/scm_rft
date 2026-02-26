@@ -24,10 +24,12 @@ routes:
   - id: auth
     path: /api/auth/**
     target: http://localhost:8081
+    authRequired: false
     rateLimitRps: 80
   - id: member
     path: /api/member/**
     target: http://localhost:8082
+    authRequired: true
     rateLimitRps: 80
 
 cutoverSwitches:
