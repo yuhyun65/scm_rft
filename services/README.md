@@ -1,9 +1,9 @@
 # Services
 
-MSA 서비스 코드를 관리합니다.
+MSA ?쒕퉬??肄붾뱶瑜?愿由ы빀?덈떎.
 
-## 서비스 목록 및 기본 포트
-- `gateway` : 8080
+## ?쒕퉬??紐⑸줉 諛?湲곕낯 ?ы듃
+- `gateway` : 18080
 - `auth` : 8081
 - `member` : 8082
 - `board` : 8083
@@ -13,10 +13,12 @@ MSA 서비스 코드를 관리합니다.
 - `file` : 8087
 - `report` : 8088
 
-## 빌드/실행
-- 전체 빌드: `.\gradlew.bat build`
-- 전체 테스트: `.\gradlew.bat test`
-- 단일 서비스 실행 예시:
+## 鍮뚮뱶/?ㅽ뻾
+- ?꾩껜 鍮뚮뱶: `.\gradlew.bat build`
+- ?꾩껜 ?뚯뒪?? `.\gradlew.bat test`
+- ?⑥씪 ?쒕퉬???ㅽ뻾 ?덉떆:
   - `.\gradlew.bat :services:gateway:bootRun`
   - `.\gradlew.bat :services:auth:bootRun`
   - `.\gradlew.bat :services:member:bootRun`
+
+

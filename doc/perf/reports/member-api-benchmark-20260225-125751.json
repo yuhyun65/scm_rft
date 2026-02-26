@@ -1,0 +1,46 @@
+﻿[
+    {
+        "scenario":  "status-only-page0",
+        "requestCount":  50,
+        "successCount":  0,
+        "errorCount":  50,
+        "errorRate":  100,
+        "p50Ms":  6.66,
+        "p95Ms":  9.25,
+        "p99Ms":  12.74,
+        "tps":  134.35
+    },
+    {
+        "scenario":  "keyword-prefix-page0",
+        "requestCount":  50,
+        "successCount":  0,
+        "errorCount":  50,
+        "errorRate":  100,
+        "p50Ms":  5.5,
+        "p95Ms":  6.72,
+        "p99Ms":  38.12,
+        "tps":  158.39
+    },
+    {
+        "scenario":  "status-keyword-page0",
+        "requestCount":  50,
+        "successCount":  0,
+        "errorCount":  50,
+        "errorRate":  100,
+        "p50Ms":  4.65,
+        "p95Ms":  8.69,
+        "p99Ms":  12.98,
+        "tps":  186.61
+    },
+    {
+        "scenario":  "status-only-page1000",
+        "requestCount":  50,
+        "successCount":  0,
+        "errorCount":  50,
+        "errorRate":  100,
+        "p50Ms":  4.3,
+        "p95Ms":  5.27,
+        "p99Ms":  5.89,
+        "tps":  217.8
+    }
+]

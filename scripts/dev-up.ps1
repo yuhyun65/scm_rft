@@ -58,9 +58,10 @@ try {
       "-Command",
       "Set-Location '$root'; .\gradlew.bat :services:gateway:bootRun"
     ) | Out-Null
-    Write-Host "- Gateway    : http://localhost:8080"
+    Write-Host "- Gateway    : http://localhost:18080"
   }
 }
 finally {
   Pop-Location
 }
+

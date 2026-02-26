@@ -12,6 +12,7 @@ COPY infra/gateway/policies /app/infra/gateway/policies
 
 ENV GATEWAY_POLICY_PATH=/app/infra/gateway/policies/cutover-isolation.yaml
 ENV GATEWAY_EMERGENCY_STOP_ENABLED=false
-EXPOSE 8080
+EXPOSE 18080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
