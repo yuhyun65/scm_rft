@@ -11,6 +11,8 @@ import kr.co.computermate.scmrft.gateway.auth.AuthVerificationClient;
 import kr.co.computermate.scmrft.gateway.auth.TokenVerificationResult;
 import kr.co.computermate.scmrft.gateway.policy.GatewayPolicyDocument;
 import kr.co.computermate.scmrft.gateway.policy.GatewayPolicyLoader;
+import kr.co.computermate.scmrft.gateway.policy.GatewayRoutePolicyResolver;
+import kr.co.computermate.scmrft.gateway.policy.GatewayRoutePolicyResolver.ResolvedRoutePolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -23,8 +25,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -46,53 +48,50 @@ public class GatewayRouteConfiguration {
   }
 
   @Bean
-  public RedisRateLimiter globalRedisRateLimiter(GatewayPolicyDocument policy) {
-    int replenishRate = policy.getTrafficControl().getGlobalRateLimit().getRequestsPerSecond();
-    int burstCapacity = policy.getTrafficControl().getGlobalRateLimit().getBurstCapacity();
-    if (replenishRate <= 0) {
-      replenishRate = 1;
-    }
-    if (burstCapacity <= 0) {
-      burstCapacity = replenishRate;
-    }
-    return new RedisRateLimiter(replenishRate, burstCapacity);
-  }
-
-  @Bean
   public RouteLocator gatewayRouteLocator(
       RouteLocatorBuilder builder,
       GatewayPolicyDocument policy,
-      RedisRateLimiter rateLimiter,
+      GatewayRoutePolicyResolver resolver,
       KeyResolver keyResolver,
       AuthVerificationClient authVerificationClient
   ) {
     var routes = builder.routes();
-    int connectTimeout = policy.getDefaults().getConnectTimeoutMs();
-    Duration responseTimeout = Duration.ofMillis(policy.getDefaults().getRequestTimeoutMs());
-    int retries = Math.max(0, policy.getDefaults().getRetry().getAttempts());
 
-    for (GatewayPolicyDocument.RouteRule route : policy.getRoutes()) {
-      routes.route(route.getId(), predicate ->
-          predicate.path(route.getPath())
-              .filters(filters -> {
-                filters.requestRateLimiter(config ->
-                    config.setRateLimiter(rateLimiter).setKeyResolver(keyResolver)
-                );
+    for (ResolvedRoutePolicy route : resolver.resolve(policy)) {
+      routes.route(route.id(), predicate -> {
+        var routePredicate = predicate.path(route.path());
+        if (!route.methods().isEmpty()) {
+          routePredicate = routePredicate.and().method(route.methods().toArray(String[]::new));
+        }
 
-                if (policy.getDefaults().getRetry().isEnabled() && retries > 0) {
-                  filters.retry(config -> config.setRetries(retries));
-                }
+        return routePredicate
+            .filters(filters -> {
+              int replenishRate = Math.max(1, route.rateLimitRps());
+              int burstCapacity = Math.max(replenishRate, replenishRate * 2);
+              filters.requestRateLimiter(config ->
+                  config.setRateLimiter(new RedisRateLimiter(replenishRate, burstCapacity)).setKeyResolver(keyResolver)
+              );
 
-                filters.filter(authVerificationFilter(route.getId(), authVerificationClient));
-                filters.filter(writeProtectionFilter(route, policy.getCutoverSwitches().isBlockLegacyWrites()));
-                filters.setResponseHeader("X-SCM-Gateway-Route", route.getId());
-                return filters;
-              })
-              .metadata(CONNECT_TIMEOUT_ATTR, connectTimeout)
-              .metadata(RESPONSE_TIMEOUT_ATTR, responseTimeout)
-              .uri(route.getTarget())
-      );
+              if (route.retry().isEnabled() && route.retry().getAttempts() > 0) {
+                filters.retry(config -> config.setRetries(route.retry().getAttempts()));
+              }
+
+              if (route.circuitBreaker().isEnabled()) {
+                filters.circuitBreaker(config -> config.setName("cb-" + route.id()));
+              }
+
+              filters.filter(authVerificationFilter(route.authRequired(), authVerificationClient));
+              filters.filter(writeProtectionFilter(route.writeProtection(), policy.getCutoverSwitches().isBlockLegacyWrites()));
+              filters.setResponseHeader("X-SCM-Gateway-Route", route.id());
+              filters.setResponseHeader("X-SCM-Policy-Id", policy.getName());
+              return filters;
+            })
+            .metadata(CONNECT_TIMEOUT_ATTR, route.connectTimeoutMs())
+            .metadata(RESPONSE_TIMEOUT_ATTR, Duration.ofMillis(route.requestTimeoutMs()))
+            .uri(route.target());
+      });
     }
+
     return routes.build();
   }
 
@@ -120,12 +119,15 @@ public class GatewayRouteConfiguration {
     };
   }
 
-  private GatewayFilter writeProtectionFilter(GatewayPolicyDocument.RouteRule route, boolean blockLegacyWrites) {
-    if (route.getWriteProtection() == null || !route.getWriteProtection().isEnabledDuringCutover()) {
+  private GatewayFilter writeProtectionFilter(
+      GatewayPolicyDocument.WriteProtection writeProtection,
+      boolean blockLegacyWrites
+  ) {
+    if (writeProtection == null || !writeProtection.isEnabledDuringCutover()) {
       return (exchange, chain) -> chain.filter(exchange);
     }
 
-    Set<HttpMethod> blockedMethods = route.getWriteProtection().getMethods().stream()
+    Set<HttpMethod> blockedMethods = writeProtection.getMethods().stream()
         .map(this::toHttpMethodOrNull)
         .filter(method -> method != null)
         .collect(Collectors.toSet());
@@ -141,10 +143,10 @@ public class GatewayRouteConfiguration {
   }
 
   private GatewayFilter authVerificationFilter(
-      String routeId,
+      boolean authRequired,
       AuthVerificationClient authVerificationClient
   ) {
-    if (!requiresAuthentication(routeId)) {
+    if (!authRequired) {
       return (exchange, chain) -> chain.filter(exchange);
     }
 
@@ -179,10 +181,6 @@ public class GatewayRouteConfiguration {
             return exchange.getResponse().setComplete();
           });
     };
-  }
-
-  private boolean requiresAuthentication(String routeId) {
-    return routeId == null || !routeId.equalsIgnoreCase("auth");
   }
 
   private String extractBearerToken(String authorizationHeader) {
