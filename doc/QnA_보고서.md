@@ -877,3 +877,20 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 종료 상태 확인:
       - `docker ps` 결과 실행 중 컨테이너 없음
       - 워킹 트리 clean 상태 확인
+
+### Q69. 일일 Runbook 파일 생성 및 저장 반영
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 당일 실행용 Runbook 파일 생성 완료:
+    - `runbooks/daily-runbook-2026-02-26.md`
+  - 포함 항목:
+    - A. 오전/오후 타임라인 + 병렬화 제안
+    - B. SCM-210~214 이슈별 WBS(Task/Owner/선행조건/절차/산출물/DoD/검증/롤백)
+    - C. 위험 레지스터 Top10
+    - D. 체크리스트 3종(시작 전/머지 전/리허설 전)
+    - 도메인별 gateway 정책표(timeout/retry/circuit-breaker/rate-limit, order-lot 예외)
+    - 도메인별 migration 검증 SQL 4종 템플릿(건수/합계/샘플링/상태분포)
+  - 후속 상태:
+    - QnA 보고서에 해당 프롬프트-결과 쌍(Q69) 추가
+    - 커밋/푸시 진행 예정
