@@ -1,4 +1,4 @@
-# HISCM 전환 준비 Q&A 보고서
+﻿# HISCM 전환 준비 Q&A 보고서
 
 - 작성일: 2026-02-24
 - 작성자: Codex
@@ -894,3 +894,263 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 후속 상태:
     - QnA 보고서에 해당 프롬프트-결과 쌍(Q69) 추가
     - 커밋/푸시 진행 예정
+
+### Q70. 프로젝트 고정 컨텍스트 저장 및 응답 규칙 잠금
+- 사용자 프롬프트:
+  - "아래를 프로젝트 수행의 고정 컨텍스트로 저장하고, 이후 답변은 이 컨텍스트를 항상 준수해줘. ... 이제부터 ... 바로 실행 가능한 산출물 중심으로만 답해줘."
+- Codex 답변(결과):
+  - 고정 컨텍스트 파일 저장 완료:
+    - `runbooks/fixed-project-context.md`
+  - 고정 적용 항목:
+    - 기준 브랜치: `feature/to-be-dev-env-bootstrap`
+    - 원칙: `1 Issue = 1 PR = 1 dedicated branch`
+    - 필수 게이트: `build`, `unit-integration-test`, `contract-test`, `smoke-test`, `migration-dry-run`
+    - 산출물 경로: `shared/contracts/`, `migration/reports/`, `runbooks/`, `doc/QnA_보고서.md`
+    - 오늘 작업: `SCM-210~214` (`Order-Lot P0` 최우선)
+    - DoD 규칙: 측정 가능한 수치 기준만 사용(`p95`, `오류율`, `mismatch=0` 등)
+    - 응답 규칙: 파일/템플릿/체크리스트/커맨드/SQL 중심, 모호 표현 금지
+
+### Q71. runbooks 완성본 3종 생성 요청
+- 사용자 프롬프트:
+  - "runbooks/ 아래에 저장할 문서 3개를 완성본으로 생성해줘..."
+- Codex 답변(결과):
+  - 생성 완료 파일:
+    - `runbooks/today-execution-R1.md`
+    - `runbooks/merge-gates-checklist.md`
+    - `runbooks/rehearsal-R1-runbook.md`
+  - 반영 내용:
+    - `today-execution-R1.md`: 09~18시 타임라인, Track A/Track B 병렬화, 시간 슬롯별 체크포인트/실행 커맨드/중단 조건
+    - `merge-gates-checklist.md`: 5개 필수 게이트별 실행 커맨드, 성공 판정, 실패 시 즉시 조치, PR 증적 목록/위치/붙여넣기 템플릿
+    - `rehearsal-R1-runbook.md`: Prep→Cutover→Validation→Rollback(optional)→Signoff 단계, 담당(Dev/Codex), 입력/산출물, 총 90분 목표, 단계별 중단 조건, Go/No-Go 임계치 표
+
+### Q72. SCM-210~214 PR 본문 템플릿 5종 생성
+- 사용자 프롬프트:
+  - "SCM-210~214 각각에 대해 PR 본문 템플릿을 생성해줘(총 5개)..."
+- Codex 답변(결과):
+  - 생성 완료 파일(`runbooks/pr-templates/`):
+    - `SCM-210-pr-description-template.md`
+    - `SCM-211-pr-description-template.md`
+    - `SCM-212-pr-description-template.md`
+    - `SCM-213-pr-description-template.md`
+    - `SCM-214-pr-description-template.md`
+  - 공통 포함 섹션:
+    - 배경/목표
+    - 범위(in/out)
+    - 변경 요약(코드/DB/계약/OpenAPI)
+    - 실행 방법(로컬 커맨드 포함)
+    - 게이트 결과 체크(5개 게이트 + 증적 링크/파일 경로 칸)
+    - 리스크/롤백
+    - DoD 체크(측정 기준)
+    - QnA 반영 여부(`doc/QnA_보고서.md`)
+  - 이슈별 하단 포함:
+    - 서브태스크 체크리스트(각 8개)
+
+### Q73. SCM-210/211 OpenAPI 스켈레톤 3종 생성
+- 사용자 프롬프트:
+  - "shared/contracts/ 아래에 둘 OpenAPI 초안(skeleton)을 생성해줘..."
+- Codex 답변(결과):
+  - 갱신 파일(고정 파일명):
+    - `shared/contracts/order-lot.openapi.yaml`
+    - `shared/contracts/board.openapi.yaml`
+    - `shared/contracts/quality-doc.openapi.yaml`
+  - 반영 내용:
+    - 공통 `components` 포함: 에러 응답(`ErrorResponse`/`ErrorCode`), 페이지네이션(`PageMeta`), 표준 헤더(`X-Trace-Id`, `X-Request-Id`), `traceId`
+    - `order-lot`: P0 최소 엔드포인트 4개(주문 목록/상세, LOT 상세, 주문 상태변경), 표준 에러 enum 반영, write API retry 금지 설명 명시
+    - `board`: 게시글 목록/상세/작성, 첨부를 fileId 참조 모델로 정의, 403/424/502 정책 명시
+    - `quality-doc`: 문서 목록/상세/ACK, ACK idempotent 정책 명시(동일 요청 재호출 시 동일 결과), `Idempotency-Key` 헤더 파라미터 추가
+    - 각 파일 말미에 `TODO: 팀 확정 필요 항목` 섹션 추가
+  - 검증:
+    - `ci-run-gate.ps1 -Gate contract-test` 실행 결과: `[OK] contract-test: validated 8 contract file(s).`
+
+### Q74. SCM-212 Gateway 라우팅 매트릭스/정책 예시 파일 생성
+- 사용자 프롬프트:
+  - "SCM-212를 위해 아래 산출물 2개를 생성해줘..."
+- Codex 답변(결과):
+  - 생성 파일:
+    - `runbooks/gateway-routing-matrix.md`
+    - `gateway/policies/cutover-isolation.yaml`
+  - 반영 내용:
+    - 매트릭스: auth/member/file/inventory/report/order-lot(read/write 분리)/board/quality-doc 도메인별 path prefix, target, auth required, timeout, retry, circuit-breaker, rate-limit 표 반영
+    - 정책 YAML: defaults + routes override 구조로 작성
+      - 예외 반영: `report retry=0`, `order-lot write retry=0` (정책 주석에 명시)
+      - `order-lot` write 보호: `writeProtection.methods=[POST,PUT,PATCH,DELETE]`
+      - 파일 끝에 `검증 방법(스모크 시나리오 8개)` 주석 포함
+  - 참고:
+    - 현재 gateway 정책 로더는 route별 timeout/retry/circuit-breaker 필드를 직접 파싱하지 않아, 해당 override 값은 문서/주석으로 고정했다.
+
+### Q75. SCM-213 R1 리포트 템플릿 + 도메인 검증 SQL 8종 생성
+- 사용자 프롬프트:
+  - "SCM-213을 위해 migration/reports/에 둘 리포트 템플릿과, sql/ 아래 ... 도메인별 검증 SQL 파일을 생성해줘..."
+- Codex 답변(결과):
+  - 생성 파일:
+    - `migration/reports/R1-report-template.md`
+    - `migration/sql/r1-validation/01-auth-validation.sql`
+    - `migration/sql/r1-validation/02-member-validation.sql`
+    - `migration/sql/r1-validation/03-file-validation.sql`
+    - `migration/sql/r1-validation/04-inventory-validation.sql`
+    - `migration/sql/r1-validation/05-report-validation.sql`
+    - `migration/sql/r1-validation/06-order-lot-validation.sql`
+    - `migration/sql/r1-validation/07-board-validation.sql`
+    - `migration/sql/r1-validation/08-quality-doc-validation.sql`
+  - 리포트 템플릿 반영 항목:
+    - RunId 규칙, 실행환경, 실행자, 실행시간, 결과 요약, 이슈/조치, Go/No-Go 초안
+    - 도메인별(건수/합계/샘플200/상태분포) 결과 표 포함
+    - R1 고정 임계치 체크 규칙 명시:
+      - `count mismatch = 0`
+      - `sum delta <= 0.1%`
+      - `sample mismatch = 0/200`
+      - `status delta <= 1.0%p`
+  - SQL 파일 반영 항목:
+    - 각 파일에 4종 쿼리 포함:
+      1) count 비교(legacy/target)
+      2) sum 비교 + delta 계산
+      3) sample 200 키 추출(legacy/target) + mismatch 계산
+      4) status 분포 비교 + delta(%p) 계산
+    - 치환 기준에 맞춘 target 테이블/컬럼 반영
+    - legacy 불명확 구간은 파일별 TODO 주석으로 명시
+
+### Q76. SCM-214 Go/No-Go Signoff 완성본 작성
+- 사용자 프롬프트:
+  - "SCM-214 산출물로 runbooks/go-nogo-signoff.md 문서를 완성본으로 작성해줘..."
+- Codex 답변(결과):
+  - 갱신 파일:
+    - `runbooks/go-nogo-signoff.md`
+  - 필수 반영 내용:
+    - 판정 지표 포함:
+      - 5xx/4xx 오류율
+      - p95/p99 latency
+      - RabbitMQ 적체
+      - DB deadlock/timeout
+      - 데이터 정합성 오차율
+      - 롤백 시간
+      - 인증 실패율
+    - `order-lot` 전용 강화 임계치 표 별도 추가
+    - 각 지표별 항목 포함:
+      - 측정 위치(로그/메트릭/SQL)
+      - 샘플 커맨드/쿼리
+      - 임계치 초과 시 즉시 조치(런북 링크)
+      - 에스컬레이션 트리거(기본 10분 지속, order-lot 일부 5분)
+    - 서명 섹션 추가:
+      - 승인자/시간/결정/근거 링크
+
+### Q77. 스크립트 부재/실패 대비 게이트별 대체 커맨드 요청
+- 사용자 프롬프트:
+  - "오늘 실행 커맨드 표에 나온 ... 스크립트들이 실제로 없거나 실패할 경우 ... 각 게이트별 대체 커맨드 ... 제시해줘"
+- Codex 답변(결과):
+  - 대상 스크립트별(3종) 체크 항목(3~5개) 정의 및 대체 PowerShell 커맨드 제공:
+    - `scripts/check-prereqs.ps1`
+    - `scripts/ci-run-gate.ps1`
+    - `scripts/rehearsal-run.ps1`
+  - 포함 범위:
+    - Gradle/도커/DB/HTTP 호출 기반 대체 실행 절차
+    - 필수 게이트(build/unit-integration-test/contract-test/smoke-test/migration-dry-run) 대체 커맨드
+    - 도메인별 최소 스모크 8개 curl 예시(auth/member/file/inventory/report/order-lot/board/quality-doc)
+
+### Q78. 설계서 대비 현재 진행현황 비교 분석 및 다음 실행계획 요청
+- 사용자 프롬프트:
+  - "scm_rft_design.md에 따라 진행하고 있는 이 프로젝트의 현재 진행현황을 QnA_보고서.md와 비교 분석하여 ... 다음 진행 ... 실제구현은 언제부터 ..."
+- Codex 답변(결과):
+  - 비교 기준:
+    - `doc/scm_rft_design.md` 1~8장
+    - `doc/QnA_보고서.md` (Q1~Q77)
+    - 코드/산출물 실체(`services/*`, `shared/contracts/*`, `runbooks/*`, `migration/*`)
+  - 핵심 판정:
+    - 기반/운영/문서/계약/리허설 체계는 대부분 구축 완료
+    - SCM-210~214 중 다수는 문서/템플릿/정책/검증 SQL까지 준비 완료
+    - 실제 기능 코드 구현은 `SCM-210(order-lot)`/`SCM-211(board/quality-doc)` 본 구현이 아직 본격 착수 전(health endpoint 수준)
+  - 구현 시작 시점 권고:
+    - `2026-02-26` 즉시(오늘) 착수
+    - 착수 순서: SCM-210 코드 구현 → SCM-211 코드 구현 → SCM-212 runtime 반영(필요 시 gateway 코드 확장) → SCM-213 SQL 실측 리포트 → SCM-214 리허설 R1 실측
+
+### Q79. 현재 프로젝트 상태 고정 및 이후 응답 형식 잠금
+- 사용자 프롬프트:
+  - "아래를 현재 프로젝트 상태로 고정하고, 이후 답변은 이 사실을 전제로 실행 단계만 제시해줘..."
+- Codex 답변(결과):
+  - 고정 컨텍스트 파일 갱신:
+    - `runbooks/fixed-project-context.md`
+  - 고정 반영 내용:
+    - 설계/실행기록 기준 파일, phase 진행상태, SCM-210~214 상태, 워킹트리 미커밋 상태
+    - 기준 브랜치/원칙/필수 게이트/산출물 경로/기준일(2026-02-26)
+    - 출력 원칙 잠금(실행 단계 + command/file path/checkpoint/DoD)
+
+### Q80. 준비 산출물 1개 PR 정리안(포함/제외, 브랜치/PR, 커맨드, DoD) 요청
+- 사용자 프롬프트:
+  - "워킹트리에 누적된 준비 산출물(문서/계약/정책/SQL)을 1개 PR로 정리..."
+- Codex 답변(결과):
+  - 현재 워킹트리 변경 파일 기준으로 포함/제외 규칙 정의
+  - 브랜치명 2안, PR 제목/본문 템플릿, 2~4개 커밋 분할 단위 제시
+  - `git status -> add 범위 지정 -> commit -> push -> gh pr create` 복붙 시퀀스 제공
+  - 게이트 5종 실행 여부(YES/NO) 판정 및 최소 실행 게이트/머지 후 clean 체크리스트 제시
+
+### Q82. SCM-210/211/212 코드 구현 + 게이트 + PR 생성
+- 사용자 프롬프트:
+  - "SCM-210, SCM-211, SCM-212(범위 고정 후) 구현을 진행해줘"
+  - "예" (브랜치/게이트/PR 생성 진행 승인)
+- Codex 답변(결과):
+  - 구현 커밋 분리:
+    - d016753 feat(scm-210): implement order-lot p0 api mvp
+    - 90769cc feat(scm-211): implement board and quality-doc mvp
+    - a24509 feat(scm-212): apply runtime route policy overrides
+  - 원격 브랜치 생성/푸시:
+    - eature/scm-210-order-lot-p0-mvp
+    - eature/scm-211-board-qualitydoc-mvp
+    - eature/scm-212-gateway-policy-runtime
+  - 필수 게이트 실행(각 이슈 워크트리): build, unit-integration-test, contract-test, smoke-test, migration-dry-run
+    - SCM-210 evidence: unbooks/evidence/SCM-210-20260226-124328/
+    - SCM-211 evidence: unbooks/evidence/SCM-211-20260226-124514/
+    - SCM-212 evidence: unbooks/evidence/SCM-212-20260226-124717/
+  - PR 생성:
+    - PR #16: https://github.com/yuhyun65/scm_rft/pull/16
+    - PR #17: https://github.com/yuhyun65/scm_rft/pull/17
+    - PR #18: https://github.com/yuhyun65/scm_rft/pull/18
+  - 참고:
+    - gh pr checks 결과 현재 3개 PR 모두 "no checks reported"
+
+### Q83. SCM-213~214 implementation with merge prerequisites applied
+- User prompt:
+  - "현재 상태 기준 핵심 준비사항 2개를 포함하여 SCM-213부터 SCM-214를 구현해줘"
+  - Required constraints:
+    1) If PR checks are empty, local 5-gate evidence must be added as PR comments.
+    2) For ordered merge, rebase #17/#18 immediately before merge.
+- Codex result:
+  - Merged PRs in order with required handling:
+    - PR #16 merged (local 5-gate evidence comment added)
+    - PR #17 rebased right before merge, then merged (evidence comment added)
+    - PR #18 rebased right before merge, then merged (evidence comment added)
+  - Implemented SCM-213:
+    - Issue #19 created and closed
+    - Branch: feature/scm-213-migration-r1-execution
+    - Added files:
+      - migration/reports/R1-report-template.md
+      - migration/sql/r1-validation/01~08 domain SQL
+      - migration/scripts/run-r1-validation.ps1
+    - PR #21 created and merged
+    - Local 5-gate evidence comment added to PR #21
+  - Implemented SCM-214:
+    - Issue #20 created and closed
+    - Branch: feature/scm-214-rehearsal-r1-signoff
+    - Added/updated files:
+      - runbooks/go-nogo-signoff.md
+      - runbooks/rehearsal-R1-runbook.md
+      - runbooks/merge-gates-checklist.md (includes empty-check handling + pre-merge rebase rule)
+      - runbooks/today-execution-R1.md
+      - runbooks/gateway-routing-matrix.md
+      - scripts/scm214-rehearsal-r1.ps1
+    - PR #22 created, rebased right before merge, then merged
+    - Local 5-gate evidence comment added to PR #22
+
+### Q84. 오늘 작업 종료 및 다음 진행사항 정리 요청
+- 사용자 프롬프트:
+  - "오늘은 여기까지 진행하겠습니다. 다음 진행할 사항을 정리해주고, 종료를 위한 사항을 처리해줘"
+- Codex 답변(결과):
+  - 다음 진행 우선순위 정리:
+    1) SCM-213 실측 실행(sqlcmd 설치 후 run-r1-validation 실행 결과 적재)
+    2) SCM-214 리허설 R1 실측 + go-nogo-signoff 수치 근거 채움
+    3) Gateway E2E smoke(SCM_ENABLE_GATEWAY_E2E_SMOKE=1) 포함 5게이트 재검증
+    4) 기준 브랜치 clean 정리 후 다음 도메인 구현 이슈 착수
+  - 종료 점검 처리:
+    - 현재 브랜치: feature/to-be-dev-env-bootstrap
+    - Docker daemon: 미기동(종료 상태)
+    - 주요 포트 점검: 8080(httpd 추정)만 LISTEN, 서비스 개발 포트(8081/8082/18080) 비점유
+    - 워킹트리 변경사항/다중 worktree 존재 상태 확인 완료
+
