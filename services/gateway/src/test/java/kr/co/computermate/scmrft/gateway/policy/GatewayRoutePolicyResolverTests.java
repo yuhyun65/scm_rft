@@ -82,4 +82,23 @@ class GatewayRoutePolicyResolverTests {
     assertThat(resolved.stream().filter(item -> item.id().equals("member")).findFirst().orElseThrow().authRequired())
         .isTrue();
   }
+
+  @Test
+  void disablesRateLimitWhenGlobalRateLimitIsDisabledAndRouteDoesNotOverride() {
+    GatewayPolicyDocument document = new GatewayPolicyDocument();
+    GatewayPolicyDocument.GlobalRateLimit globalRateLimit = new GatewayPolicyDocument.GlobalRateLimit();
+    globalRateLimit.setEnabled(false);
+    document.getTrafficControl().setGlobalRateLimit(globalRateLimit);
+
+    GatewayPolicyDocument.RouteRule authRoute = new GatewayPolicyDocument.RouteRule();
+    authRoute.setId("auth");
+    authRoute.setPath("/api/auth/**");
+    authRoute.setTarget("http://auth:8081");
+    document.setRoutes(List.of(authRoute));
+
+    List<GatewayRoutePolicyResolver.ResolvedRoutePolicy> resolved = resolver.resolve(document);
+
+    assertThat(resolved).hasSize(1);
+    assertThat(resolved.getFirst().rateLimitRps()).isZero();
+  }
 }

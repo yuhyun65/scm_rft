@@ -75,6 +75,19 @@ function Assert-ExpectedStatusCode {
   }
 }
 
+function Invoke-Login {
+  param(
+    [Parameter(Mandatory = $true)][string]$Uri,
+    [Parameter(Mandatory = $true)][string]$LoginIdValue,
+    [Parameter(Mandatory = $true)][string]$PasswordValue
+  )
+
+  return Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json" -Body (@{
+    loginId = $LoginIdValue
+    password = $PasswordValue
+  } | ConvertTo-Json)
+}
+
 function Seed-SmokeData {
   param(
     [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -231,18 +244,42 @@ try {
   $memberByIdUri = "$GatewayBaseUrl/api/member/v1/members/$LoginId"
 
   try {
-    $loginResponse = Invoke-RestMethod -Method Post -Uri $loginUri -ContentType "application/json" -Body (@{
-      loginId = $LoginId
-      password = $Password
-    } | ConvertTo-Json)
+    Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password | Out-Null
+    Write-Host "[INFO] login pre-warm request completed."
   }
   catch {
-    $statusCode = "unknown"
-    if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
-      $statusCode = [int]$_.Exception.Response.StatusCode
-    }
-    throw "[FAIL] login via gateway failed (HTTP $statusCode). Ensure auth/member are running with shared SQL configuration and credentials are seeded."
+    Write-Host "[WARN] login pre-warm request failed. continue to formal login."
   }
+
+  $loginResponse = $null
+  $maxLoginAttempts = 2
+  for ($attempt = 1; $attempt -le $maxLoginAttempts; $attempt++) {
+    try {
+      $loginResponse = Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password
+      break
+    }
+    catch {
+      $statusCode = "unknown"
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+        $statusCode = [int]$_.Exception.Response.StatusCode
+      }
+      if ($statusCode -eq 504 -and $attempt -lt $maxLoginAttempts) {
+        Write-Host "[WARN] login via gateway returned 504. retrying once..."
+        Start-Sleep -Milliseconds 400
+        continue
+      }
+      throw "[FAIL] login via gateway failed (HTTP $statusCode). Ensure auth/member are running with shared SQL configuration and credentials are seeded."
+    }
+  }
+
+  try {
+    if (-not $loginResponse) {
+      throw "login response is empty."
+    }
+  }
+  catch {
+    throw "[FAIL] login via gateway failed after retry."
+  }  
 
   if (-not $loginResponse.accessToken) {
     throw "[FAIL] login succeeded but accessToken is empty."

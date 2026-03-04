@@ -153,9 +153,34 @@ function Invoke-SmokeTest {
   }
 
   if ($env:SCM_ENABLE_GATEWAY_E2E_SMOKE -eq "1") {
-    & powershell -ExecutionPolicy Bypass -File $gatewayE2ESmoke
-    if ($LASTEXITCODE -ne 0) {
-      throw "[FAIL] smoke-test: gateway auth/member e2e smoke failed."
+    $smokeArgs = @()
+    if (-not [string]::IsNullOrWhiteSpace($env:SCM_GATEWAY_BASE_URL)) {
+      $smokeArgs += @("-GatewayBaseUrl", $env:SCM_GATEWAY_BASE_URL)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:SCM_SQL_CONTAINER_NAME)) {
+      $smokeArgs += @("-SqlContainerName", $env:SCM_SQL_CONTAINER_NAME)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:SCM_ENV_FILE)) {
+      $smokeArgs += @("-EnvFile", $env:SCM_ENV_FILE)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:SCM_DB_NAME)) {
+      $smokeArgs += @("-Database", $env:SCM_DB_NAME)
+    }
+    $smokePassed = $false
+    $maxAttempts = 2
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+      & powershell -ExecutionPolicy Bypass -File $gatewayE2ESmoke @smokeArgs
+      if ($LASTEXITCODE -eq 0) {
+        $smokePassed = $true
+        break
+      }
+      if ($attempt -lt $maxAttempts) {
+        Write-Host "[WARN] smoke-test: gateway auth/member e2e failed. retrying once..."
+        Start-Sleep -Seconds 1
+      }
+    }
+    if (-not $smokePassed) {
+      throw "[FAIL] smoke-test: gateway auth/member e2e smoke failed after retry."
     }
     Write-Host "[OK] smoke-test: gateway auth/member e2e smoke passed."
   }

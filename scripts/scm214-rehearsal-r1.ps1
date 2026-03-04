@@ -23,14 +23,36 @@ $gateList = @(
 
 $results = @()
 
+function Invoke-LoggedPowerShell {
+  param(
+    [Parameter(Mandatory = $true)][string]$ArgumentLine,
+    [Parameter(Mandatory = $true)][string]$LogPath
+  )
+
+  $errPath = "$LogPath.err"
+  if (Test-Path $LogPath) { Remove-Item -Force $LogPath }
+  if (Test-Path $errPath) { Remove-Item -Force $errPath }
+
+  $proc = Start-Process -FilePath "powershell" -ArgumentList $ArgumentLine -Wait -PassThru -WindowStyle Hidden -RedirectStandardOutput $LogPath -RedirectStandardError $errPath
+  if (Test-Path $errPath) {
+    $err = Get-Content -Raw -Encoding UTF8 $errPath
+    if (-not [string]::IsNullOrWhiteSpace($err)) {
+      Add-Content -Path $LogPath -Value $err -Encoding UTF8
+    }
+    Remove-Item -Force $errPath
+  }
+  return $proc.ExitCode
+}
+
 if (-not $SkipExecution) {
   $rehearsalScript = Join-Path $repoRoot "scripts/rehearsal-run.ps1"
   if (-not (Test-Path $rehearsalScript)) {
     throw "Missing script: $rehearsalScript"
   }
 
-  & powershell -ExecutionPolicy Bypass -File $rehearsalScript -FailOnMismatch 2>&1 | Tee-Object (Join-Path $evDir "rehearsal-run.log")
-  if ($LASTEXITCODE -ne 0) {
+  $rehearsalLog = Join-Path $evDir "rehearsal-run.log"
+  $rehearsalExit = Invoke-LoggedPowerShell -ArgumentLine ("-ExecutionPolicy Bypass -File `"{0}`" -FailOnMismatch" -f $rehearsalScript) -LogPath $rehearsalLog
+  if ($rehearsalExit -ne 0) {
     throw "rehearsal-run failed."
   }
 
@@ -38,9 +60,19 @@ if (-not $SkipExecution) {
     $logPath = Join-Path $evDir ("gate-{0}.log" -f $gate)
     if ($gate -eq "smoke-test") {
       $env:SCM_ENABLE_GATEWAY_E2E_SMOKE = "1"
+      if (-not $env:SCM_SQL_CONTAINER_NAME) {
+        $env:SCM_SQL_CONTAINER_NAME = "scm-stg-sqlserver"
+      }
+      if (-not $env:SCM_ENV_FILE) {
+        $env:SCM_ENV_FILE = ".env.staging"
+      }
+      if (-not $env:SCM_DB_NAME) {
+        $env:SCM_DB_NAME = "MES_HI"
+      }
     }
-    & powershell -ExecutionPolicy Bypass -File (Join-Path $repoRoot "scripts/ci-run-gate.ps1") -Gate $gate 2>&1 | Tee-Object $logPath
-    $passed = ($LASTEXITCODE -eq 0)
+    $gateScript = Join-Path $repoRoot "scripts/ci-run-gate.ps1"
+    $gateExit = Invoke-LoggedPowerShell -ArgumentLine ("-ExecutionPolicy Bypass -File `"{0}`" -Gate {1}" -f $gateScript, $gate) -LogPath $logPath
+    $passed = ($gateExit -eq 0)
     $results += [pscustomobject]@{
       Gate = $gate
       Passed = $passed

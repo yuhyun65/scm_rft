@@ -11,7 +11,10 @@ public class GatewayRoutePolicyResolver {
   public List<ResolvedRoutePolicy> resolve(GatewayPolicyDocument document) {
     List<ResolvedRoutePolicy> policies = new ArrayList<>();
     GatewayPolicyDocument.Defaults defaults = document.getDefaults();
-    int globalRateLimit = Math.max(1, document.getTrafficControl().getGlobalRateLimit().getRequestsPerSecond());
+    GatewayPolicyDocument.GlobalRateLimit globalRateLimitConfig = document.getTrafficControl().getGlobalRateLimit();
+    int globalRateLimit = globalRateLimitConfig.isEnabled()
+        ? Math.max(1, globalRateLimitConfig.getRequestsPerSecond())
+        : 0;
 
     for (GatewayPolicyDocument.RouteRule route : document.getRoutes()) {
       if (route.getMethodPolicies().isEmpty()) {
@@ -65,9 +68,9 @@ public class GatewayRoutePolicyResolver {
         methodPolicy == null ? null : methodPolicy.getCircuitBreaker()
     );
 
-    int rateLimitRps = pickInt(
+    int rateLimitRps = pickRateLimit(
         methodPolicy == null ? null : methodPolicy.getRateLimitRps(),
-        route.getRateLimitRps() > 0 ? route.getRateLimitRps() : null,
+        route.getRateLimitRps(),
         globalRateLimit
     );
 
@@ -96,6 +99,16 @@ public class GatewayRoutePolicyResolver {
       return routeValue;
     }
     return Math.max(1, defaultValue);
+  }
+
+  private int pickRateLimit(Integer methodValue, int routeValue, int defaultValue) {
+    if (methodValue != null) {
+      return Math.max(0, methodValue);
+    }
+    if (routeValue > 0) {
+      return routeValue;
+    }
+    return Math.max(0, defaultValue);
   }
 
   private GatewayPolicyDocument.Retry mergeRetry(

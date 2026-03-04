@@ -1154,3 +1154,27 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 주요 포트 점검: 8080(httpd 추정)만 LISTEN, 서비스 개발 포트(8081/8082/18080) 비점유
     - 워킹트리 변경사항/다중 worktree 존재 상태 확인 완료
 
+### Q85. gateway 504 대응 권장안 실행
+- 사용자 프롬프트:
+  - "추천하는 대응방안은?"
+  - "진행해줘"
+- Codex 답변(결과):
+  - 원인 고정: gateway 로그에서 `circuitBreaker` 1000ms 타임리미터 초과로 504 발생 확인
+  - 단기 안정화 반영:
+    - `infra/gateway/policies/local-auth-member-e2e.yaml`
+      - auth/member 라우트 CB 비활성화
+      - 로컬 E2E에서 글로벌 rate-limit/emergency-stop 비활성화
+    - `scripts/smoke-gateway-auth-member-e2e.ps1`
+      - login pre-warm 1회 호출 추가
+      - login 504 발생 시 1회 재시도 추가
+    - `scripts/ci-run-gate.ps1`
+      - gateway e2e smoke 1회 재시도 추가
+  - 구조 개선 반영:
+    - `GatewayResilienceConfiguration.java`
+      - 정책 기반 route CB(`cb-{routeId}`) 동적 구성
+      - route time-limiter를 `max(3000ms, requestTimeoutMs)`로 연동
+    - `GatewayRouteConfiguration.java`, `GatewayPolicyLoader.java`, `GatewayRoutePolicyResolver.java` 및 테스트 보강
+  - 검증:
+    - 5게이트 재실행: build / unit-integration-test / contract-test / smoke-test / migration-dry-run 모두 PASS
+    - smoke e2e에서 login/verify/member 조회/401 시나리오 PASS 확인
+

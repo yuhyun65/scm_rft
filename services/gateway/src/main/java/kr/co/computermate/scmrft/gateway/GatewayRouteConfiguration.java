@@ -27,10 +27,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 @Configuration
 public class GatewayRouteConfiguration {
+  private static final Logger log = LoggerFactory.getLogger(GatewayRouteConfiguration.class);
   @Bean
   public GatewayPolicyDocument gatewayPolicy(GatewayPolicyLoader loader) {
     return loader.load();
@@ -58,6 +61,8 @@ public class GatewayRouteConfiguration {
     var routes = builder.routes();
 
     for (ResolvedRoutePolicy route : resolver.resolve(policy)) {
+      log.info("Resolved gateway route id={} path={} target={} authRequired={} rateLimitRps={}",
+          route.id(), route.path(), route.target(), route.authRequired(), route.rateLimitRps());
       routes.route(route.id(), predicate -> {
         var routePredicate = predicate.path(route.path());
         if (!route.methods().isEmpty()) {
@@ -66,11 +71,13 @@ public class GatewayRouteConfiguration {
 
         return routePredicate
             .filters(filters -> {
-              int replenishRate = Math.max(1, route.rateLimitRps());
-              int burstCapacity = Math.max(replenishRate, replenishRate * 2);
-              filters.requestRateLimiter(config ->
-                  config.setRateLimiter(new RedisRateLimiter(replenishRate, burstCapacity)).setKeyResolver(keyResolver)
-              );
+              if (route.rateLimitRps() > 0) {
+                int replenishRate = route.rateLimitRps();
+                int burstCapacity = Math.max(replenishRate, replenishRate * 2);
+                filters.requestRateLimiter(config ->
+                    config.setRateLimiter(new RedisRateLimiter(replenishRate, burstCapacity)).setKeyResolver(keyResolver)
+                );
+              }
 
               if (route.retry().isEnabled() && route.retry().getAttempts() > 0) {
                 filters.retry(config -> config.setRetries(route.retry().getAttempts()));

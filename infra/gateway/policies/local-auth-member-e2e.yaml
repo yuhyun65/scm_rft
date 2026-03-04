@@ -16,7 +16,7 @@ defaults:
 
 trafficControl:
   globalRateLimit:
-    enabled: true
+    enabled: false
     requestsPerSecond: 300
     burstCapacity: 600
 
@@ -25,16 +25,20 @@ routes:
     path: /api/auth/**
     target: http://localhost:8081
     authRequired: false
-    rateLimitRps: 80
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
   - id: member
     path: /api/member/**
     target: http://localhost:8082
     authRequired: true
-    rateLimitRps: 80
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
 
 cutoverSwitches:
   blockLegacyWrites: false
   allowReadOnlyFallback: true
   emergencyStop:
-    enabled: true
+    enabled: false
     httpStatus: 503
