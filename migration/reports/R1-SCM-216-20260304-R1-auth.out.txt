@@ -1,0 +1,12 @@
+﻿
+domain legacy_count target_count count_mismatch
+------ ------------ ------------ --------------
+auth              0            2              2
+auth                                           
+                                               
+                                               
+auth                                           
+auth                                           
+
+
+

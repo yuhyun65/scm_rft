@@ -1,0 +1,10 @@
+﻿
+domain      metric                legacy_count target_count count_mismatch
+------      ------                ------------ ------------ --------------
+quality-doc quality_documents                0            0              0
+quality-doc quality_document_acks            0            0              0
+quality-doc                                                               
+quality-doc                                                               
+
+
+
