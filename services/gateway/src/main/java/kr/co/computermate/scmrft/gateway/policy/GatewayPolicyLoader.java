@@ -11,9 +11,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class GatewayPolicyLoader {
+  private static final Logger log = LoggerFactory.getLogger(GatewayPolicyLoader.class);
   private static final String DEFAULT_REPO_POLICY_PATH = "infra/gateway/policies/cutover-isolation.yaml";
   private static final String DEFAULT_CLASSPATH_POLICY_PATH = "policy/cutover-isolation.yaml";
 
@@ -39,6 +42,7 @@ public class GatewayPolicyLoader {
         try (InputStream is = Files.newInputStream(candidate)) {
           GatewayPolicyDocument document = yamlMapper.readValue(is, GatewayPolicyDocument.class);
           document.normalize();
+          log.info("Loaded gateway policy from file: {} (name={}, routes={})", candidate, document.getName(), document.getRoutes().size());
           return document;
         }
         catch (IOException e) {
@@ -54,6 +58,7 @@ public class GatewayPolicyLoader {
     try (InputStream is = resource.getInputStream()) {
       GatewayPolicyDocument document = yamlMapper.readValue(is, GatewayPolicyDocument.class);
       document.normalize();
+      log.info("Loaded gateway policy from classpath: {} (name={}, routes={})", DEFAULT_CLASSPATH_POLICY_PATH, document.getName(), document.getRoutes().size());
       return document;
     }
     catch (IOException e) {
