@@ -1,0 +1,118 @@
+policyVersion: 1
+name: local-all-domains-e2e
+
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 1
+    backoffMs: 100
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: false
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://localhost:8081
+    authRequired: false
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: member
+    path: /api/member/**
+    target: http://localhost:8082
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: board
+    path: /api/board/**
+    target: http://localhost:8083
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: quality-doc
+    path: /api/quality-doc/**
+    target: http://localhost:8084
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: order-lot
+    path: /api/order-lot/**
+    target: http://localhost:8085
+    authRequired: true
+    writeProtection:
+      enabledDuringCutover: false
+      methods: [POST, PUT, PATCH, DELETE]
+    methodPolicies:
+      - id: read
+        methods: [GET]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: true
+          attempts: 1
+          backoffMs: 100
+        circuitBreaker:
+          enabled: false
+        rateLimitRps: 0
+      - id: write
+        methods: [POST, PUT, PATCH, DELETE]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: false
+          attempts: 0
+          backoffMs: 0
+        circuitBreaker:
+          enabled: false
+        rateLimitRps: 0
+
+  - id: inventory
+    path: /api/inventory/**
+    target: http://localhost:8086
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: file
+    path: /api/file/**
+    target: http://localhost:8087
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+  - id: report
+    path: /api/report/**
+    target: http://localhost:8088
+    authRequired: true
+    retry:
+      enabled: false
+      attempts: 0
+      backoffMs: 0
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+cutoverSwitches:
+  blockLegacyWrites: false
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: false
+    httpStatus: 503

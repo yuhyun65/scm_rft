@@ -1178,3 +1178,20 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 5게이트 재실행: build / unit-integration-test / contract-test / smoke-test / migration-dry-run 모두 PASS
     - smoke e2e에서 login/verify/member 조회/401 시나리오 PASS 확인
 
+
+### Q86. SCM-218 immediate execution (Issue/Branch/Restore/Verify)
+- User prompt:
+  - "샐행해줘"
+- Codex result:
+  - Created issue: #29 (`SCM-218: track full-domain P0 gateway smoke assets`)
+  - Created dedicated branch/worktree:
+    - Branch: `feature/scm-218-p0-e2e-assets`
+    - Worktree: `C:\Users\CMN-091\projects\SCM_RFT_wt_218`
+  - Restored tracked artifacts from archive:
+    - `infra/gateway/policies/local-all-domains-e2e.yaml`
+    - `scripts/smoke-gateway-p0-e2e.ps1`
+  - Executed full-domain P0 smoke (F01~F07) and passed all scenarios.
+    - Evidence log: `runbooks/evidence/SCM-218-20260304-R1/smoke-gateway-p0-e2e.log`
+  - Note:
+    - Initial run failed due missing `.env.staging` in wt_218.
+    - Re-run with `-EnvFile ..\SCM_RFT_wt_217\.env.staging` succeeded.
