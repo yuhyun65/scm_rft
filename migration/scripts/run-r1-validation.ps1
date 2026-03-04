@@ -43,20 +43,15 @@ $domains = @(
 
 $outputs = @()
 
-if (-not $SkipSqlExecution) {
+function Invoke-ValidationSql {
+  param(
+    [Parameter(Mandatory = $true)][string]$SqlPath,
+    [Parameter(Mandatory = $true)][string]$OutPath
+  )
+
   $sqlcmd = Get-Command sqlcmd -ErrorAction SilentlyContinue
-  if (-not $sqlcmd) {
-    throw "sqlcmd is required. Install SQL Server command line tools or run with -SkipSqlExecution."
-  }
-
-  foreach ($item in $domains) {
-    $sqlPath = Join-Path $resolvedSqlDir $item.File
-    if (-not (Test-Path $sqlPath)) {
-      throw "SQL file not found: $sqlPath"
-    }
-
-    $outPath = Join-Path $resolvedReportDir ("R1-{0}-{1}.out.txt" -f $RunId, $item.Key)
-    $args = @("-S", $Server, "-d", $Database, "-i", $sqlPath, "-o", $outPath, "-b", "-I")
+  if ($sqlcmd) {
+    $args = @("-S", $Server, "-d", $Database, "-i", $SqlPath, "-o", $OutPath, "-b", "-I")
     if ($UseTrustedConnection) {
       $args += "-E"
     }
@@ -67,11 +62,51 @@ if (-not $SkipSqlExecution) {
       $args += @("-U", $User, "-P", $Password)
     }
 
-    Write-Host ("[INFO] executing: {0}" -f $item.File)
     & sqlcmd @args
     if ($LASTEXITCODE -ne 0) {
-      throw ("sqlcmd failed for {0}" -f $item.File)
+      throw ("sqlcmd failed for {0}" -f (Split-Path $SqlPath -Leaf))
     }
+    return
+  }
+
+  $invokeSqlcmd = Get-Command Invoke-Sqlcmd -ErrorAction SilentlyContinue
+  if (-not $invokeSqlcmd) {
+    Import-Module SqlServer -ErrorAction SilentlyContinue
+    $invokeSqlcmd = Get-Command Invoke-Sqlcmd -ErrorAction SilentlyContinue
+  }
+  if (-not $invokeSqlcmd) {
+    throw "Neither sqlcmd nor Invoke-Sqlcmd is available."
+  }
+
+  $conn = if ($UseTrustedConnection) {
+    "Server=$Server;Database=$Database;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False;"
+  }
+  else {
+    if ([string]::IsNullOrWhiteSpace($Password)) {
+      throw "Password is required when -UseTrustedConnection is not set."
+    }
+    "Server=$Server;Database=$Database;User ID=$User;Password=$Password;TrustServerCertificate=True;Encrypt=False;"
+  }
+
+  $result = Invoke-Sqlcmd -ConnectionString $conn -InputFile $SqlPath -QueryTimeout 600 -ErrorAction Stop
+  if ($null -eq $result) {
+    "" | Set-Content -Path $OutPath -Encoding UTF8
+  }
+  else {
+    $result | Format-Table -AutoSize | Out-String -Width 4096 | Set-Content -Path $OutPath -Encoding UTF8
+  }
+}
+
+if (-not $SkipSqlExecution) {
+  foreach ($item in $domains) {
+    $sqlPath = Join-Path $resolvedSqlDir $item.File
+    if (-not (Test-Path $sqlPath)) {
+      throw "SQL file not found: $sqlPath"
+    }
+
+    $outPath = Join-Path $resolvedReportDir ("R1-{0}-{1}.out.txt" -f $RunId, $item.Key)
+    Write-Host ("[INFO] executing: {0}" -f $item.File)
+    Invoke-ValidationSql -SqlPath $sqlPath -OutPath $outPath
     $outputs += [pscustomobject]@{
       Domain = $item.Key
       OutputPath = $outPath

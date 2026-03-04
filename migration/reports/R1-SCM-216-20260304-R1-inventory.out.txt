@@ -1,0 +1,11 @@
+﻿
+domain    metric                legacy_count target_count count_mismatch
+------    ------                ------------ ------------ --------------
+inventory inventory_balances               0            0              0
+inventory inventory_movements              0            0              0
+inventory balance_quantity_sum                                          
+inventory movement_quantity_sum                                         
+inventory                                                               
+
+
+
