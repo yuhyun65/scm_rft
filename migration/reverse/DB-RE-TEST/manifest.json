@@ -1,0 +1,17 @@
+﻿{
+    "runId":  "DB-RE-TEST",
+    "generatedAt":  "2026-03-05 17:47:53",
+    "server":  "localhost,11433",
+    "database":  "MES_HI",
+    "outputDir":  "C:\\Users\\CMN-091\\projects\\SCM_RFT\\migration\\reverse\\DB-RE-TEST",
+    "mode":  "docker-sqlcmd",
+    "sqlContainerName":  "scm-stg-sqlserver",
+    "files":  [
+                  "01_tables_columns.csv",
+                  "02_pk_uk_fk.csv",
+                  "03_indexes.csv",
+                  "04_constraints.csv",
+                  "05_sp_dependencies.csv",
+                  "06_rowcount.csv"
+              ]
+}

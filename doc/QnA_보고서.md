@@ -1680,3 +1680,29 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 실패 시 즉시조치(컨테이너명 불일치 케이스) 명시
   - 문서 인덱스 반영:
     - `runbooks/README.md`에 `integration-test-runbook.md` 추가
+
+### Q111. DB 리버스엔지니어링 산출물(쿼리/스크립트/ERD) 생성
+- 사용자 프롬프트:
+  - "이시스템의 데이터베이스 설계도를 리버스엔지니어링으로 작성하는 방법을 정리해줘"
+  - "진행해줘요"
+- Codex 답변(결과):
+  - 산출물 생성:
+    - `sql/reverse/01_tables_columns.sql`
+    - `sql/reverse/02_pk_uk_fk.sql`
+    - `sql/reverse/03_indexes.sql`
+    - `sql/reverse/04_constraints.sql`
+    - `sql/reverse/05_sp_dependencies.sql`
+    - `sql/reverse/06_rowcount.sql`
+    - `sql/reverse/README.md`
+    - `scripts/reverse-export-schema.ps1`
+    - `scripts/reverse-generate-erd.ps1`
+  - 실행/검증:
+    - `reverse-export-schema.ps1` 실행 성공
+      - mode: `docker-sqlcmd` (container: `scm-stg-sqlserver`)
+      - 출력: `migration/reverse/DB-RE-TEST/*.csv`, `manifest.json`
+    - `reverse-generate-erd.ps1` 실행 성공
+      - 출력: `migration/reverse/DB-RE-TEST/erd.mmd`
+      - 결과: `Tables=13`, `FK Relations=10`
+  - 보완:
+    - host `sqlcmd` 미설치 환경 대응을 위해 export 스크립트에 Docker fallback 로직 추가
+    - CSV 헤더 고정 및 실행 manifest 기록 강화

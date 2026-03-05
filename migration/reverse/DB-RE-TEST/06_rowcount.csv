@@ -1,0 +1,14 @@
+﻿table_schema,table_name,row_count
+dbo,members,3
+dbo,report_jobs,3
+dbo,upload_files,3
+dbo,auth_credentials,2
+dbo,board_posts,1
+dbo,inventory_balances,1
+dbo,inventory_movements,1
+dbo,order_lots,1
+dbo,orders,1
+dbo,quality_document_acks,1
+dbo,quality_documents,1
+dbo,auth_sessions,0
+dbo,board_post_attachments,0

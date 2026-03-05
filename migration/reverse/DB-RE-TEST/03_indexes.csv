@@ -1,0 +1,32 @@
+﻿table_schema,table_name,index_name,index_type,is_unique,is_primary_key,is_unique_constraint,fill_factor,has_filter,filter_definition,key_columns,included_columns
+dbo,auth_credentials,ix_auth_credentials_locked_until,NONCLUSTERED,0,0,0,0,0,NULL,[locked_until] ASC,NULL
+dbo,auth_credentials,pk_auth_credentials,CLUSTERED,1,1,0,0,0,NULL,[login_id] ASC,NULL
+dbo,auth_credentials,ux_auth_credentials_member_id,NONCLUSTERED,1,0,0,0,0,NULL,[member_id] ASC,NULL
+dbo,auth_sessions,ix_auth_sessions_expires_at,NONCLUSTERED,0,0,0,0,0,NULL,[expires_at] ASC,NULL
+dbo,auth_sessions,PK__auth_ses__69B13FDCE62715EF,CLUSTERED,1,1,0,0,0,NULL,[session_id] ASC,NULL
+dbo,auth_sessions,ux_auth_sessions_access_token,NONCLUSTERED,1,0,0,0,0,NULL,[access_token] ASC,NULL
+dbo,board_post_attachments,ix_board_post_attachments_file_id,NONCLUSTERED,0,0,0,0,0,NULL,[file_id] ASC,NULL
+dbo,board_post_attachments,pk_board_post_attachments,CLUSTERED,1,1,0,0,0,NULL,[post_id] ASC, [file_id] ASC,NULL
+dbo,board_posts,ix_board_posts_category_created_at,NONCLUSTERED,0,0,0,0,0,NULL,[category_code] ASC, [created_at] ASC,NULL
+dbo,board_posts,PK__board_po__3ED7876656461E5C,CLUSTERED,1,1,0,0,0,NULL,[post_id] ASC,NULL
+dbo,inventory_balances,pk_inventory_balances,CLUSTERED,1,1,0,0,0,NULL,[item_code] ASC, [warehouse_code] ASC,NULL
+dbo,inventory_movements,ix_inventory_movements_item_wh_moved_at,NONCLUSTERED,0,0,0,0,0,NULL,[item_code] ASC, [warehouse_code] ASC, [moved_at] ASC,NULL
+dbo,inventory_movements,PK__inventor__AB1D1022567F2D7B,CLUSTERED,1,1,0,0,0,NULL,[movement_id] ASC,NULL
+dbo,members,ix_members_member_name_member_id,NONCLUSTERED,0,0,0,0,0,NULL,[member_name] ASC, [member_id] ASC,NULL
+dbo,members,ix_members_status_member_id,NONCLUSTERED,0,0,0,0,0,NULL,[status] ASC, [member_id] ASC,NULL
+dbo,members,ix_members_status_member_name,NONCLUSTERED,0,0,0,0,0,NULL,[status] ASC, [member_name] ASC,NULL
+dbo,members,PK__members__B29B85343E055DC5,CLUSTERED,1,1,0,0,0,NULL,[member_id] ASC,NULL
+dbo,order_lots,ix_order_lots_order_no,NONCLUSTERED,0,0,0,0,0,NULL,[order_no] ASC,NULL
+dbo,order_lots,ix_order_lots_order_no_lot_no,NONCLUSTERED,0,0,0,0,0,NULL,[order_no] ASC, [lot_no] ASC,NULL
+dbo,order_lots,PK__order_lo__38CAC254D575E59D,CLUSTERED,1,1,0,0,0,NULL,[lot_no] ASC,NULL
+dbo,orders,ix_orders_member_status_order_no,NONCLUSTERED,0,0,0,0,0,NULL,[member_id] ASC, [status] ASC, [order_no] ASC,NULL
+dbo,orders,ix_orders_status_order_no,NONCLUSTERED,0,0,0,0,0,NULL,[status] ASC, [order_no] ASC,NULL
+dbo,orders,PK__orders__465C81B9C731B90F,CLUSTERED,1,1,0,0,0,NULL,[order_no] ASC,NULL
+dbo,quality_document_acks,ix_quality_document_acks_member_ack_at,NONCLUSTERED,0,0,0,0,0,NULL,[member_id] ASC, [ack_at] ASC,NULL
+dbo,quality_document_acks,pk_quality_document_acks,CLUSTERED,1,1,0,0,0,NULL,[document_id] ASC, [member_id] ASC,NULL
+dbo,quality_documents,ix_quality_documents_issued_at,NONCLUSTERED,0,0,0,0,0,NULL,[issued_at] ASC,NULL
+dbo,quality_documents,PK__quality___9666E8ACFD88F6FA,CLUSTERED,1,1,0,0,0,NULL,[document_id] ASC,NULL
+dbo,report_jobs,ix_report_jobs_output_file_id,NONCLUSTERED,0,0,0,0,0,NULL,[output_file_id] ASC,NULL
+dbo,report_jobs,ix_report_jobs_status_requested_at,NONCLUSTERED,0,0,0,0,0,NULL,[status] ASC, [requested_at] ASC,NULL
+dbo,report_jobs,PK__report_j__6E32B6A5CF67618F,CLUSTERED,1,1,0,0,0,NULL,[job_id] ASC,NULL
+dbo,upload_files,PK__upload_f__07D884C6A76DA094,CLUSTERED,1,1,0,0,0,NULL,[file_id] ASC,NULL
