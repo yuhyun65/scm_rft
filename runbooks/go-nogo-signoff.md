@@ -53,7 +53,7 @@
 - [ ] Rollback-time measurement (`<=20m`) evidence still pending
 
 **Decision:** `GO (R1~R3 rehearsal scope)`  
-**Follow-up:** capture rollback-time evidence in the next rehearsal cycle.
+**Follow-up:** run `scripts/scm226-measure-rollback-time.ps1` and attach `runbooks/evidence/<RunId>/rollback-time-summary.md`.
 
 ## 6) Sign-off
 
@@ -69,3 +69,4 @@
 - `runbooks/merge-gates-checklist.md`
 - `runbooks/gateway-routing-matrix.md`
 - `runbooks/rollback-playbook.md`
+- `runbooks/rollback-time-evidence-runbook.md`

@@ -1356,3 +1356,29 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 정리:
     - PR 생성용 임시 파일 `.pr_scm225.md` 삭제
     - 워킹트리 clean 유지 확인
+
+### Q96. SCM-226(롤백 시간 실측 증적 보강) 착수
+- 사용자 프롬프트:
+  - "다음으로 SCM-226(롤백 시간 실측 증적 보강) 이슈 생성부터 바로 진행해줘"
+  - "진행해줘요"
+- Codex 답변(결과):
+  - 이슈/브랜치 생성:
+    - Issue: `#34` (`SCM-226: rollback-time measured evidence hardening`)
+    - Branch: `feature/scm-226-rollback-time-evidence`
+  - 구현 산출물:
+    - 신규 스크립트: `scripts/scm226-measure-rollback-time.ps1`
+      - rollback 소요시간 실측(restore)
+      - DoD 임계치(`<=20분`) PASS/FAIL 판정
+      - 증적 자동 생성:
+        - `runbooks/evidence/<RunId>/rollback-restore.log`
+        - `runbooks/evidence/<RunId>/rollback-health.log`
+        - `runbooks/evidence/<RunId>/rollback-time-summary.md`
+        - `runbooks/evidence/<RunId>/rollback-time-summary.json`
+      - `-DryRun` 지원 추가(백업/복원 미실행 검증 경로)
+    - 신규 런북: `runbooks/rollback-time-evidence-runbook.md`
+    - 문서 연계 업데이트:
+      - `runbooks/README.md`
+      - `runbooks/go-nogo-signoff.md`(SCM-226 증적 수집 명시)
+  - 검증:
+    - `powershell -File .\\scripts\\scm226-measure-rollback-time.ps1 -RunId SCM-226-DRYRUN-VERIFY -Staging -DryRun` 실행
+    - 결과: `verdict=DRYRUN`, summary 파일 생성 확인
