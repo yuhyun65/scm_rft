@@ -1333,3 +1333,26 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `origin/feature/scm-225-dod-closeout` 푸시 완료
     - PR 생성 URL 안내 확인:
       - `https://github.com/yuhyun65/scm_rft/pull/new/feature/scm-225-dod-closeout`
+
+### Q95. 9번 진행(PR 생성 및 증적 코멘트 등록)
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - PR 생성:
+    - PR #33
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/33`
+    - 제목: `docs(scm-225): finalize R1~R3 rehearsal records and go-no-go signoff`
+    - 상태: `OPEN`, merge state: `CLEAN`
+    - 이슈 연계: `Closes #32`
+  - 체크 리포트 확인:
+    - `gh pr checks 33` 결과: checks 미보고(`no checks reported`)
+  - 로컬 증적 코멘트 등록:
+    - 코멘트 URL: `https://github.com/yuhyun65/scm_rft/pull/33#issuecomment-4002331826`
+    - 포함 내용:
+      - 5게이트 로그 경로
+      - P0 E2E smoke 로그 경로
+      - R1~R3 measured 리포트 경로
+      - signoff 문서 경로 및 GO 판정
+  - 정리:
+    - PR 생성용 임시 파일 `.pr_scm225.md` 삭제
+    - 워킹트리 clean 유지 확인
