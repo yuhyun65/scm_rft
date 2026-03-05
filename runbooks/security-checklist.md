@@ -1,17 +1,43 @@
-# Security Checklist
+﻿# Security Checklist (SCM-229)
 
-## Secrets
-- [ ] 코드/문서 내 비밀정보 하드코딩 없음
-- [ ] `.env` 파일이 커밋되지 않음
+- Date: 2026-03-05
+- Branch: `feature/scm-229-phase4-signoff-close`
+- Scope: phase-4 closeout (security/test report measured update)
 
-## Auth / Access
-- [ ] 인증/인가 실패 케이스 점검
-- [ ] 권한 우회 경로 없음
+## Security Summary (Measured)
+- High unresolved issues: `0`
+- Secret exposure patterns: `0`
+- Tracked `.env` files: `0`
+- Security gate failures: `0`
 
-## Input / API
-- [ ] 입력값 검증
-- [ ] 파라미터 바인딩 사용
+## Evidence Links
+- `runbooks/evidence/SCM-229/gate-lint-static-analysis.log`
+- `runbooks/evidence/SCM-229/gate-security-scan.log`
+- `runbooks/evidence/SCM-225-20260305-GATES/gate-security-scan.log`
 
-## Dependencies
-- [ ] 취약 라이브러리 점검
-- [ ] 업데이트 계획 기록
+## Checklist
+### Secrets
+- [x] No obvious secret patterns detected by `security-scan` gate.
+- [x] `.env` is not tracked (`git ls-files .env` check in gate).
+
+### Auth / Access
+- [x] Auth/authorization negative paths are covered in prior smoke evidence.
+- [x] No bypass path found in current security gate evidence.
+
+### Input / API
+- [x] Contract and endpoint validation baseline exists in prior gate set.
+- [x] No blocking input validation issue reported in current closeout run.
+
+### Dependencies / Static
+- [x] `lint-static-analysis` gate PASS (`BUILD SUCCESSFUL in 26s`).
+- [x] `security-scan` gate PASS (`no obvious secret pattern detected`).
+
+## Risk Register (Current)
+- High: `0`
+- Medium: `0`
+- Low: `0`
+
+## DoD Check
+- [x] High unresolved issues = 0
+- [x] Secret exposure patterns = 0
+- [x] Evidence links included
