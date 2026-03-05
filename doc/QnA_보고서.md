@@ -1452,3 +1452,72 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.md`
       - `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.json`
       - `runbooks/evidence/SCM-228-20260305-R4/rollback-time-summary.md`
+
+### Q100. 설계서/개발계획 대비 현재 실적 및 후속 과제 정리
+- 사용자 프롬프트:
+  - "이 프로젝트는 scm_rft_design.md와 dev_plan.md를 기반으로 ... 현재까지의 진행실적을 정리하고 추가적으로 진행해야할 과정을 정리해줘"
+- Codex 답변(결과):
+  - 기준 문서(`doc/scm_rft_design.md`, `doc/dev_plan.md`, `doc/QnA_보고서.md`) 대조 결과를 정리.
+  - 핵심 현황:
+    - phase-1~3 완료, phase-4~5 진행중
+    - P0 E2E 및 R1~R3 정합성 증적 확보
+    - SCM-228 rollback health PASS 증적 확보
+  - 추가 실행 과제:
+    - PR #39 머지/Issue #38 종료
+    - signoff rollback health 지표 반영
+    - `progress.json` 상태값 동기화
+    - phase-4 보안/테스트 리포트 실측화
+    - 7게이트 무스킵 재검증
+
+### Q101. 2026-03-05 점검문서 생성 및 반영
+- 사용자 프롬프트:
+  - "위내용을 20260305_inspection.md파일로 만들어줘"
+- Codex 답변(결과):
+  - 문서 생성:
+    - `20260305_inspection.md`
+  - 포함 내용:
+    - 현재 진행실적(phase/기능/품질/데이터/이슈-PR 상태)
+    - 종료 전 추가 진행 항목(체크포인트/DoD 포함)
+  - 커밋/푸시:
+    - 커밋: `96c45fc` (`docs: add 20260305 project inspection summary`)
+    - 원격 브랜치 `feature/scm-228-rollback-health-pass` 푸시 완료
+
+### Q102. 종료 후속 절차 문서화 및 반영
+- 사용자 프롬프트:
+  - "다음은 프로젝트 종료까지 앞으로 진행해야 할 과정입니다. 단계별작업을 위한 순서를 정리해줘요"
+  - "이내용을 20260305_after_process.md로 만들어줘"
+- Codex 답변(결과):
+  - 단계별 실행 순서 정리:
+    - SCM-228 머지/이슈 종료
+    - signoff 증적 반영
+    - progress 상태 동기화
+    - phase-4 보안/테스트 실측
+    - 7게이트 무스킵 재검증
+    - 종료 PR 생성/머지
+  - 문서 생성:
+    - `20260305_after_process.md`
+  - 커밋/푸시:
+    - 커밋: `a1a16d4` (`docs: add 20260305 after-process closeout steps`)
+    - 원격 브랜치 `feature/scm-228-rollback-health-pass` 푸시 완료
+
+### Q103. SCM-228 머지 및 이슈 종료 실행
+- 사용자 프롬프트:
+  - "다음의 작업을 진행해줘 1) SCM-228 머지/이슈 종료 확정 ..."
+- Codex 답변(결과):
+  - 실행 명령:
+    - `gh pr checks 39`
+    - `gh pr merge 39 --squash --delete-branch`
+    - `gh issue close 38 --comment "Merged via PR #39"`
+    - 상태 검증(`gh pr view 39`, `gh issue view 38`)
+  - 실행 결과:
+    - `gh pr checks 39`: `no checks reported`
+    - PR #39: `MERGED`
+      - mergedAt: `2026-03-05T07:09:33Z`
+      - URL: `https://github.com/yuhyun65/scm_rft/pull/39`
+    - Issue #38: `CLOSED`
+      - URL: `https://github.com/yuhyun65/scm_rft/issues/38`
+    - 기준 브랜치 fast-forward 반영:
+      - 최신 커밋: `4a129d8` (`feat(scm-228): enforce rollback health PASS with service startup (#39)`)
+  - 체크포인트/DoD 판정:
+    - PR #39 MERGED, Issue #38 CLOSED 충족
+    - rollback health PASS 고정 코드의 기준 브랜치 반영 완료
