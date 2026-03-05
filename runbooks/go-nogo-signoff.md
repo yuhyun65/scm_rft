@@ -9,6 +9,7 @@
   - `runbooks/evidence/SCM-225-20260305-GATES/`
   - `runbooks/evidence/SCM-225-20260305-P0/`
   - `migration/reports/SCM-225-20260305-R*-measured.md`
+  - `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md`
 
 ## 2) Required Inputs
 - [x] `runbooks/evidence/SCM-225-20260305-GATES/gate-build.log`
@@ -32,7 +33,7 @@
 | RabbitMQ backlog | `http://localhost:35672/api/queues` (`scm_stage`) | `ready<=1000, unacked<=500` | `ready=0, unacked=0` | PASS |
 | DB deadlock/timeout | `Invoke-Sqlcmd` system_health last 10m | `deadlock=0, timeout<=3` | `0 / 0` | PASS |
 | Data consistency | `SCM-225-20260305-R1~R3-measured.md` | `count=0, sum<=0.1%, sample=0/200, status<=1.0%p` | `3 runs, 8/8 PASS` | PASS |
-| Rollback time | not executed in this stable path (`-SkipBackup`) | `<=20m` | `N/A` | N/A |
+| Rollback time | `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md` | `<=20m` | `0.05m` | PASS |
 | Auth failure rate | auth route summary (`0/6`) | `<=3.0%` | `0.00%` | PASS |
 
 ## 4) Order-Lot Strict Metrics
@@ -50,10 +51,10 @@
 - [x] Required 5 gates passed
 - [x] P0 E2E (F01~F07) passed
 - [x] R1~R3 consistency checks passed
-- [ ] Rollback-time measurement (`<=20m`) evidence still pending
+- [x] Rollback-time measurement (`<=20m`) evidence captured
 
 **Decision:** `GO (R1~R3 rehearsal scope)`  
-**Follow-up:** run `scripts/scm226-measure-rollback-time.ps1` and attach `runbooks/evidence/<RunId>/rollback-time-summary.md`.
+**Follow-up:** run SCM-226 measurement for each future rehearsal cycle and append evidence links.
 
 ## 6) Sign-off
 

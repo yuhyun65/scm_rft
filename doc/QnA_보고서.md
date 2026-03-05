@@ -1382,3 +1382,24 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 검증:
     - `powershell -File .\\scripts\\scm226-measure-rollback-time.ps1 -RunId SCM-226-DRYRUN-VERIFY -Staging -DryRun` 실행
     - 결과: `verdict=DRYRUN`, summary 파일 생성 확인
+
+### Q97. SCM-226 PR 생성 및 실제 롤백 시간 실측
+- 사용자 프롬프트:
+  - "진행해줘요"
+- Codex 답변(결과):
+  - PR 생성:
+    - PR `#35` (`feat(scm-226): add rollback-time measured evidence workflow`)
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/35`
+  - 체크 상태:
+    - `gh pr checks 35` 결과 checks 미보고
+    - 로컬 검증 코멘트 등록:
+      - `https://github.com/yuhyun65/scm_rft/pull/35#issuecomment-4002422514`
+  - 실제 실측 실행:
+    - `powershell -File .\\scripts\\scm226-measure-rollback-time.ps1 -RunId SCM-226-20260305-R1 -Staging -ThresholdMinutes 20`
+    - 결과: `elapsedMinutes=0.05`, `verdict=PASS`
+    - 증적:
+      - `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md`
+      - `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.json`
+  - Signoff 반영:
+    - `runbooks/go-nogo-signoff.md`의 Rollback time 항목을 PASS 실측값으로 갱신
+    - rollback-time pending 체크를 완료로 전환
