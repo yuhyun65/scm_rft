@@ -1601,3 +1601,24 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 체크리스트 미체크 항목 제거 완료
     - 이슈/리스크 수치 기입 완료
     - High 이상 미해결 0건, 비밀정보 노출 패턴 0건, 근거 링크 포함 조건 충족
+
+### Q107. progress 상태값 동기화
+- 사용자 프롬프트:
+  - "다음의 작업을 진행해줘 5) progress 상태값 동기화 ..."
+- Codex 답변(결과):
+  - 대상 파일:
+    - `doc/roadmap/progress.json`
+  - 반영 내용:
+    - `updated_at`: `2026-03-05T16:49:57`로 갱신
+    - phase-4:
+      - `status: completed`
+      - `security/test report update: done=true`
+    - phase-5:
+      - `status: completed`
+      - `Go/No-Go checklist signed: done=true`
+  - 검증:
+    - JSON 파싱 검증(`ConvertFrom-Json`) 성공
+    - phase-4/phase-5 상태 및 done 값 확인 완료
+  - 체크포인트/DoD 판정:
+    - `updated_at` 최신 시간 갱신 완료
+    - 문서 상태와 증적 상태 일치하도록 동기화 완료

@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-05T13:05:00",
+  "updated_at": "2026-03-05T16:49:57",
   "phases": [
     {
       "id": "phase-1",
@@ -36,21 +36,21 @@
     {
       "id": "phase-4",
       "title": "Board/QualityDoc/Inventory/Report integration",
-      "status": "in_progress",
+      "status": "completed",
       "items": [
         { "name": "remaining domain contracts", "done": true },
         { "name": "integration tests", "done": true },
-        { "name": "security/test report update", "done": false }
+        { "name": "security/test report update", "done": true }
       ]
     },
     {
       "id": "phase-5",
       "title": "Rehearsal x3 and Big-Bang cutover",
-      "status": "in_progress",
+      "status": "completed",
       "items": [
         { "name": "3 rehearsal runs completed", "done": true },
         { "name": "validation mismatch zero critical", "done": true },
-        { "name": "Go/No-Go checklist signed", "done": false }
+        { "name": "Go/No-Go checklist signed", "done": true }
       ]
     }
   ]
