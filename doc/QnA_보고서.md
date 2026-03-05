@@ -1403,3 +1403,25 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - Signoff 반영:
     - `runbooks/go-nogo-signoff.md`의 Rollback time 항목을 PASS 실측값으로 갱신
     - rollback-time pending 체크를 완료로 전환
+
+### Q98. SCM-226 R2/R3 롤백 시간 실측 누적
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 추적 단위 생성:
+    - Issue: `#36` (`SCM-227: add rollback-time R2/R3 measured evidence`)
+    - Branch: `feature/scm-227-rollback-r2-r3-evidence`
+  - 실측 실행:
+    - `powershell -File .\\scripts\\scm226-measure-rollback-time.ps1 -RunId SCM-226-20260305-R2 -Staging -ThresholdMinutes 20`
+    - `powershell -File .\\scripts\\scm226-measure-rollback-time.ps1 -RunId SCM-226-20260305-R3 -Staging -ThresholdMinutes 20`
+  - 결과:
+    - R2: `elapsedMinutes=0.05`, `verdict=PASS`
+    - R3: `elapsedMinutes=0.05`, `verdict=PASS`
+    - 증적:
+      - `runbooks/evidence/SCM-226-20260305-R2/rollback-time-summary.md`
+      - `runbooks/evidence/SCM-226-20260305-R3/rollback-time-summary.md`
+  - 문서 반영:
+    - `runbooks/go-nogo-signoff.md`
+      - R1~R3 rollback-time evidence root 누적
+      - rollback metric을 다회차 실측값으로 갱신
+      - `Rollback Measurement History` 섹션 추가

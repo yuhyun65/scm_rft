@@ -10,6 +10,8 @@
   - `runbooks/evidence/SCM-225-20260305-P0/`
   - `migration/reports/SCM-225-20260305-R*-measured.md`
   - `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md`
+  - `runbooks/evidence/SCM-226-20260305-R2/rollback-time-summary.md`
+  - `runbooks/evidence/SCM-226-20260305-R3/rollback-time-summary.md`
 
 ## 2) Required Inputs
 - [x] `runbooks/evidence/SCM-225-20260305-GATES/gate-build.log`
@@ -33,7 +35,7 @@
 | RabbitMQ backlog | `http://localhost:35672/api/queues` (`scm_stage`) | `ready<=1000, unacked<=500` | `ready=0, unacked=0` | PASS |
 | DB deadlock/timeout | `Invoke-Sqlcmd` system_health last 10m | `deadlock=0, timeout<=3` | `0 / 0` | PASS |
 | Data consistency | `SCM-225-20260305-R1~R3-measured.md` | `count=0, sum<=0.1%, sample=0/200, status<=1.0%p` | `3 runs, 8/8 PASS` | PASS |
-| Rollback time | `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md` | `<=20m` | `0.05m` | PASS |
+| Rollback time | `SCM-226-20260305-R1/R2/R3 rollback-time-summary.md` | `<=20m` | `R1=0.05m, R2=0.05m, R3=0.05m (max=0.05m)` | PASS |
 | Auth failure rate | auth route summary (`0/6`) | `<=3.0%` | `0.00%` | PASS |
 
 ## 4) Order-Lot Strict Metrics
@@ -55,6 +57,15 @@
 
 **Decision:** `GO (R1~R3 rehearsal scope)`  
 **Follow-up:** run SCM-226 measurement for each future rehearsal cycle and append evidence links.
+
+## 5.1 Rollback Measurement History
+| RunId | ElapsedMinutes | ThresholdMinutes | Verdict | Evidence |
+|---|---:|---:|---|---|
+| SCM-226-20260305-R1 | 0.05 | 20 | PASS | `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md` |
+| SCM-226-20260305-R2 | 0.05 | 20 | PASS | `runbooks/evidence/SCM-226-20260305-R2/rollback-time-summary.md` |
+| SCM-226-20260305-R3 | 0.05 | 20 | PASS | `runbooks/evidence/SCM-226-20260305-R3/rollback-time-summary.md` |
+
+Note: health probe result in each summary depends on service runtime state at measurement time and is not part of rollback-time threshold (`<=20m`).
 
 ## 6) Sign-off
 
