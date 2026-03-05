@@ -12,6 +12,7 @@
   - `runbooks/evidence/SCM-226-20260305-R1/rollback-time-summary.md`
   - `runbooks/evidence/SCM-226-20260305-R2/rollback-time-summary.md`
   - `runbooks/evidence/SCM-226-20260305-R3/rollback-time-summary.md`
+  - `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.md`
 
 ## 2) Required Inputs
 - [x] `runbooks/evidence/SCM-225-20260305-GATES/gate-build.log`
@@ -23,6 +24,7 @@
 - [x] `migration/reports/SCM-225-20260305-R1-measured.md`
 - [x] `migration/reports/SCM-225-20260305-R2-measured.md`
 - [x] `migration/reports/SCM-225-20260305-R3-measured.md`
+- [x] `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.md`
 
 ## 3) Global Metrics
 
@@ -36,6 +38,7 @@
 | DB deadlock/timeout | `Invoke-Sqlcmd` system_health last 10m | `deadlock=0, timeout<=3` | `0 / 0` | PASS |
 | Data consistency | `SCM-225-20260305-R1~R3-measured.md` | `count=0, sum<=0.1%, sample=0/200, status<=1.0%p` | `3 runs, 8/8 PASS` | PASS |
 | Rollback time | `SCM-226-20260305-R1/R2/R3 rollback-time-summary.md` | `<=20m` | `R1=0.05m, R2=0.05m, R3=0.05m (max=0.05m)` | PASS |
+| Rollback health (auth/member/gateway=UP) | `SCM-228-20260305-R4 rollback-health-summary.md` | `auth=UP, member=UP, gateway=UP` | `auth=UP, member=UP, gateway=UP` | PASS |
 | Auth failure rate | auth route summary (`0/6`) | `<=3.0%` | `0.00%` | PASS |
 
 ## 4) Order-Lot Strict Metrics
@@ -54,6 +57,7 @@
 - [x] P0 E2E (F01~F07) passed
 - [x] R1~R3 consistency checks passed
 - [x] Rollback-time measurement (`<=20m`) evidence captured
+- [x] Rollback-health measurement (`auth/member/gateway=UP`) evidence captured
 
 **Decision:** `GO (R1~R3 rehearsal scope)`  
 **Follow-up:** run SCM-226 measurement for each future rehearsal cycle and append evidence links.
