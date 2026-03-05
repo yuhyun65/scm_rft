@@ -1281,3 +1281,78 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `doc/pr_comments/SCM-224-evidence-summary.md` 생성 (PR 코멘트 즉시 사용 가능)
   - 최종 조치:
     - 변경분 커밋/푸시 진행
+
+### Q92. 6번(리허설 기록 3회 + Go/No-Go 서명) 진행
+- 사용자 프롬프트:
+  - "6번(리허설 기록 3회 + Go/No-Go 서명) 진행"
+- Codex 답변(결과):
+  - 리허설 기록 3건 완성:
+    - `runbooks/rehearsals/R1-20260305.md`
+    - `runbooks/rehearsals/R2-20260305.md`
+    - `runbooks/rehearsals/R3-20260305.md`
+  - Go/No-Go 서명 문서 실측 반영:
+    - `runbooks/go-nogo-signoff.md`
+    - 반영값:
+      - 5게이트 PASS 증적 경로 체크 완료
+      - P0 E2E(F01~F07) PASS 증적 반영
+      - R1~R3 정합성(`count/sum/sample/status`) 8도메인 PASS 반영
+      - gateway 로그 기반 오류율/지연(p95/p99), RabbitMQ 적체, DB deadlock/timeout 실측 결과 반영
+  - 판정:
+    - `GO (R1~R3 rehearsal scope)`로 서명 완료
+    - 단, rollback 시간 실측 증적은 후속 차수에서 보강 필요로 명시
+
+### Q93. 7번 단계 정의 확인
+- 사용자 프롬프트:
+  - "7번은 리허설 기록 생성 및 Signoff 채움입니다."
+- Codex 답변(결과):
+  - 7번 범위를 `리허설 기록 생성 + Go/No-Go Signoff 채움`으로 확정.
+  - 현재 반영 상태 확인:
+    - `runbooks/rehearsals/R1-20260305.md`
+    - `runbooks/rehearsals/R2-20260305.md`
+    - `runbooks/rehearsals/R3-20260305.md`
+    - `runbooks/go-nogo-signoff.md`
+  - 결론:
+    - 7번은 완료 상태이며, 다음 단계(8번)로 진행 가능.
+
+### Q94. 8번 진행(리허설/Signoff 산출물 커밋/푸시)
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 8번을 `7번 산출물 커밋/푸시`로 실행.
+  - 브랜치:
+    - `feature/scm-225-dod-closeout`
+  - 커밋:
+    - `f1e1834` (`docs(scm-225): finalize rehearsal records and go-nogo signoff`)
+  - 포함 파일:
+    - `runbooks/rehearsals/R1-20260305.md`
+    - `runbooks/rehearsals/R2-20260305.md`
+    - `runbooks/rehearsals/R3-20260305.md`
+    - `runbooks/go-nogo-signoff.md`
+    - `doc/QnA_보고서.md`
+  - 원격 반영:
+    - `origin/feature/scm-225-dod-closeout` 푸시 완료
+    - PR 생성 URL 안내 확인:
+      - `https://github.com/yuhyun65/scm_rft/pull/new/feature/scm-225-dod-closeout`
+
+### Q95. 9번 진행(PR 생성 및 증적 코멘트 등록)
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - PR 생성:
+    - PR #33
+    - URL: `https://github.com/yuhyun65/scm_rft/pull/33`
+    - 제목: `docs(scm-225): finalize R1~R3 rehearsal records and go-no-go signoff`
+    - 상태: `OPEN`, merge state: `CLEAN`
+    - 이슈 연계: `Closes #32`
+  - 체크 리포트 확인:
+    - `gh pr checks 33` 결과: checks 미보고(`no checks reported`)
+  - 로컬 증적 코멘트 등록:
+    - 코멘트 URL: `https://github.com/yuhyun65/scm_rft/pull/33#issuecomment-4002331826`
+    - 포함 내용:
+      - 5게이트 로그 경로
+      - P0 E2E smoke 로그 경로
+      - R1~R3 measured 리포트 경로
+      - signoff 문서 경로 및 GO 판정
+  - 정리:
+    - PR 생성용 임시 파일 `.pr_scm225.md` 삭제
+    - 워킹트리 clean 유지 확인
