@@ -1622,3 +1622,32 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 체크포인트/DoD 판정:
     - `updated_at` 최신 시간 갱신 완료
     - 문서 상태와 증적 상태 일치하도록 동기화 완료
+
+### Q108. 최종 DoD 검증 배치 1회 재실행(무스킵)
+- 사용자 프롬프트:
+  - "다음의 작업을 진행해줘 6) 최종 DoD 검증 배치 1회 재실행(무스킵) ..."
+- Codex 답변(결과):
+  - 증적 디렉터리:
+    - `runbooks/evidence/SCM-229-final/`
+  - 게이트 실행 결과:
+    - build: PASS (`gate-build.log`)
+    - unit-integration-test: PASS (`gate-unit-integration-test.log`)
+    - contract-test: PASS (`gate-contract-test.log`, 8 contracts validated)
+    - lint-static-analysis: PASS (`gate-lint-static-analysis.log`, `BUILD SUCCESSFUL`)
+    - security-scan: PASS (`gate-security-scan.log`, no obvious secret pattern)
+    - smoke-test: PASS (`gate-smoke-test.log`)
+      - 최초 시도는 기본 SQL 컨테이너명(`scm-sqlserver`) 불일치로 실패
+      - 환경변수 보정 후 재실행:
+        - `SCM_SQL_CONTAINER_NAME=scm-stg-sqlserver`
+        - `SCM_ENV_FILE=.env.staging`
+        - `SCM_DB_NAME=MES_HI`
+      - 보정 재실행에서 gateway auth/member E2E PASS
+    - migration-dry-run: PASS (`gate-migration-dry-run.log`)
+  - 로그 무결성 점검:
+    - `runbooks/evidence/SCM-229-final` 전체 로그 스캔 결과
+      - `[FAIL]`: 0건
+      - `[SKIP]`: 0건
+  - 체크포인트/DoD 판정:
+    - 각 게이트 exit code 0(최종 증적 기준)
+    - 로그 내 `[FAIL]` 0건
+    - `dev_plan 2.2`의 7게이트 무스킵 PASS 조건 충족
