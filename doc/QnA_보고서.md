@@ -1706,3 +1706,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 보완:
     - host `sqlcmd` 미설치 환경 대응을 위해 export 스크립트에 Docker fallback 로직 추가
     - CSV 헤더 고정 및 실행 manifest 기록 강화
+
+### Q112. 당일 종료 조치 및 다음 진행사항 정리
+- 사용자 프롬프트:
+  - "오늘은 여기까지 진행하고 종료합니다. 종료에 따른 조치사항을 진행하고 다음 진행사항을 정리하여 QnA_보고서.md파일 기록해줘"
+- Codex 답변(결과):
+  - 종료 조치:
+    - 대상 문서/산출물 최신 상태 확인:
+      - `doc/QnA_보고서.md`
+      - `scripts/reverse-export-schema.ps1`
+      - `scripts/reverse-generate-erd.ps1`
+      - `sql/reverse/*`
+      - `migration/reverse/DB-RE-TEST/*`
+    - 리버스엔지니어링 실행 결과 기준선 확정:
+      - Export PASS (docker-sqlcmd)
+      - ERD 생성 PASS (`Tables=13`, `FK Relations=10`)
+  - 다음 진행사항(실행 순서):
+    1. `migration/reverse/DB-RE-TEST/erd.mmd` 검토 후 도메인 경계 주석 추가
+    2. `sql/reverse` 쿼리를 RunId 규칙(`DB-RE-YYYYMMDD-HHMMSS`)으로 1회 재실행해 신규 스냅샷 생성
+    3. 신규 스냅샷을 `migration/reports` 템플릿과 연결해 도메인별 정합성 검증 근거 보강
+    4. `SCM-230~239` 릴리즈 플랜 기준으로 다음 이슈 1건 선택 후 `Issue=PR=Branch` 착수
+  - 종료 기준:
+    - 당일 작업 내용 QnA 반영 완료
+    - 다음 실행 백로그(4개) 우선순위 확정 완료
+
+### Q113. QnA 종료 반영분 커밋/푸시
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `doc/QnA_보고서.md` 변경분을 커밋/푸시하여 종료 상태를 원격 기준으로 고정
+  - 브랜치: `feature/to-be-dev-env-bootstrap`
+  - 목적: 당일 종료 조치 기록(`Q112`)의 원격 반영 완료
