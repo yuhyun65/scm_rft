@@ -1425,3 +1425,30 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - R1~R3 rollback-time evidence root 누적
       - rollback metric을 다회차 실측값으로 갱신
       - `Rollback Measurement History` 섹션 추가
+
+### Q99. SCM-228 Rollback Health PASS(서비스 기동 포함) 고정
+- 사용자 프롬프트:
+  - "SCM-228로 rollback health PASS(서비스 기동 포함)를 고정해줘"
+- Codex 답변(결과):
+  - 원인 확인:
+    - `gateway` health가 Redis 기본 포트(`6379`)로 점검되어 `503` 발생
+    - staging Redis는 `16379`로 노출되어 포트 불일치 존재
+  - 코드 반영:
+    - `scripts/scm228-enforce-rollback-health-pass.ps1`
+      - 파라미터 추가: `RedisHost`, `RedisPort`
+      - gateway `bootRun` 환경변수 주입:
+        - `SPRING_DATA_REDIS_HOST`
+        - `SPRING_DATA_REDIS_PORT`
+    - `runbooks/rollback-health-pass-runbook.md`
+      - 실행 예시를 실제 스크립트 파라미터(`EnvFile/Sql/Redis/GatewayPolicyPath`) 기준으로 정합화
+  - 실측 검증:
+    - 실행:
+      - `.\scripts\scm228-enforce-rollback-health-pass.ps1 -RunId SCM-228-20260305-R4 -EnvFile .env.staging -SqlPort 11433 -RedisPort 16379 -StopExistingPorts`
+    - 결과:
+      - `rollback-time`: PASS (`0.03 min <= 20 min`)
+      - `auth/member/gateway` health: 모두 `UP`
+      - 최종 verdict: PASS
+    - 증적:
+      - `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.md`
+      - `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.json`
+      - `runbooks/evidence/SCM-228-20260305-R4/rollback-time-summary.md`
