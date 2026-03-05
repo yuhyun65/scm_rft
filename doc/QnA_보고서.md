@@ -1664,3 +1664,19 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 각 작업별 선행조건/핵심작업/측정 가능한 DoD 명시
     - 공통 7게이트 실행 커맨드 및 PASS 규칙(exit code 0, FAIL/SKIP 0) 포함
     - 최종 릴리즈 체크포인트(전 PR MERGED, 보안 이슈 0, signoff 완료, progress 동기화, 릴리즈 태그) 명시
+
+### Q110. 통합테스트 방법 문서화
+- 사용자 프롬프트:
+  - "이 시스템의 통합테스트 방법을 정리해줘"
+  - "진행해줘"
+- Codex 답변(결과):
+  - 산출물 생성:
+    - `runbooks/integration-test-runbook.md`
+  - 반영 내용:
+    - 통합테스트 범위(7게이트 + gateway smoke + P0 E2E) 정의
+    - 표준 실행 커맨드(증적 디렉터리 생성 포함)
+    - staging 기반 smoke 환경변수(`SCM_SQL_CONTAINER_NAME`, `SCM_ENV_FILE`, `SCM_DB_NAME`) 고정 방법
+    - 합격 기준(exit code 0, `[FAIL]/[SKIP]` 0, P0-F01~F07 PASS) 명시
+    - 실패 시 즉시조치(컨테이너명 불일치 케이스) 명시
+  - 문서 인덱스 반영:
+    - `runbooks/README.md`에 `integration-test-runbook.md` 추가
