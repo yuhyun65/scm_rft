@@ -1547,3 +1547,26 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 기준 브랜치 최신 동기화 완료
     - 종료 작업 전용 브랜치 시작 완료
     - 종료 작업 시작 기준선 고정 완료
+
+### Q105. Signoff 문서에 SCM-228 롤백 헬스 증적 반영
+- 사용자 프롬프트:
+  - "다음의 작업을 진행해줘 3) Signoff 문서에 SCM-228 증적 링크 반영 ..."
+- Codex 답변(결과):
+  - 대상 파일:
+    - `runbooks/go-nogo-signoff.md`
+  - 반영 내용:
+    - Evidence roots에 `runbooks/evidence/SCM-228-20260305-R4/rollback-health-summary.md` 추가
+    - Required Inputs에 동일 증적 체크 항목 추가
+    - Global Metrics 표에 지표 추가:
+      - `Rollback health (auth/member/gateway=UP)`
+      - threshold: `auth=UP, member=UP, gateway=UP`
+      - measured: `auth=UP, member=UP, gateway=UP`
+      - result: `PASS`
+    - Final Decision 체크리스트에 rollback-health 증적 항목 추가
+  - 체크포인트/DoD 판정:
+    - Signoff 표에 rollback health 지표 존재 확인
+    - 롤백 지표 2개(`time<=20m`, `health all UP`) PASS 명시 충족
+  - 커밋/푸시:
+    - 브랜치: `feature/scm-229-phase4-signoff-close`
+    - 커밋: `cf98ff2` (`docs(signoff): add SCM-228 rollback health evidence metric`)
+    - 원격 푸시 완료
