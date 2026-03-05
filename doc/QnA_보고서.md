@@ -1651,3 +1651,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 각 게이트 exit code 0(최종 증적 기준)
     - 로그 내 `[FAIL]` 0건
     - `dev_plan 2.2`의 7게이트 무스킵 PASS 조건 충족
+
+### Q109. 실운영 Go까지 남은 작업을 Issue/PR 단위로 분해
+- 사용자 프롬프트:
+  - "“실운영 전환 가능 상태(Go)”까지 필요한 남은 작업을 이슈/PR 단위로 쪼개서 실행 순서대로 만들서 releas_plan_procces.md파일을 만들어줘"
+- Codex 답변(결과):
+  - 산출물 생성:
+    - `releas_plan_procces.md`
+  - 반영 내용:
+    - 최종 Go 판정기준 정의
+    - `SCM-230 ~ SCM-239` 10개 작업을 `Issue/PR/브랜치` 단위로 실행 순서화
+    - 각 작업별 선행조건/핵심작업/측정 가능한 DoD 명시
+    - 공통 7게이트 실행 커맨드 및 PASS 규칙(exit code 0, FAIL/SKIP 0) 포함
+    - 최종 릴리즈 체크포인트(전 PR MERGED, 보안 이슈 0, signoff 완료, progress 동기화, 릴리즈 태그) 명시
