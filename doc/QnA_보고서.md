@@ -1313,3 +1313,23 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `runbooks/go-nogo-signoff.md`
   - 결론:
     - 7번은 완료 상태이며, 다음 단계(8번)로 진행 가능.
+
+### Q94. 8번 진행(리허설/Signoff 산출물 커밋/푸시)
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 8번을 `7번 산출물 커밋/푸시`로 실행.
+  - 브랜치:
+    - `feature/scm-225-dod-closeout`
+  - 커밋:
+    - `f1e1834` (`docs(scm-225): finalize rehearsal records and go-nogo signoff`)
+  - 포함 파일:
+    - `runbooks/rehearsals/R1-20260305.md`
+    - `runbooks/rehearsals/R2-20260305.md`
+    - `runbooks/rehearsals/R3-20260305.md`
+    - `runbooks/go-nogo-signoff.md`
+    - `doc/QnA_보고서.md`
+  - 원격 반영:
+    - `origin/feature/scm-225-dod-closeout` 푸시 완료
+    - PR 생성 URL 안내 확인:
+      - `https://github.com/yuhyun65/scm_rft/pull/new/feature/scm-225-dod-closeout`
