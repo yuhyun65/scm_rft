@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -22,17 +25,24 @@ public class GatewayPolicyLoader {
 
   private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
   private final String configuredPolicyPath;
+  private final Path baseDirectory;
 
+  @Autowired
   public GatewayPolicyLoader(@Value("${gateway.policy.path:}") String configuredPolicyPath) {
+    this(configuredPolicyPath, Path.of("").toAbsolutePath().normalize());
+  }
+
+  GatewayPolicyLoader(String configuredPolicyPath, Path baseDirectory) {
     this.configuredPolicyPath = configuredPolicyPath;
+    this.baseDirectory = baseDirectory == null ? Path.of("").toAbsolutePath().normalize() : baseDirectory.normalize();
   }
 
   public GatewayPolicyDocument load() {
     List<Path> candidates = new ArrayList<>();
     if (configuredPolicyPath != null && !configuredPolicyPath.isBlank()) {
-      candidates.add(Path.of(configuredPolicyPath));
+      candidates.addAll(expandRelativeCandidates(Path.of(configuredPolicyPath)));
     }
-    candidates.add(Path.of(DEFAULT_REPO_POLICY_PATH));
+    candidates.addAll(expandRelativeCandidates(Path.of(DEFAULT_REPO_POLICY_PATH)));
 
     for (Path candidate : candidates) {
       if (!candidate.isAbsolute()) {
@@ -64,5 +74,19 @@ public class GatewayPolicyLoader {
     catch (IOException e) {
       throw new IllegalStateException("failed to read gateway policy from classpath", e);
     }
+  }
+
+  private List<Path> expandRelativeCandidates(Path original) {
+    if (original.isAbsolute()) {
+      return List.of(original.normalize());
+    }
+
+    Set<Path> expanded = new LinkedHashSet<>();
+    Path cursor = baseDirectory;
+    while (cursor != null) {
+      expanded.add(cursor.resolve(original).normalize());
+      cursor = cursor.getParent();
+    }
+    return new ArrayList<>(expanded);
   }
 }

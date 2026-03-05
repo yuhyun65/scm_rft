@@ -38,4 +38,5 @@ migration/backups/staging/*.bak
 # Migration generated reports
 migration/reports/*.md
 migration/reports/*.state.json
+migration/reports/*.out.txt
 !migration/reports/README.md

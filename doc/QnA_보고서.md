@@ -1195,3 +1195,89 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - Note:
     - Initial run failed due missing `.env.staging` in wt_218.
     - Re-run with `-EnvFile ..\SCM_RFT_wt_217\.env.staging` succeeded.
+
+### Q87. SCM-218 PR 머지 및 정리
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - PR/이슈 처리:
+    - PR #30 머지 완료 (`feat(scm-218): track full-domain P0 gateway smoke assets`)
+    - 이슈 #29 종료 완료
+  - 증적/게이트:
+    - P0 full-domain smoke(F01~F07) PASS
+    - 5게이트(build/unit-integration/contract/smoke/migration-dry-run) PASS
+    - PR 코멘트에 로컬 증적 경로/핵심 PASS 로그 요약 첨부
+  - 정리:
+    - 원격 브랜치 `feature/scm-218-p0-e2e-assets` 삭제
+    - 워크트리 `SCM_RFT_wt_218` 종료 시점 정리 완료
+
+### Q88. 종료 정리 및 기준선 동기화
+- 사용자 프롬프트:
+  - "남은 상태 ... 처리방안을 정리해줘"
+  - "예"
+- Codex 답변(결과):
+  - 로컬 정리:
+    - untracked 문서 5건 ZIP 보관 후 삭제
+    - 보관 파일: `C:\Users\CMN-091\projects\_codex_archive\SCM_RFT-untracked-docs-20260305-095446.zip`
+    - `.git/info/exclude`에 로컬 제외 규칙 반영
+  - 기준선 동기화:
+    - `feature/to-be-dev-env-bootstrap`를 원격과 fast-forward 동기화
+    - 최종 상태: `behind=0`, `ahead=0`, working tree clean
+  - 이슈 정리:
+    - open issue였던 #25(`[SCM-216] SCM-213 measured execution report`) 종료 완료
+
+### Q89. 무스킵 smoke 복구 및 gateway 정책 로더 재발 방지
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 원인 분리:
+    - 초기 실패 원인 1: `SCM_DB_URL` 포맷 오류(`localhost,11433` -> JDBC는 `localhost:11433` 필요)
+    - 초기 실패 원인 2: gateway가 `GATEWAY_POLICY_PATH` 상대경로를 찾지 못해 classpath 기본 정책으로 fallback
+    - 그 결과 `RedisRateLimiter is not initialized`로 `/api/auth/v1/login` 500 발생
+  - 즉시 복구:
+    - auth/member SQL 설정으로 재기동 후 health `UP`
+    - gateway를 정책 절대경로(`...\\infra\\gateway\\policies\\local-auth-member-e2e.yaml`)로 재기동
+    - smoke-test(E2E 강제) 재실행 PASS:
+      - login/verify/member search/member by id/401 케이스 전부 통과
+      - 증적 로그: `runbooks/evidence/SCM-224-20260305-R4/gate-smoke-test.log`
+  - 재발 방지 코드 반영:
+    - `GatewayPolicyLoader`를 개선해 상대경로를 현재 디렉터리뿐 아니라 상위 디렉터리까지 탐색하도록 확장
+    - 테스트 추가:
+      - `GatewayPolicyLoaderTests#resolvesConfiguredRelativePathFromParentDirectories`
+    - 검증:
+      - `:services:gateway:test --tests GatewayPolicyLoaderTests` PASS
+
+### Q90. gateway 로더 수정 후 런타임 검증 보완
+- 사용자 프롬프트:
+  - "진행해줘"
+- Codex 답변(결과):
+  - 이슈 처리:
+    - 로더 테스트용 생성자 추가 후 Spring 기동 시 `No default constructor found` 발생
+    - `GatewayPolicyLoader` 주입 생성자에 `@Autowired` 명시로 런타임 복구
+  - 최종 검증:
+    - gateway를 `GATEWAY_POLICY_PATH=infra/gateway/policies/local-auth-member-e2e.yaml`(상대경로)로 기동
+    - 로그 확인:
+      - `Loaded gateway policy from file ...local-auth-member-e2e.yaml`
+      - `auth/member rateLimitRps=0` 확인
+    - 로그인 검증:
+      - `POST /api/auth/v1/login` via gateway 성공
+    - smoke 재검증:
+      - `runbooks/evidence/SCM-224-20260305-R7/gate-smoke-test.log` PASS
+
+### Q91. 변경분 커밋/푸시 및 산출물 정리, PR 증적 요약 생성
+- 사용자 프롬프트:
+  - "다음을 진행해줘
+    1. 변경분 커밋/푸시
+    2. untracked migration 산출물 포함/제외 기준 확정 후 정리
+    3. PR 코멘트용 증적 요약 생성"
+- Codex 답변(결과):
+  - 기준 확정:
+    - `migration/reports/*.out.txt`는 재생성 가능한 원시 출력으로 제외
+    - 코드/테스트/문서 및 구조화 리포트는 포함
+  - 정리 조치:
+    - `.gitignore`에 `migration/reports/*.out.txt` 추가
+    - untracked `R1-SCM-222-20260305-R2/R3-*.out.txt` 삭제
+  - 산출물 생성:
+    - `doc/pr_comments/SCM-224-evidence-summary.md` 생성 (PR 코멘트 즉시 사용 가능)
+  - 최종 조치:
+    - 변경분 커밋/푸시 진행
