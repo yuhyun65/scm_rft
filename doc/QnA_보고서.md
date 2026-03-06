@@ -1898,3 +1898,31 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - Codex 답변(결과):
   - `20260306_progress.md`, `doc/QnA_보고서.md`를 현재 작업 브랜치에 커밋 후 원격 푸시
   - 목적: DoD 진행률 보고서 및 이력 로그를 원격 기준으로 고정
+
+### Q124. 1번 실행(SCM-231 구현/증적 갱신/PR-이슈 정리)
+- 사용자 프롬프트:
+  - "1번"
+- Codex 답변(결과):
+  - 작업 브랜치: `feature/scm-231-service-containerization`
+  - 구현 반영:
+    - 서비스별 Dockerfile 추가(8개): `services/auth|member|board|quality-doc|order-lot|inventory|file|report/Dockerfile`
+    - gateway Dockerfile Linux 빌드 경로 수정: `services/gateway/Dockerfile`
+    - 실행 스크립트 추가: `scripts/scm231-build-images.ps1`, `scripts/scm231-health-check.ps1`
+    - 런북 추가/인덱스 반영: `runbooks/scm-231-container-runtime.md`, `runbooks/README.md`
+  - 로컬 증적:
+    - 컨테이너 빌드 요약: `runbooks/evidence/SCM-231/image-build-summary.md`
+    - 9개 서비스 health summary: `runbooks/evidence/SCM-231/health-check-summary.md` (9/9 UP)
+    - 5게이트 증적(로컬):
+      - build: `runbooks/evidence/SCM-231-PR45/gate-build-final.log` PASS
+      - unit/integration: `runbooks/evidence/SCM-231-PR45/gate-unit-integration-test-final.log` PASS
+      - contract: `runbooks/evidence/SCM-231-PR45/gate-contract-test-final.log` PASS
+      - smoke: `runbooks/evidence/SCM-231-PR45/gate-smoke-test.log` PASS
+      - migration dry-run: `runbooks/evidence/SCM-231-PR45/gate-migration-dry-run-final.log` PASS
+  - PR 코멘트:
+    - `https://github.com/yuhyun65/scm_rft/pull/45#issuecomment-4009853516`
+  - 머지/이슈 정리:
+    - PR `#45` 상태: `MERGED` (`mergedAt=2026-03-06T06:22:40Z`)
+    - Issue `#44` 상태: `CLOSED` (comment: `Merged via PR #45`)
+  - 기준 브랜치 상태:
+    - 현재 브랜치: `feature/to-be-dev-env-bootstrap`
+    - 워킹트리: clean
