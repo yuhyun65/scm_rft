@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${SCM_DB_URL}
+    username: ${SCM_DB_USER}
+    password: ${SCM_DB_PASSWORD}
+    driver-class-name: ${SCM_DB_DRIVER}
+  flyway:
+    enabled: ${SCM_FLYWAY_ENABLED}
+    baseline-on-migrate: true
+    locations: ${SCM_FLYWAY_LOCATIONS}
+    table: ${SCM_FLYWAY_TABLE}
+
+scm:
+  auth:
+    jwt:
+      secret: ${SCM_AUTH_JWT_SECRET}
+      issuer: ${SCM_AUTH_JWT_ISSUER}
+      access-token-expiration-seconds: ${SCM_AUTH_ACCESS_TOKEN_EXP_SECONDS}
+    login:
+      max-failed-attempts: ${SCM_AUTH_LOGIN_MAX_FAILED_ATTEMPTS}
+      lock-minutes: ${SCM_AUTH_LOGIN_LOCK_MINUTES}
