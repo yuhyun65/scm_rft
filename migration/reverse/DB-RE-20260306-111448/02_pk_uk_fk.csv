@@ -1,0 +1,24 @@
+﻿relation_type,constraint_name,parent_schema,parent_table,parent_columns,referenced_schema,referenced_table,referenced_columns,delete_action,update_action,is_disabled,is_not_trusted
+FK,fk_auth_credentials_member,dbo,auth_credentials,[member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_auth_sessions_member,dbo,auth_sessions,[member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_board_post_attachments_file,dbo,board_post_attachments,[file_id],dbo,upload_files,[file_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_board_post_attachments_post,dbo,board_post_attachments,[post_id],dbo,board_posts,[post_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_board_posts_writer_member,dbo,board_posts,[writer_member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_quality_document_acks_document,dbo,quality_document_acks,[document_id],dbo,quality_documents,[document_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_quality_document_acks_member,dbo,quality_document_acks,[member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_quality_documents_publisher,dbo,quality_documents,[publisher_member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_report_jobs_output_file,dbo,report_jobs,[output_file_id],dbo,upload_files,[file_id],NO_ACTION,NO_ACTION,0,0
+FK,fk_report_jobs_requested_by_member,dbo,report_jobs,[requested_by_member_id],dbo,members,[member_id],NO_ACTION,NO_ACTION,0,0
+PK,pk_auth_credentials,dbo,auth_credentials,[login_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__auth_ses__69B13FDCE62715EF,dbo,auth_sessions,[session_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,pk_board_post_attachments,dbo,board_post_attachments,[post_id], [file_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__board_po__3ED7876656461E5C,dbo,board_posts,[post_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,pk_inventory_balances,dbo,inventory_balances,[item_code], [warehouse_code],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__inventor__AB1D1022567F2D7B,dbo,inventory_movements,[movement_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__members__B29B85343E055DC5,dbo,members,[member_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__order_lo__38CAC254D575E59D,dbo,order_lots,[lot_no],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__orders__465C81B9C731B90F,dbo,orders,[order_no],NULL,NULL,NULL,NULL,NULL,0,0
+PK,pk_quality_document_acks,dbo,quality_document_acks,[document_id], [member_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__quality___9666E8ACFD88F6FA,dbo,quality_documents,[document_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__report_j__6E32B6A5CF67618F,dbo,report_jobs,[job_id],NULL,NULL,NULL,NULL,NULL,0,0
+PK,PK__upload_f__07D884C6A76DA094,dbo,upload_files,[file_id],NULL,NULL,NULL,NULL,NULL,0,0

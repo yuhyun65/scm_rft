@@ -1,0 +1,36 @@
+﻿constraint_type,constraint_name,table_schema,table_name,column_name,definition,is_disabled,is_not_trusted
+CHECK,ck_auth_credentials_algo,dbo,auth_credentials,password_algo,([password_algo]=N'BCRYPT'),0,0
+CHECK,ck_board_posts_status,dbo,board_posts,status,([status]=N'HIDDEN' OR [status]=N'DELETED' OR [status]=N'ACTIVE'),0,0
+CHECK,ck_inventory_movements_type,dbo,inventory_movements,movement_type,([movement_type]=N'ADJUST' OR [movement_type]=N'OUT' OR [movement_type]=N'IN'),0,0
+CHECK,ck_quality_document_acks_ack_type,dbo,quality_document_acks,ack_type,([ack_type]=N'CONFIRMED' OR [ack_type]=N'READ'),0,0
+CHECK,ck_quality_documents_status,dbo,quality_documents,status,([status]=N'ARCHIVED' OR [status]=N'RECEIVED' OR [status]=N'ISSUED'),0,0
+CHECK,ck_report_jobs_status,dbo,report_jobs,status,([status]=N'FAILED' OR [status]=N'COMPLETED' OR [status]=N'RUNNING' OR [status]=N'QUEUED'),0,0
+DEFAULT,DF__auth_cred__creat__74AE54BC,dbo,auth_credentials,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__auth_cred__faile__73BA3083,dbo,auth_credentials,failed_count,((0)),0,0
+DEFAULT,DF__auth_cred__passw__72C60C4A,dbo,auth_credentials,password_algo,(N'BCRYPT'),0,0
+DEFAULT,DF__auth_cred__updat__75A278F5,dbo,auth_credentials,updated_at,(sysutcdatetime()),0,0
+DEFAULT,DF__auth_sess__creat__3B75D760,dbo,auth_sessions,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__board_pos__creat__4D94879B,dbo,board_post_attachments,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__board_pos__creat__49C3F6B7,dbo,board_posts,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__board_pos__is_no__47DBAE45,dbo,board_posts,is_notice,((0)),0,0
+DEFAULT,DF__board_pos__post___46E78A0C,dbo,board_posts,post_id,(newsequentialid()),0,0
+DEFAULT,DF__board_pos__statu__48CFD27E,dbo,board_posts,status,(N'ACTIVE'),0,0
+DEFAULT,DF__board_pos__updat__4AB81AF0,dbo,board_posts,updated_at,(sysutcdatetime()),0,0
+DEFAULT,DF__inventory__quant__59FA5E80,dbo,inventory_balances,quantity,((0)),0,0
+DEFAULT,DF__inventory__updat__5AEE82B9,dbo,inventory_balances,updated_at,(sysutcdatetime()),0,0
+DEFAULT,DF__inventory__creat__5EBF139D,dbo,inventory_movements,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__inventory__movem__5DCAEF64,dbo,inventory_movements,movement_id,(newsequentialid()),0,0
+DEFAULT,DF__members__created__37A5467C,dbo,members,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__members__updated__38996AB5,dbo,members,updated_at,(sysutcdatetime()),0,0
+DEFAULT,DF__order_lot__creat__412EB0B6,dbo,order_lots,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__orders__created___3E52440B,dbo,orders,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__quality_d__ack_a__5629CD9C,dbo,quality_document_acks,ack_at,(sysutcdatetime()),0,0
+DEFAULT,DF__quality_d__creat__571DF1D5,dbo,quality_document_acks,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__quality_d__creat__52593CB8,dbo,quality_documents,created_at,(sysutcdatetime()),0,0
+DEFAULT,DF__quality_d__docum__5070F446,dbo,quality_documents,document_id,(newsequentialid()),0,0
+DEFAULT,DF__quality_d__statu__5165187F,dbo,quality_documents,status,(N'ISSUED'),0,0
+DEFAULT,DF__quality_d__updat__534D60F1,dbo,quality_documents,updated_at,(sysutcdatetime()),0,0
+DEFAULT,DF__report_jo__job_i__619B8048,dbo,report_jobs,job_id,(newsequentialid()),0,0
+DEFAULT,DF__report_jo__reque__6383C8BA,dbo,report_jobs,requested_at,(sysutcdatetime()),0,0
+DEFAULT,DF__report_jo__statu__628FA481,dbo,report_jobs,status,(N'QUEUED'),0,0
+DEFAULT,DF__upload_fi__creat__440B1D61,dbo,upload_files,created_at,(sysutcdatetime()),0,0

@@ -1737,3 +1737,24 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - `doc/QnA_보고서.md` 변경분을 커밋/푸시하여 종료 상태를 원격 기준으로 고정
   - 브랜치: `feature/to-be-dev-env-bootstrap`
   - 목적: 당일 종료 조치 기록(`Q112`)의 원격 반영 완료
+
+### Q114. reverse 재실행 + 정합성 근거 연결 + SCM-230 착수
+- 사용자 프롬프트:
+  - "다음의 내용을 진행해줘\n1.sql/reverse 재실행으로 신규 RunId 스냅샷 생성 \n2.정합성 리포트(migration/reports) 근거 연결 \n3.SCM-230~239 중 다음 이슈 1건 선택 후 Issue=PR=Branch로 착수"
+- Codex 답변(결과):
+  - 1) 신규 RunId 스냅샷 생성 완료
+    - RunId: `DB-RE-20260306-111448`
+    - 실행: `scripts/reverse-export-schema.ps1` + `scripts/reverse-generate-erd.ps1`
+    - 결과: `tables=13`, `FK=10`, 산출물 `migration/reverse/DB-RE-20260306-111448/*`
+    - 이슈 대응: 초기 실행(`DB-RE-20260306-111033`)은 Docker daemon 미기동으로 실패, `scripts/staging-up.ps1`로 환경 기동 후 재실행 PASS
+  - 2) 정합성 리포트 근거 연결 완료
+    - 파일: `migration/reports/reverse-evidence-DB-RE-20260306-111448.md`
+    - 연결 근거:
+      - reverse snapshot 8개 산출물 경로
+      - 최신 validation: `migration/reports/validation-20260305-165633.md`
+      - 최신 dry-run state: `migration/reports/dryrun-20260305-165631.state.json`
+      - R1-SCM-225-R3 도메인별 output 8개
+  - 3) 다음 이슈 선택/착수 완료
+    - 선택: `SCM-230`
+    - GitHub 이슈 생성: `#42` (`SCM-230: lock production release baseline`)
+    - 전용 브랜치 생성: `feature/scm-230-release-baseline-lock`
