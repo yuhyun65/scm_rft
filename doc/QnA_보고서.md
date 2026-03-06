@@ -1826,3 +1826,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - Codex 답변(결과):
   - 기준 브랜치 `feature/to-be-dev-env-bootstrap`에서 `doc/QnA_보고서.md`를 커밋/푸시하여 원격 동기화
   - 목적: Q117(이슈 종료/기준 브랜치 동기화) 이력의 원격 반영 완료
+
+### Q119. release plan 다음 단계(SCM-231) 이슈/브랜치/PR 착수
+- 사용자 프롬프트:
+  - "release plan 다음 단계(`SCM-231`) 이슈/브랜치/PR 착수 진행해줘"
+- Codex 답변(결과):
+  - 이슈 생성:
+    - `#44` `SCM-231: add deployable runtime artifacts for 8 services`
+  - 브랜치 착수:
+    - 기준 브랜치 동기화(`feature/to-be-dev-env-bootstrap`, `pull --ff-only`) 후
+    - 전용 브랜치 생성: `feature/scm-231-service-containerization`
+  - 착수 산출물 생성:
+    - `doc/roadmap/scm-231-containerization-kickoff.md`
+    - 내용: 범위/체크리스트/측정형 DoD/시작 커맨드
