@@ -1,0 +1,16 @@
+gateway:
+  policy:
+    path: ${GATEWAY_POLICY_PATH}
+  auth:
+    verify-uri: ${GATEWAY_AUTH_VERIFY_URI}
+    verify-timeout-ms: ${GATEWAY_AUTH_VERIFY_TIMEOUT_MS}
+    circuit-breaker:
+      sliding-window-size: ${GATEWAY_AUTH_CB_SLIDING_WINDOW_SIZE}
+      minimum-number-of-calls: ${GATEWAY_AUTH_CB_MIN_CALLS}
+      failure-rate-threshold: ${GATEWAY_AUTH_CB_FAILURE_RATE_THRESHOLD}
+      wait-duration-in-open-state-ms: ${GATEWAY_AUTH_CB_WAIT_OPEN_MS}
+      permitted-number-of-calls-in-half-open-state: ${GATEWAY_AUTH_CB_HALF_OPEN_CALLS}
+  cutover:
+    emergency-stop:
+      enabled: ${GATEWAY_EMERGENCY_STOP_ENABLED}
+      http-status: ${GATEWAY_EMERGENCY_STOP_STATUS}
