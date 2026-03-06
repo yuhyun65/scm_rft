@@ -1826,3 +1826,75 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - Codex 답변(결과):
   - 기준 브랜치 `feature/to-be-dev-env-bootstrap`에서 `doc/QnA_보고서.md`를 커밋/푸시하여 원격 동기화
   - 목적: Q117(이슈 종료/기준 브랜치 동기화) 이력의 원격 반영 완료
+
+### Q119. release plan 다음 단계(SCM-231) 이슈/브랜치/PR 착수
+- 사용자 프롬프트:
+  - "release plan 다음 단계(`SCM-231`) 이슈/브랜치/PR 착수 진행해줘"
+- Codex 답변(결과):
+  - 이슈 생성:
+    - `#44` `SCM-231: add deployable runtime artifacts for 8 services`
+  - 브랜치 착수:
+    - 기준 브랜치 동기화(`feature/to-be-dev-env-bootstrap`, `pull --ff-only`) 후
+    - 전용 브랜치 생성: `feature/scm-231-service-containerization`
+  - 착수 산출물 생성:
+    - `doc/roadmap/scm-231-containerization-kickoff.md`
+    - 내용: 범위/체크리스트/측정형 DoD/시작 커맨드
+
+### Q120. PR #45 5게이트 증적 첨부 및 머지 준비
+- 사용자 프롬프트:
+  - "PR #45 기준 5게이트 증적까지 붙여 머지 준비 진행해줘"
+- Codex 답변(결과):
+  - 실행 브랜치: `feature/scm-231-service-containerization`
+  - 증적 디렉터리: `runbooks/evidence/SCM-231-PR45`
+  - 5게이트 결과:
+    - build: PASS (`gate-build-rerun.log`)
+      - 최초 실행은 세션 타임아웃 발생, 로그(`gate-build.log`) 확인 결과 `BUILD SUCCESSFUL`
+      - 머지 증적 명확화를 위해 build 재실행 후 PASS 고정
+    - unit-integration-test: PASS (`gate-unit-integration-test.log`)
+    - contract-test: PASS (`gate-contract-test.log`)
+    - smoke-test: PASS (`gate-smoke-test.log`)
+      - auth/member/gateway health UP
+      - gateway auth/member E2E 시나리오 PASS
+    - migration-dry-run: PASS (`gate-migration-dry-run.log`)
+      - validation: `migration/reports/validation-20260306-133703.md`
+      - state: `migration/reports/dryrun-20260306-133702.state.json`
+  - PR 코멘트 첨부:
+    - `https://github.com/yuhyun65/scm_rft/pull/45#issuecomment-4009516710`
+  - 판정:
+    - 로컬 5게이트 기준 `PR #45` 머지 준비 완료
+
+### Q121. Open PR #1 정리(릴리즈 라인 단순화)
+- 사용자 프롬프트:
+  - "Open PR #1 정리(머지 또는 close)로 릴리즈 라인 단순화 해줘"
+- Codex 답변(결과):
+  - PR #1 상태 분석:
+    - 대상: `main`
+    - 규모: `392 files`, `+23742/-171`
+    - 상태: `MERGEABLE`, `OPEN`
+  - 조치:
+    - 릴리즈 단일 라인 유지 목적(이슈 기반 PR 체계)으로 PR #1 `CLOSE` 처리
+    - 코멘트 남김:
+      - 기존 우산 PR은 `feature/to-be-dev-env-bootstrap` 기반 이슈 라인(SCM-202~)에 의해 대체되었고,
+      - SCM-230~239 완료 후 최종 curated release PR을 별도 생성한다는 방침 명시
+  - 결과:
+    - PR #1: `CLOSED` (`closedAt=2026-03-06T04:46:48Z`)
+    - 오픈 PR 목록: `#45` 단일화 완료
+
+### Q122. DoD(2.x) 기준 진행률 보고서 작성
+- 사용자 프롬프트:
+  - "dev_plan.md의 \"2. 최종 완료(Definition of Done)\" 기준 대비 이프로젝트의 진행상황과 세부사항별 진행률을 정리해서 20260306_progress.md파일을 작성해줘"
+- Codex 답변(결과):
+  - 산출물 생성:
+    - `20260306_progress.md`
+  - 반영 내용:
+    - 기준 문서 `doc/dev_plan.md` 2.1/2.2/2.3 항목별 진행률(%) 표 작성
+    - DoD 총합 판정(2.x 기준) 및 근거 파일 경로 명시
+    - 현재 운영 관점 상태(오픈 이슈/PR, PR #45 게이트 증적, PR #1 정리 결과) 반영
+    - DoD 기준 갭/릴리즈 후속 갭 및 다음 단계(231 머지 → 232 착수 → 233~239) 제시
+
+### Q123. 20260306 진행보고서 커밋/푸시
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - `20260306_progress.md`, `doc/QnA_보고서.md`를 현재 작업 브랜치에 커밋 후 원격 푸시
+  - 목적: DoD 진행률 보고서 및 이력 로그를 원격 기준으로 고정
