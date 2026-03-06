@@ -1862,3 +1862,20 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `https://github.com/yuhyun65/scm_rft/pull/45#issuecomment-4009516710`
   - 판정:
     - 로컬 5게이트 기준 `PR #45` 머지 준비 완료
+
+### Q121. Open PR #1 정리(릴리즈 라인 단순화)
+- 사용자 프롬프트:
+  - "Open PR #1 정리(머지 또는 close)로 릴리즈 라인 단순화 해줘"
+- Codex 답변(결과):
+  - PR #1 상태 분석:
+    - 대상: `main`
+    - 규모: `392 files`, `+23742/-171`
+    - 상태: `MERGEABLE`, `OPEN`
+  - 조치:
+    - 릴리즈 단일 라인 유지 목적(이슈 기반 PR 체계)으로 PR #1 `CLOSE` 처리
+    - 코멘트 남김:
+      - 기존 우산 PR은 `feature/to-be-dev-env-bootstrap` 기반 이슈 라인(SCM-202~)에 의해 대체되었고,
+      - SCM-230~239 완료 후 최종 curated release PR을 별도 생성한다는 방침 명시
+  - 결과:
+    - PR #1: `CLOSED` (`closedAt=2026-03-06T04:46:48Z`)
+    - 오픈 PR 목록: `#45` 단일화 완료
