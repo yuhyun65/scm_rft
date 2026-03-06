@@ -1953,3 +1953,38 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `gh pr checks 47` 결과 `no checks reported`
     - 로컬 증적 코멘트 첨부:
       - `https://github.com/yuhyun65/scm_rft/pull/47#issuecomment-4010190718`
+  - 머지/이슈 정리:
+    - PR `#47` 상태: `MERGED` (`mergedAt=2026-03-06T08:03:30Z`)
+    - Issue `#46` 상태: `CLOSED` (comment: `Merged via PR #47`)
+
+### Q126. 3번 실행(SCM-233 운영 배포 오케스트레이션) 진행 + 금일 종료
+- 사용자 프롬프트:
+  - "3번 진행해줘"
+  - "오늘은 여기에서 종료하겠습니다. 종료를 위한 조치사항을 해줘요"
+- Codex 답변(결과):
+  - 이슈/브랜치 착수:
+    - Issue 생성: `#48` `SCM-233: add production deployment orchestration scripts`
+    - 브랜치 생성: `feature/scm-233-prod-deploy-orchestration`
+  - 구현 반영:
+    - 공통 유틸: `scripts/prod-orchestration-common.ps1`
+    - 기동 스크립트: `scripts/prod-up.ps1`
+    - 종료 스크립트: `scripts/prod-down.ps1`
+    - 롤링재기동 스크립트: `scripts/prod-rolling-restart.ps1`
+    - 운영 런북: `runbooks/prod-deploy-orchestration-runbook.md`
+    - 런북 인덱스 반영: `runbooks/README.md`
+  - 실측 리허설(로컬):
+    - env 파일: `.env.production.test`(임시, 종료 시 삭제)
+    - RunId `SCM-233-20260306-R3` 기준
+      - startup PASS: `runbooks/evidence/SCM-233-20260306-R3/prod-up-summary.md`
+      - rolling restart PASS(복구 12초): `runbooks/evidence/SCM-233-20260306-R3/prod-rolling-restart-summary.md`
+      - shutdown PASS: `runbooks/evidence/SCM-233-20260306-R3/prod-down-summary.md`
+  - 이슈 수정:
+    - `prod-down.ps1`의 PowerShell 예약변수(`PID`) 충돌 수정
+    - `prod-orchestration-common.ps1`에서 Java 21 실행 경로 우선 선택 로직 추가
+  - 게이트 진행 상태:
+    - `build` 로그는 PASS 확보(`SCM-233-PR49/gate-build.log`)했으나 장시간 실행 중 사용자 중단 이벤트 발생
+    - `unit-integration-test` 실행 중 사용자 중단으로 금일 세션 종료
+  - 종료 조치:
+    - 임시 파일 `.env.production.test` 삭제 완료
+    - 임시 Gradle 캐시 `.gradle-user` 삭제 완료
+    - 다음 시작 지점: `feature/scm-233-prod-deploy-orchestration`에서 5게이트 재실행 → PR 생성/증적 코멘트 → 머지/Issue #48 종료

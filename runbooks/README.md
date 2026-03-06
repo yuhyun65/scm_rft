@@ -12,6 +12,7 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `integration-test-runbook.md`
 - `scm-231-container-runtime.md`
 - `prod-config-secrets-checklist.md`
+- `prod-deploy-orchestration-runbook.md`
 - `security-checklist.md`
 - `test-report.md`
 - `go-nogo-signoff.md`
