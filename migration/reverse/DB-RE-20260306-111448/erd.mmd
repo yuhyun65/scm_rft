@@ -1,0 +1,115 @@
+﻿erDiagram
+  dbo_auth_credentials {
+    nvarchar login_id PK
+    nvarchar member_id
+    nvarchar password_hash
+    nvarchar password_algo
+    int failed_count
+    datetime2 locked_until
+    datetime2 created_at
+    datetime2 updated_at
+  }
+  dbo_auth_sessions {
+    uniqueidentifier session_id PK
+    nvarchar member_id
+    nvarchar access_token
+    datetime2 expires_at
+    datetime2 created_at
+  }
+  dbo_board_post_attachments {
+    uniqueidentifier post_id PK
+    uniqueidentifier file_id
+    datetime2 created_at
+  }
+  dbo_board_posts {
+    uniqueidentifier post_id PK
+    nvarchar category_code
+    nvarchar title
+    nvarchar content
+    nvarchar writer_member_id
+    bit is_notice
+    nvarchar status
+    datetime2 created_at
+    datetime2 updated_at
+  }
+  dbo_inventory_balances {
+    nvarchar item_code PK
+    nvarchar warehouse_code
+    decimal quantity
+    datetime2 updated_at
+  }
+  dbo_inventory_movements {
+    uniqueidentifier movement_id PK
+    nvarchar item_code
+    nvarchar warehouse_code
+    nvarchar movement_type
+    decimal quantity
+    nvarchar reference_no
+    datetime2 moved_at
+    datetime2 created_at
+  }
+  dbo_members {
+    nvarchar member_id PK
+    nvarchar member_name
+    nvarchar status
+    datetime2 created_at
+    datetime2 updated_at
+  }
+  dbo_order_lots {
+    nvarchar lot_no PK
+    nvarchar order_no
+    decimal quantity
+    nvarchar status
+    datetime2 created_at
+  }
+  dbo_orders {
+    nvarchar order_no PK
+    nvarchar member_id
+    date order_date
+    nvarchar status
+    datetime2 created_at
+  }
+  dbo_quality_document_acks {
+    uniqueidentifier document_id PK
+    nvarchar member_id
+    datetime2 ack_at
+    datetime2 created_at
+    nvarchar ack_type
+  }
+  dbo_quality_documents {
+    uniqueidentifier document_id PK
+    nvarchar title
+    nvarchar document_type
+    datetime2 issued_at
+    nvarchar publisher_member_id
+    nvarchar status
+    datetime2 created_at
+    datetime2 updated_at
+  }
+  dbo_report_jobs {
+    uniqueidentifier job_id PK
+    nvarchar report_type
+    nvarchar requested_by_member_id
+    nvarchar status
+    datetime2 requested_at
+    datetime2 completed_at
+    uniqueidentifier output_file_id
+    nvarchar error_message
+  }
+  dbo_upload_files {
+    uniqueidentifier file_id PK
+    nvarchar domain_key
+    nvarchar storage_path
+    nvarchar original_name
+    datetime2 created_at
+  }
+  dbo_board_posts ||--o{ dbo_board_post_attachments : "fk_board_post_attachments_post"
+  dbo_members ||--o{ dbo_auth_credentials : "fk_auth_credentials_member"
+  dbo_members ||--o{ dbo_auth_sessions : "fk_auth_sessions_member"
+  dbo_members ||--o{ dbo_board_posts : "fk_board_posts_writer_member"
+  dbo_members ||--o{ dbo_quality_document_acks : "fk_quality_document_acks_member"
+  dbo_members ||--o{ dbo_quality_documents : "fk_quality_documents_publisher"
+  dbo_members ||--o{ dbo_report_jobs : "fk_report_jobs_requested_by_member"
+  dbo_quality_documents ||--o{ dbo_quality_document_acks : "fk_quality_document_acks_document"
+  dbo_upload_files ||--o{ dbo_board_post_attachments : "fk_board_post_attachments_file"
+  dbo_upload_files ||--o{ dbo_report_jobs : "fk_report_jobs_output_file"
