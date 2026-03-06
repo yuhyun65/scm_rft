@@ -67,14 +67,15 @@ foreach ($svc in $services) {
     Remove-Item -Force $err
   }
 
+  $logRel = $log.Replace($repoRoot.Path + "\", "")
   if ($proc.ExitCode -ne 0) {
-    $summary.Add("| $svc | `$image` | FAIL | `$($log.Replace($repoRoot.Path + '\', ''))` |")
+    $summary.Add("| $svc | $image | FAIL | $logRel |")
     $summaryPath = Join-Path $evDir "image-build-summary.md"
     $summary | Set-Content -Encoding UTF8 $summaryPath
     throw "docker build failed for $svc"
   }
 
-  $summary.Add("| $svc | `$image` | PASS | `$($log.Replace($repoRoot.Path + '\', ''))` |")
+  $summary.Add("| $svc | $image | PASS | $logRel |")
 }
 
 $summaryPath = Join-Path $evDir "image-build-summary.md"
