@@ -10,6 +10,7 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `rollback-time-evidence-runbook.md`
 - `rollback-health-pass-runbook.md`
 - `integration-test-runbook.md`
+- `scm-231-container-runtime.md`
 - `security-checklist.md`
 - `test-report.md`
 - `go-nogo-signoff.md`
