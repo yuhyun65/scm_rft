@@ -1926,3 +1926,30 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 기준 브랜치 상태:
     - 현재 브랜치: `feature/to-be-dev-env-bootstrap`
     - 워킹트리: clean
+
+### Q125. 2번 실행(SCM-232 운영 시크릿 외부화/기본값 제거)
+- 사용자 프롬프트:
+  - "2번 진행해줘요"
+- Codex 답변(결과):
+  - 이슈/브랜치/PR:
+    - Issue 생성: `#46` `SCM-232: externalize production secrets and remove defaults`
+    - 브랜치 생성: `feature/scm-232-prod-config-secrets`
+    - PR 생성: `#47` `security(scm-232): externalize production secrets and remove defaults`
+  - 코드/문서 반영:
+    - `.env.production` git 추적 방지: `.gitignore`
+    - 운영 템플릿 추가: `.env.production.example`
+    - 예제 시크릿 기본값 제거: `.env.example`, `.env.staging.example`
+    - prod 프로파일 추가(9개 서비스): `services/*/src/main/resources/application-prod.yml`
+    - 시크릿 사전검증 스크립트 추가: `scripts/check-prod-secrets.ps1`
+    - 운영 체크리스트 추가: `runbooks/prod-config-secrets-checklist.md`
+    - 런북 인덱스 반영: `runbooks/README.md`
+  - 로컬 증적:
+    - build PASS: `runbooks/evidence/SCM-232-PR47/gate-build.log`
+    - unit-integration-test PASS: `runbooks/evidence/SCM-232-PR47/gate-unit-integration-test.log`
+    - security-scan PASS: `runbooks/evidence/SCM-232-PR47/gate-security-scan.log`
+    - prod secret precheck PASS(23 keys): `runbooks/evidence/SCM-232-PR47/check-prod-secrets.log`
+    - 현재 auth/member/gateway health: `UP` (`8081`, `8082`, `18080`)
+  - PR 체크 상태:
+    - `gh pr checks 47` 결과 `no checks reported`
+    - 로컬 증적 코멘트 첨부:
+      - `https://github.com/yuhyun65/scm_rft/pull/47#issuecomment-4010190718`
