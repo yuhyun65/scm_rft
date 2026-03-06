@@ -1839,3 +1839,26 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 착수 산출물 생성:
     - `doc/roadmap/scm-231-containerization-kickoff.md`
     - 내용: 범위/체크리스트/측정형 DoD/시작 커맨드
+
+### Q120. PR #45 5게이트 증적 첨부 및 머지 준비
+- 사용자 프롬프트:
+  - "PR #45 기준 5게이트 증적까지 붙여 머지 준비 진행해줘"
+- Codex 답변(결과):
+  - 실행 브랜치: `feature/scm-231-service-containerization`
+  - 증적 디렉터리: `runbooks/evidence/SCM-231-PR45`
+  - 5게이트 결과:
+    - build: PASS (`gate-build-rerun.log`)
+      - 최초 실행은 세션 타임아웃 발생, 로그(`gate-build.log`) 확인 결과 `BUILD SUCCESSFUL`
+      - 머지 증적 명확화를 위해 build 재실행 후 PASS 고정
+    - unit-integration-test: PASS (`gate-unit-integration-test.log`)
+    - contract-test: PASS (`gate-contract-test.log`)
+    - smoke-test: PASS (`gate-smoke-test.log`)
+      - auth/member/gateway health UP
+      - gateway auth/member E2E 시나리오 PASS
+    - migration-dry-run: PASS (`gate-migration-dry-run.log`)
+      - validation: `migration/reports/validation-20260306-133703.md`
+      - state: `migration/reports/dryrun-20260306-133702.state.json`
+  - PR 코멘트 첨부:
+    - `https://github.com/yuhyun65/scm_rft/pull/45#issuecomment-4009516710`
+  - 판정:
+    - 로컬 5게이트 기준 `PR #45` 머지 준비 완료
