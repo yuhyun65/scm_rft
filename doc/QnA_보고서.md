@@ -1758,3 +1758,71 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 선택: `SCM-230`
     - GitHub 이슈 생성: `#42` (`SCM-230: lock production release baseline`)
     - 전용 브랜치 생성: `feature/scm-230-release-baseline-lock`
+
+### Q115. dev_plan DoD(2.1~2.3) 대비 진행실적 비교/갭/다음 단계
+- 사용자 프롬프트:
+  - "dev_plan.md의 \"2. 최종 완료(Definition of Done)\" 기준 대비 현재 진행실적을 비교하여 갭을 정리하고 다음 진행할 사항을 정리해줘"
+- Codex 답변(결과):
+  - 비교 기준 파일:
+    - `doc/dev_plan.md` (2.1~2.3)
+    - `doc/roadmap/progress.json`
+    - `runbooks/go-nogo-signoff.md`
+    - `migration/reports/SCM-225-20260305-R1~R3-measured.md`
+    - `runbooks/evidence/SCM-229-final/*`
+  - 판정 요약:
+    - 2.1 제품/기능: 충족(8개 서비스 디렉터리/게이트웨이 정책/P0 E2E 증적 존재)
+    - 2.2 품질/보안: 충족(7게이트 무스킵 PASS 증적, High/secret 0건)
+    - 2.3 데이터/전환: 충족(R1~R3 정합성 PASS, Go/No-Go 서명, 롤백 시간/헬스 PASS)
+  - 현재 갭(종료 기준 외 확장 작업):
+    - `SCM-230` 이슈/PR 진행 중(`Issue #42`, `PR #43`)으로 release baseline lock 미머지
+    - `PR #43` GitHub checks 미연결(`no checks reported`) 상태
+    - Open PR `#1` 장기 미정리 상태 유지
+  - 다음 진행 항목:
+    1. PR #43에 로컬 게이트/증적 코멘트 첨부 후 리뷰-머지
+    2. Issue #42 close 및 기준 브랜치 동기화
+    3. release plan 다음 단계(`SCM-231`) 이슈/브랜치/PR 착수
+    4. Open PR #1 정리(머지 또는 close)로 릴리즈 라인 단순화
+
+### Q116. PR #43 로컬 게이트/증적 코멘트 첨부 후 머지
+- 사용자 프롬프트:
+  - "PR #43에 로컬 게이트/증적 코멘트 첨부 후 리뷰-머지 진행해줘"
+- Codex 답변(결과):
+  - 로컬 게이트 실행(증적 디렉터리: `runbooks/evidence/SCM-230-PR43`)
+    - build: PASS (`gate-build.log`)
+    - unit-integration-test: PASS (`gate-unit-integration-test.log`)
+    - contract-test: PASS (`gate-contract-test.log`)
+    - smoke-test:
+      - 1차/재시도 실패 원인: auth(8081) 미기동
+      - 조치: auth/member/gateway를 SQL 고정값 + `local-auth-member-e2e.yaml` 정책으로 백그라운드 기동
+      - 재실행 PASS (`gate-smoke-test-pass.log`)
+    - migration-dry-run: PASS (`gate-migration-dry-run.log`)
+      - 산출물: `migration/reports/validation-20260306-130146.md`, `dryrun-20260306-130139.state.json`
+  - PR 증적 코멘트 첨부 완료:
+    - `https://github.com/yuhyun65/scm_rft/pull/43#issuecomment-4009405472`
+  - 리뷰/머지 처리:
+    - `gh pr review --approve`는 자기 PR 제한으로 실패(정상 정책)
+    - `gh pr merge 43 --squash` 결과: `MERGED` (`mergedAt=2026-03-06T04:02:54Z`)
+  - 후속 상태:
+    - `Issue #42`는 base가 기본브랜치가 아니어서 자동 close 미적용, 현재 `OPEN`
+
+### Q117. Issue #42 종료 + 기준 브랜치 동기화
+- 사용자 프롬프트:
+  - "Issue #42 close 및 기준 브랜치 동기화 해줘"
+- Codex 답변(결과):
+  - 이슈 상태 확인:
+    - `gh issue view 42` 결과 `CLOSED` 확인
+  - 기준 브랜치 동기화:
+    - 로컬 변경(`doc/QnA_보고서.md`)을 `stash`로 임시 보관
+    - `feature/to-be-dev-env-bootstrap` 체크아웃
+    - `git pull --ff-only` 수행 (원격 1커밋 fast-forward 반영)
+  - 후속 정리:
+    - 임시 보관 `stash@{0}` 복원(pop) 완료
+    - 현재 브랜치: `feature/to-be-dev-env-bootstrap`
+    - 현재 상태: `doc/QnA_보고서.md` 로컬 수정 1건(미커밋)
+
+### Q118. QnA 반영분 커밋/푸시
+- 사용자 프롬프트:
+  - "예"
+- Codex 답변(결과):
+  - 기준 브랜치 `feature/to-be-dev-env-bootstrap`에서 `doc/QnA_보고서.md`를 커밋/푸시하여 원격 동기화
+  - 목적: Q117(이슈 종료/기준 브랜치 동기화) 이력의 원격 반영 완료
