@@ -39,9 +39,11 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-scm_stage}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-scm_stage_1234}
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_prometheus return_per_object_metrics true"
     ports:
       - "25673:5672"
       - "35672:15672"
+      - "35692:15692"
     volumes:
       - rabbitmq-staging-data:/var/lib/rabbitmq
     networks:
@@ -69,6 +71,7 @@ services:
       - "19090:9090"
     volumes:
       - ./infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/observability/prometheus/alerts:/etc/prometheus/alerts:ro
       - prometheus-staging-data:/prometheus
     networks:
       - scm-staging-net
