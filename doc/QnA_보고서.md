@@ -2099,3 +2099,40 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - modified: `doc/QnA_보고서.md`
       - untracked: `services/*/bin` 산출물
     - 참고: `services/*/bin`은 실행 산출물로 커밋 제외 대상
+
+### Q129. SCM-233 후속 실행(저장소 경로 재고정 + 7게이트 단일 RunId 재확정) (2026-03-10)
+- 사용자 프롬프트:
+  - "실행해줘"
+  - "나는 지금까지 진행한 프로젝트의 디렉토리가  C:\Users\CMN-091\projects\SCM_RFT로 알고 있는데 왜 C:\Users\CMN-091\projects\HISCM에서 점검하고 있는지 설명해줘"
+  - "그렇게 진행해되 되는지 점검해줘"
+  - "진행해줘"
+  - "다음진행할 사항을 정리해줘"
+  - "실행해줘"
+- Codex 답변(결과):
+  - 1) 저장소 경로 재고정
+    - 세션 컨텍스트가 `HISCM`로 열려 있던 원인을 설명하고, 작업 경로를 `C:\Users\CMN-091\projects\SCM_RFT`로 재고정
+    - `SCM_RFT` 필수 스크립트 존재/브랜치 상태 확인 완료
+  - 2) 선행 복구
+    - Docker daemon DOWN 복구 후 `docker info` 연속 성공 확인
+    - `8081` 점유 프로세스 정리 및 auth/member/gateway 헬스 기준선 재설정
+    - `.gradle-user` ACL 문제 재발 구간 복구 후 쓰기 가능 상태 확보
+  - 3) 7게이트 단일 RunId 재실행
+    - RunId: `SCM-233-7GATE-20260310-114748`
+    - 증적 경로: `runbooks/evidence/SCM-233-7GATE-20260310-114748`
+    - 결과:
+      - build: 로그상 `BUILD SUCCESSFUL` 확인
+      - unit-integration-test: PASS
+      - contract-test: PASS
+      - lint-static-analysis: PASS
+      - security-scan: PASS
+      - smoke-test(E2E ON): PASS
+      - migration-dry-run: PASS
+    - 중간 이슈 및 복구:
+      - `security-scan` 1차 실패(`.gradle-user` lock, `rg os error 33`) → 서비스/daemon 일시 정지 후 재실행 PASS
+      - `build` 명령 자체는 PASS 로그가 반복 확인되었고, 일부 실행은 셸 타임아웃 이슈로 종료코드 증빙이 불안정해 로그 기반 PASS로 판정
+  - 4) 실행 산출물 고정
+    - 최신 RunId 인덱스 갱신: `runbooks/evidence/LATEST-7GATE-RUNID.txt` → `SCM-233-7GATE-20260310-114748`
+  - 5) 현재 상태
+    - 브랜치: `feature/scm-233-prod-deploy-orchestration`
+    - GitHub 상태: 현재 브랜치 연계 Open PR 없음, Issue `#48` OPEN
+    - 워킹트리: `services/*/bin` untracked(빌드 산출물, 커밋 제외 대상)
