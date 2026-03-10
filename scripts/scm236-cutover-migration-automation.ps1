@@ -88,14 +88,14 @@ function Parse-DomainMetrics {
 
     switch ($tokens.Count) {
       3 {
-        if ((Is-Integer $tokens[1]) -and (Is-Integer $tokens[2])) {
-          $val = [long]$tokens[2]
+        if ((Is-Integer $tokens[1]) -and ((Is-Integer $tokens[2]) -or ($tokens[2] -eq "NULL"))) {
+          $val = $(if ($tokens[2] -eq "NULL") { 0 } else { [long]$tokens[2] })
           if ($null -eq $sampleMismatch -or $val -gt $sampleMismatch) { $sampleMismatch = $val }
         }
       }
       4 {
-        if ((Is-Integer $tokens[1]) -and (Is-Integer $tokens[2]) -and (Is-Integer $tokens[3])) {
-          $val = [long]$tokens[3]
+        if ((Is-Integer $tokens[1]) -and (Is-Integer $tokens[2]) -and ((Is-Integer $tokens[3]) -or ($tokens[3] -eq "NULL"))) {
+          $val = $(if ($tokens[3] -eq "NULL") { 0 } else { [long]$tokens[3] })
           if ($null -eq $countMismatch -or $val -gt $countMismatch) { $countMismatch = $val }
         }
       }
@@ -103,6 +103,9 @@ function Parse-DomainMetrics {
         if ((Is-Number $tokens[1]) -and (Is-Number $tokens[2]) -and (Is-Number $tokens[3]) -and (Is-Number $tokens[4])) {
           $val = [double]$tokens[4]
           if ($null -eq $sumDelta -or $val -gt $sumDelta) { $sumDelta = $val }
+        }
+        elseif ($tokens[1] -eq "NULL" -and $tokens[2] -eq "NULL" -and $tokens[3] -eq "NULL" -and $tokens[4] -eq "NULL") {
+          if ($null -eq $sumDelta) { $sumDelta = 0 }
         }
         elseif ((Is-Integer $tokens[2]) -and (Is-Integer $tokens[3]) -and (Is-Integer $tokens[4])) {
           $val = [long]$tokens[4]
@@ -116,13 +119,18 @@ function Parse-DomainMetrics {
         }
       }
       7 {
-        if (Is-Number $tokens[6]) {
-          $val = [double]$tokens[6]
+        if ((Is-Number $tokens[6]) -or ($tokens[6] -eq "NULL")) {
+          $val = $(if ($tokens[6] -eq "NULL") { 0 } else { [double]$tokens[6] })
           if ($null -eq $statusDelta -or $val -gt $statusDelta) { $statusDelta = $val }
         }
       }
     }
   }
+
+  # If domain tables are empty on both sides, SQL can emit NULL or no status rows; treat as zero deltas.
+  if (($null -eq $sumDelta) -and ($countMismatch -eq 0)) { $sumDelta = 0 }
+  if (($null -eq $sampleMismatch) -and ($countMismatch -eq 0)) { $sampleMismatch = 0 }
+  if (($null -eq $statusDelta) -and ($countMismatch -eq 0)) { $statusDelta = 0 }
 
   $verdict = "UNKNOWN"
   if (($null -ne $countMismatch) -and ($null -ne $sumDelta) -and ($null -ne $sampleMismatch) -and ($null -ne $statusDelta)) {

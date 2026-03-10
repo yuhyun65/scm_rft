@@ -2167,3 +2167,31 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 중간 이슈/조치:
     - 1차 실행 시 `-Password` 빈 문자열 인자 처리 오류 발생
     - 인자 생략 로직으로 수정 후 재실행 성공
+
+### Q133. SCM-236 환경 복구 즉시 실행 (2026-03-10)
+- 사용자 프롬프트:
+  - "지금 바로 환경 복구부터 이어서 실행해줘"
+- Codex 답변(결과):
+  - 초기 상태 확인:
+    - Docker daemon DOWN 확인
+    - `MES_HI_LEGACY` 부재/불완전으로 R1 SQL 비교 불가 상태 확인
+  - 환경 복구 조치:
+    - Docker Desktop 기동 + `docker info` 연속 2회 성공으로 daemon 정상화
+    - `MES_HI_LEGACY` 재생성
+      - baseline migration 재적용: `V1`, `V2`, `V4`, `V5`, `V6`, `V7`
+    - `MES_HI` -> `MES_HI_LEGACY` 핵심 도메인 테이블 데이터 동기화
+      - members/auth_credentials/orders/order_lots/upload_files + core domain tables 포함
+  - 중간 장애 및 해결:
+    - `SCM-236-R2` 실패 원인: legacy 스키마(FK/PK 미정상) + 일부 도메인 테이블 미존재
+    - `SCM-236-R3` 실패 원인: 빈 테이블 결과가 `NULL`로 출력되어 파서가 `UNKNOWN` 판정
+    - 조치: `scripts/scm236-cutover-migration-automation.ps1`의 도메인 파서 보강
+      - `NULL`/빈 결과를 0으로 해석
+      - empty-domain 시 `sum/sample/status`를 0으로 보정
+  - 최종 재실행:
+    - RunId: `SCM-236-20260310-R4`
+    - 결과: `DomainPass 8/8`, `DomainUnknown 0`, `FinalVerdict GO`
+    - 증적:
+      - `migration/reports/SCM-236-20260310-R4-measured.md`
+      - `runbooks/evidence/SCM-236-20260310-R4/scm236-cutover-summary.md`
+      - `runbooks/evidence/SCM-236-20260310-R4/dry-run.log`
+      - `runbooks/evidence/SCM-236-20260310-R4/r1-validation.log`
