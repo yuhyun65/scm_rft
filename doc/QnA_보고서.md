@@ -2136,3 +2136,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 브랜치: `feature/scm-233-prod-deploy-orchestration`
     - GitHub 상태: 현재 브랜치 연계 Open PR 없음, Issue `#48` OPEN
     - 워킹트리: `services/*/bin` untracked(빌드 산출물, 커밋 제외 대상)
+
+### Q132. 4번(SCM-236 컷오버 이관 자동화) 실행 (2026-03-10)
+- 사용자 프롬프트:
+  - "실행해줘" (Q131 완료 후 다음 번호 승인)
+- Codex 답변(결과):
+  - 브랜치 분리:
+    - 기준 브랜치 `feature/to-be-dev-env-bootstrap`에서 `feature/scm-236-cutover-migration-automation` 생성
+  - 구현 파일:
+    - `migration/scripts/run-r1-validation.ps1`
+      - host `sqlcmd` 미설치 시 docker `sqlcmd` 폴백 지원 추가
+      - `.env(.staging)`의 `MSSQL_SA_PASSWORD` 자동 로드
+      - 실행 모드(`host-sqlcmd`/`docker-sqlcmd`/`invoke-sqlcmd`/`skipped`) 기록
+    - `scripts/scm236-cutover-migration-automation.ps1` 신규 생성
+      - 단계 자동화: migration dry-run -> R1 validation -> measured report/json 생성
+      - 도메인별 임계치 판정(count/sum/sample/status) 및 GO/NO-GO 산출
+    - `runbooks/scm-236-cutover-migration-automation-runbook.md` 신규 생성
+    - `runbooks/README.md`에 SCM-236 runbook 항목 추가
+  - 실측 실행:
+    - RunId: `SCM-236-20260310-R1`
+    - 생성 산출물:
+      - `migration/reports/SCM-236-20260310-R1-measured.md`
+      - `migration/reports/SCM-236-20260310-R1-measured.json`
+      - `runbooks/evidence/SCM-236-20260310-R1/scm236-cutover-summary.md`
+      - `runbooks/evidence/SCM-236-20260310-R1/dry-run.log`
+      - `runbooks/evidence/SCM-236-20260310-R1/r1-validation.log`
+    - 판정 결과:
+      - `SkipR1Sql` 모드(도커 데몬 DOWN)로 실행되어 도메인 지표가 `MISSING`
+      - FinalVerdict: `NO-GO` (실측 불충분)
+  - 중간 이슈/조치:
+    - 1차 실행 시 `-Password` 빈 문자열 인자 처리 오류 발생
+    - 인자 생략 로직으로 수정 후 재실행 성공
