@@ -1988,3 +1988,114 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 임시 파일 `.env.production.test` 삭제 완료
     - 임시 Gradle 캐시 `.gradle-user` 삭제 완료
     - 다음 시작 지점: `feature/scm-233-prod-deploy-orchestration`에서 5게이트 재실행 → PR 생성/증적 코멘트 → 머지/Issue #48 종료
+
+### Q127. SCM-233 게이트 재실행 장애 진단/복구 및 금일 종료 조치 (2026-03-09)
+- 사용자 프롬프트:
+  - "feature/scm-233-prod-deploy-orchestration에서 5게이트 재실행해줘"
+  - "gateway 테스트 단독 재실행 후 5게이트를 순차 재실행해 PASS까지 이어서 처리해줘"
+  - "지금진행 작업을 종료해줘"
+  - "오늘작업내용을 QnA_보고서에 추가해주고 종료해줘요"
+- Codex 답변(결과):
+  - 기준 저장소/브랜치 확인:
+    - 경로 혼선(HISCM/SCM_RFT) 정리 후 `C:\Users\CMN-091\projects\SCM_RFT`로 고정
+    - 브랜치: `feature/scm-233-prod-deploy-orchestration`
+  - 장애 원인 점검 결과:
+    - `Docker daemon` 간헐 DOWN 상태로 smoke(E2E) 경로 불안정
+    - `.gradle-user` ACL 불일치로 lock 파일/쓰기 접근 거부 발생
+    - 장시간 실행 중 중단(Abort/timeout)로 잔류 Java/Gradle 프로세스 누적
+  - 복구/안정화 조치:
+    - 잔류 프로세스 정리(포트/Gradle/Java)
+    - Docker Desktop 재기동 + `docker info` 연속 2회 성공 확인
+    - `.gradle-user` ACL 재설정(`CodexSandboxOffline` 쓰기 가능 상태) + write probe PASS
+    - gateway 단독 테스트 재실행 PASS
+  - 게이트 실행 현황:
+    - R3:
+      - build PASS: `runbooks/evidence/SCM-233-20260309-GATES-R3/gate-build.log`
+      - unit-integration-test PASS: `runbooks/evidence/SCM-233-20260309-GATES-R3/gate-unit-integration-test.log`
+    - R4(남은 게이트 재개):
+      - contract-test PASS: `runbooks/evidence/SCM-233-20260309-GATES-R4/gate-contract-test.log`
+      - smoke-test(E2E ON) PASS(504 재시도 없이 1회 성공): `runbooks/evidence/SCM-233-20260309-GATES-R4/gate-smoke-test.log`
+      - migration-dry-run PASS: `runbooks/evidence/SCM-233-20260309-GATES-R4/gate-migration-dry-run.log`
+  - 금일 종료 조치:
+    - 서비스 포트(`8081`,`8082`,`18080`) 점유 프로세스 종료 및 `gradlew --stop` 실행
+    - 임시 산출물 정리(`services/*/bin` 삭제)
+    - `.tmp`는 `hsperfdata_CMN-091` 잠금으로 일부 잔존, 나머지 임시 파일 정리 완료
+    - 최종 워킹트리 상태: `?? .gradle-user/` (untracked)
+  - 다음 시작 지점:
+    - `.tmp` 잔여 잠금 해제 후 최종 정리
+    - 필요 시 `unit-integration-test` 1회 추가 실행으로 R4 단일 증적 정합화
+    - SCM-233 PR 코멘트에 금일 게이트 증적 경로 요약 첨부 후 머지 준비
+
+### Q128. DoD 달성 경로 실행(권한/환경 복구 + 7게이트 단일 RunId 확정) (2026-03-10)
+- 사용자 프롬프트:
+  - "프로젝트 완료 기준(DOD)의 달성을 위해 다음 진행할 사항을 정리해줘"
+  - "진행해줘"
+  - "7게이트 무스킵 1회 연속 PASS 증적을 단일 RunId로 확정 진행해줘"
+  - "RunId SCM-233-7GATE-20260310-100433로 7게이트를 순차 실행이 정상적으로 진행되고 있는지 확인해줘"
+  - "실행해줘"
+  - (중간 장애 대응) `.tmp`/`.gradle-user` 권한 오류 로그 공유 및 해결 요청
+- Codex 답변(결과):
+  - 1) 권한/환경 장애 진단 및 조치
+    - 현상:
+      - `.tmp\junit-temp\hsperfdata_CMN-091` 삭제 거부(Access denied)
+      - `.gradle-user` write probe 실패 및 `runbooks/evidence` 쓰기 거부
+      - Docker daemon 간헐 DOWN
+    - 원인:
+      - 실행 계정/소유권 불일치로 ACL 충돌
+      - Java/Gradle lock 파일과 보조 프로세스 잔류
+      - Docker daemon 비기동 상태에서 smoke 의존 경로 실패
+    - 조치:
+      - Java 프로세스 정리 및 `gradlew --stop`
+      - `.tmp` 잠금 원인 정리(UsePerfData 비활성 옵션 병행)
+      - `runbooks/evidence`, `.gradle-user` ACL 보정 후 쓰기 복구
+      - Docker Desktop 재기동 + `docker info` 연속 성공 확인
+  - 2) 일부 기능 작동 확인(실측)
+    - 증적 RunId: `CHK-20260310-095638`
+    - 수행:
+      - `auth/member/gateway` SQL 고정값으로 기동 및 health 확인
+      - `smoke-test(E2E ON)` 실행
+      - `migration-dry-run` 실행
+      - `contract-test` 실행
+    - 결과:
+      - auth/member/gateway health `UP`
+      - smoke PASS (login/token verify/member search/by-id/401 정책 확인)
+      - migration dry-run PASS
+      - contract-test PASS
+    - 증적:
+      - `runbooks/evidence/CHK-20260310-095638/gate-smoke-test.log`
+      - `runbooks/evidence/CHK-20260310-095638/gate-migration-dry-run.log`
+      - `runbooks/evidence/CHK-20260310-095638/gate-contract-test.log`
+  - 3) 7게이트 무스킵 단일 RunId 확정
+    - 최종 RunId: `SCM-233-7GATE-20260310-100433`
+    - 중간 이슈:
+      - security-scan 1차 실패: `rg`가 `.gradle-user` lock 파일 접근 중 `os error 33`
+    - 복구:
+      - 서비스 포트 정리(8081/8082/18080)
+      - Gradle daemon 중지
+      - `.gradle-user` 재생성 후 security-scan 재실행
+      - Docker/서비스 재기동 후 smoke/migration 진행
+    - 최종 결과(무스킵 7게이트 PASS):
+      - build PASS
+      - unit-integration-test PASS
+      - contract-test PASS
+      - lint-static-analysis PASS
+      - security-scan PASS
+      - smoke-test PASS
+      - migration-dry-run PASS
+    - 증적 파일:
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-build.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-unit-integration-test.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-contract-test.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-lint-static-analysis.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-security-scan.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-smoke-test.log`
+      - `runbooks/evidence/SCM-233-7GATE-20260310-100433/gate-migration-dry-run.log`
+  - 4) 10분 이상 세션 모니터링 요청 반영
+    - 본 세션에서 10분 초과 단일 작업은 발생하지 않음(최장: 서비스 재기동+health 대기 약 3~4분)
+    - 10분 초과 가능 구간은 사전 고지하고(캐시 재다운로드/최초 컴파일/daemon cold start), 발생 시 원인 즉시 설명 원칙으로 진행
+  - 5) 현재 워킹트리 상태(기록 시점)
+    - 브랜치: `feature/scm-233-prod-deploy-orchestration`
+    - 변경:
+      - modified: `doc/QnA_보고서.md`
+      - untracked: `services/*/bin` 산출물
+    - 참고: `services/*/bin`은 실행 산출물로 커밋 제외 대상
