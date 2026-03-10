@@ -17,3 +17,4 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `test-report.md`
 - `go-nogo-signoff.md`
 - `rehearsals/rehearsal-record-template.md`
+- `scm-235-security-hardening-freeze.md`

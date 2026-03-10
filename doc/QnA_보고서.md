@@ -2136,3 +2136,29 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 브랜치: `feature/scm-233-prod-deploy-orchestration`
     - GitHub 상태: 현재 브랜치 연계 Open PR 없음, Issue `#48` OPEN
     - 워킹트리: `services/*/bin` untracked(빌드 산출물, 커밋 제외 대상)
+
+### Q131. 3번(SCM-235 보안 하드닝/동결) 실행 (2026-03-10)
+- 사용자 프롬프트:
+  - "실행해줘" (Q130 완료 후 다음 번호 승인)
+- Codex 답변(결과):
+  - 브랜치 분리:
+    - 기준 브랜치 `feature/to-be-dev-env-bootstrap`에서 `feature/scm-235-security-hardening-freeze` 생성
+  - 구현 파일:
+    - `scripts/scm235-security-freeze.ps1` 신규 생성
+    - `runbooks/scm-235-security-hardening-freeze.md` 신규 생성
+    - `scripts/ci-run-gate.ps1` 보안스캔 성능 안정화 수정
+      - `rg` 제외 경로 추가: `.gradle-user/**`, `services/**/bin/**`, `runbooks/evidence/**`, `.agentic-ci-smoke/**`
+    - `runbooks/README.md`에 SCM-235 런북 항목 추가
+  - 중간 이슈/원인:
+    - R1/R2 실행이 15~20분 타임아웃
+    - 원인: `security-scan`이 대용량 캐시/증적 폴더까지 전수 스캔하여 지연
+    - 조치: 보안스캔 제외 경로 추가 + 스크립트 반환값 버그(`Resolve-Path` 빈문자열) 수정
+  - 최종 실측(PASS):
+    - RunId: `SCM-235-20260310-R5`
+    - 결과: `lint-static-analysis` PASS, `security-scan` PASS
+    - 로그 내 `[FAIL]`/`[SKIP]` 0건
+    - 증적:
+      - `runbooks/evidence/SCM-235-20260310-R5/gate-lint-static-analysis.log`
+      - `runbooks/evidence/SCM-235-20260310-R5/gate-security-scan.log`
+      - `runbooks/evidence/SCM-235-20260310-R5/security-freeze-summary.md`
+      - `runbooks/evidence/SCM-235-20260310-R5/security-freeze-summary.json`

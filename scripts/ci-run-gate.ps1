@@ -1,4 +1,4 @@
-param(
+﻿param(
   [Parameter(Mandatory = $true)][ValidateSet("build", "unit-integration-test", "contract-test", "lint-static-analysis", "security-scan", "migration-dry-run", "smoke-test")][string]$Gate
 )
 
@@ -91,7 +91,7 @@ function Invoke-SecretScan {
   }
 
   $pattern = "(AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----)"
-  $matches = & rg --line-number --hidden --glob "!.git/**" --glob "!HISCM/**" $pattern $repoRoot
+  $matches = & rg --line-number --hidden --glob "!.git/**" --glob "!HISCM/**" --glob "!.gradle-user/**" --glob "!services/**/bin/**" --glob "!runbooks/evidence/**" --glob "!.agentic-ci-smoke/**" $pattern $repoRoot
 
   if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($matches -join ""))) {
     Write-Host $matches
@@ -218,3 +218,4 @@ try {
 finally {
   Pop-Location
 }
+
