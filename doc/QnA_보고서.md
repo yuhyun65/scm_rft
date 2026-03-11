@@ -2315,3 +2315,27 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - PR: `https://github.com/yuhyun65/scm_rft/pull/57`
       - 증적 코멘트: `https://github.com/yuhyun65/scm_rft/pull/57#issuecomment-4037053686`
     - Issue `#53` 종료 완료 (`Merged via PR #57`)
+
+### Q140. SCM-239 최종 Go/No-Go 서명 및 릴리즈 태그 실행 (2026-03-11)
+- 사용자 프롬프트:
+  - "진행해줘" (SCM-239 진행 지시)
+- Codex 답변(결과):
+  - 브랜치 생성:
+    - `feature/scm-239-final-signoff-release-tag`
+  - 산출물 변경:
+    - `runbooks/go-nogo-signoff.md`
+      - `SCM-239 Final Release Sign-off` 섹션 추가
+      - 최종 판정 `GO (Production release line)` 반영
+      - 릴리즈 태그 값 `v2026.03.11-scm-rft-go` 명시
+    - `runbooks/release-note.md`
+      - Issue/Branch/ReleaseDate/ReleaseTag 및 변경/리스크/롤백 반영
+  - PR/증적/머지:
+    - PR `#58` 생성 및 증적 코멘트 첨부
+      - PR: `https://github.com/yuhyun65/scm_rft/pull/58`
+      - 코멘트: `https://github.com/yuhyun65/scm_rft/pull/58#issuecomment-4037106573`
+    - PR `#58` -> `MERGED`
+  - 릴리즈 태그:
+    - `git tag -a v2026.03.11-scm-rft-go -m "SCM-239 final GO signoff release"`
+    - `git push origin v2026.03.11-scm-rft-go` 성공
+  - 이슈 종료:
+    - Issue `#54` -> `CLOSED` (`Merged via PR #58 and tagged v2026.03.11-scm-rft-go`)
