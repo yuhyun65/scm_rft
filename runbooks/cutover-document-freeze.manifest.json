@@ -1,0 +1,41 @@
+﻿{
+    "freeze_id":  "SCM-238-20260311-R1",
+    "effective_at":  "2026-03-11 16:21:32 +09:00",
+    "baseline_branch":  "feature/to-be-dev-env-bootstrap",
+    "baseline_commit":  "6302532",
+    "issue":  "#53",
+    "files":  [
+                  {
+                      "path":  "runbooks/cutover-operations-runbook.md",
+                      "sha256":  "96bb4b71cd30c2311373c6d1a477f6021c684bf18b7ab37d355e73250aa4ded8"
+                  },
+                  {
+                      "path":  "runbooks/cutover-checklist.md",
+                      "sha256":  "8ea22f265d1d1e671770410ba5f5f0b18468f6f58669b5648ad085e173235b36"
+                  },
+                  {
+                      "path":  "runbooks/rollback-playbook.md",
+                      "sha256":  "93b32a06d17082234c0c3ad5916d80bc34209c091412e24bb3d030cdaa7379f1"
+                  },
+                  {
+                      "path":  "runbooks/go-nogo-signoff.md",
+                      "sha256":  "3e111c7aaf8afa836cf008ff1df4ec1eda3c5c0e812a1202bc26d3bb59c64f72"
+                  },
+                  {
+                      "path":  "runbooks/scm-236-cutover-migration-automation-runbook.md",
+                      "sha256":  "ccf7828f6bad04eeb80523ffcad8716ccb525b8525d4654d01ad33318d63bcc6"
+                  },
+                  {
+                      "path":  "runbooks/rehearsal-R1-runbook.md",
+                      "sha256":  "b0ae869a0a362e1950063fd4f374feafd1c75a408b80fef8131b640db6c981aa"
+                  },
+                  {
+                      "path":  "runbooks/rollback-time-evidence-runbook.md",
+                      "sha256":  "f9bbe94d10366ee5d5df06f6cc166114664d9695a7558902948de996921f5cb7"
+                  },
+                  {
+                      "path":  "runbooks/rollback-health-pass-runbook.md",
+                      "sha256":  "dcb598d9f85dcd8ced877974d81916f91e13d3593cff3a248cd9dbcd36e2d235"
+                  }
+              ]
+}
