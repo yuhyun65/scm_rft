@@ -1,0 +1,9 @@
+﻿{
+    "runId":  "SCM-237-20260311-R4",
+    "generatedAt":  "2026-03-11T17:26:07+09:00",
+    "branch":  "feature/scm-241-evidence-persistence-manifest",
+    "commit":  "754ce029a97728602e912f5571d4809a7ee59781",
+    "manifestJson":  "runbooks/evidence-manifest/SCM-237-20260311-R4-manifest.json",
+    "manifestMd":  "runbooks/evidence-manifest/SCM-237-20260311-R4-manifest.md",
+    "fileCount":  3
+}

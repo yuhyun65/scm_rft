@@ -18,5 +18,6 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `go-nogo-signoff.md`
 - `cutover-document-freeze.md`
 - `cutover-document-freeze.manifest.json`
+- `evidence-manifest/README.md`
 - `rehearsals/rehearsal-record-template.md`
 - `scm-236-cutover-migration-automation-runbook.md`
