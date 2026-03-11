@@ -11,6 +11,7 @@ Operational procedures for cutover, rollback, rehearsal, and local/dev operation
 - `rollback-health-pass-runbook.md`
 - `integration-test-runbook.md`
 - `scm-231-container-runtime.md`
+- `scm-234-observability-alerting-runbook.md`
 - `prod-config-secrets-checklist.md`
 - `prod-deploy-orchestration-runbook.md`
 - `security-checklist.md`

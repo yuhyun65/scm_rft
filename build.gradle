@@ -42,6 +42,7 @@ configure(serviceProjects) {
 
     runtimeOnly "com.microsoft.sqlserver:mssql-jdbc"
     runtimeOnly "com.h2database:h2"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 
     testImplementation "org.springframework.boot:spring-boot-starter-test"
   }
@@ -77,6 +78,7 @@ project(gatewayProjectPath) {
     implementation "org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j"
     implementation "org.springframework.boot:spring-boot-starter-data-redis-reactive"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
+    runtimeOnly "io.micrometer:micrometer-registry-prometheus"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
   }

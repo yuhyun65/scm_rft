@@ -49,6 +49,7 @@ try {
   Write-Host "- Loki       : http://localhost:13100"
   Write-Host "- Tempo      : http://localhost:13200"
   Write-Host "- RabbitMQ   : amqp://localhost:25673 / http://localhost:35672"
+  Write-Host "- RabbitMQ metrics : http://localhost:35692/metrics"
   Write-Host "- SQL Server : localhost,11433"
 }
 finally {

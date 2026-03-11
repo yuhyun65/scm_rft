@@ -45,6 +45,7 @@ try {
   Write-Host "- Loki       : http://localhost:3100"
   Write-Host "- Tempo      : http://localhost:3200"
   Write-Host "- RabbitMQ   : http://localhost:15672"
+  Write-Host "- RabbitMQ metrics : http://localhost:15692/metrics"
 
   if ($WithGateway) {
     $gatewayBuildFile = Join-Path $root "services\\gateway\\build.gradle"
