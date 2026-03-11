@@ -41,3 +41,11 @@ migration/reports/*.md
 migration/reports/*.state.json
 migration/reports/*.out.txt
 !migration/reports/README.md
+!migration/reports/releases/
+!migration/reports/releases/*.md
+!migration/reports/releases/*.json
+
+# Tracked evidence manifests
+!runbooks/evidence-manifest/
+!runbooks/evidence-manifest/*.md
+!runbooks/evidence-manifest/*.json

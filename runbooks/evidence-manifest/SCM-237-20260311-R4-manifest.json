@@ -1,0 +1,28 @@
+﻿{
+    "runId":  "SCM-237-20260311-R4",
+    "generatedAt":  "2026-03-11T17:26:07+09:00",
+    "branch":  "feature/scm-241-evidence-persistence-manifest",
+    "commit":  "754ce029a97728602e912f5571d4809a7ee59781",
+    "evidenceRoot":  "runbooks/evidence/SCM-237-20260311-R4",
+    "fileCount":  3,
+    "files":  [
+                  {
+                      "path":  "runbooks/evidence/SCM-237-20260311-R4/check-prereqs.log",
+                      "sha256":  "539d10e9275b1e17b05dcad3f68508eebd78f2de2dd34ffc674d30411686a730",
+                      "sizeBytes":  1374,
+                      "lastWriteTimeUtc":  "2026-03-11T06:50:52Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-237-20260311-R4/rehearsal-run.log",
+                      "sha256":  "73ca2cfa87c472455292425dad61fd9a9e0ccc31c8d6528a975a79c0ccf3b27d",
+                      "sizeBytes":  1054,
+                      "lastWriteTimeUtc":  "2026-03-11T06:53:16Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-237-20260311-R4/scm237-rehearsal-summary.md",
+                      "sha256":  "9ba03a78c98ab0cd097a71bc2f9ab1b81048b38ebcf14fa00411fddbfdd1b4e4",
+                      "sizeBytes":  653,
+                      "lastWriteTimeUtc":  "2026-03-11T06:53:58Z"
+                  }
+              ]
+}
