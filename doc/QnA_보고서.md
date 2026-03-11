@@ -2407,3 +2407,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `updated_at` 값을 `2026-03-11T18:26:00`으로 갱신
   - 결과:
     - 문서 기준 시점이 SCM-234 실측 완료 시점과 동기화됨
+
+### Q145. 세션 종료 조치 및 다음 진행 정리 (2026-03-11)
+- 사용자 프롬프트:
+  - "오늘 작업은 여기에서 종료합니다. 종료에 필요한 조치를 진행해주고 다음 진행사항을 정리해주고, 종료해줘"
+- Codex 답변(결과):
+  - 종료 조치 실행:
+    - Gradle daemon 정리: `GRADLE_USER_HOME=.gradle-user`로 고정 후 `./gradlew.bat --stop` 실행 (`No Gradle daemons are running`)
+    - Staging 리소스 정리: `scripts/staging-down.ps1` 실행으로 `scm-stg-*` 컨테이너/네트워크 down 완료
+  - 상태 확인:
+    - 브랜치: `feature/to-be-dev-env-bootstrap` (origin 동기화 상태)
+    - 잔여 워킹트리: untracked `.tmp/` 1건
+  - 다음 진행 제안:
+    - SCM-233 프로덕션 오케스트레이션 브랜치에서 7게이트 무스킵 단일 RunId 재실행
+    - SCM-239 기준의 최종 실운영 전환 체크리스트(비밀/알람/복구) 리허설 1회
+    - `.tmp/` 정리 정책 확정(보관/삭제/ignore) 후 워킹트리 clean 고정
+
+### Q146. SCM-233/239 다음 진행 환경 준비 (2026-03-12)
+- 사용자 프롬프트:
+  - "다음 진행을 위한 환경 준비: 1) SCM-233 7게이트 무스킵 단일 RunId 재실행 2) SCM-239 기준 최종 실운영 전환 리허설 1회 3) .tmp 정책 확정 후 clean"
+- Codex 답변(결과):
+  - 공통 환경 준비 완료:
+    - Docker daemon 정상화 및 `docker info` 2회 연속 PASS 확인
+    - `scripts/check-prereqs.ps1` 실행 결과: Java/Node/Gradle/DockerCompose lock 정책 100% 일치
+    - `scripts/staging-up.ps1` 실행으로 staging 인프라 기동 완료
+    - 상태 확인: Prometheus(19090), RabbitMQ API(35672) 응답 200
+  - 실행 증적 디렉터리 선생성:
+    - `runbooks/evidence/SCM-233-7GATE-20260312-R1`
+    - `runbooks/evidence/SCM-239-REHEARSAL-20260312-R1`
+  - `.tmp/` 정책 확정 및 정리:
+    - `.gitignore`에 `.tmp/` 추가
+    - `.tmp/` 디렉터리 삭제 완료(`TMP_REMOVED`)

@@ -31,6 +31,7 @@ logs/
 # Docker volumes/cache
 .docker/
 tmp/
+.tmp/
 
 # Backup artifacts
 migration/backups/*.bak
