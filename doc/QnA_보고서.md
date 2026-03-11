@@ -2293,3 +2293,25 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - Issue `#52` -> `CLOSED` (`Merged via PR #56`)
   - 기준 브랜치 상태:
     - `feature/to-be-dev-env-bootstrap` 최신 동기화 완료
+
+### Q139. SCM-238 컷오버 문서 freeze 실행 (2026-03-11)
+- 사용자 프롬프트:
+  - "진행해줘" (SCM-238 진행 지시)
+- Codex 답변(결과):
+  - 브랜치 생성:
+    - `feature/scm-238-cutover-doc-freeze`
+  - 구현 산출물:
+    - 신규 `runbooks/cutover-document-freeze.md`
+      - Freeze ID: `SCM-238-20260311-R1`
+      - Baseline branch/commit, 변경 잠금 규칙, 승인 이력 기록
+    - 신규 `runbooks/cutover-document-freeze.manifest.json`
+      - 컷오버 기준 문서 SHA256 해시 고정
+    - 수정 `runbooks/README.md`
+      - freeze 문서/매니페스트 포함
+  - 검증:
+    - 매니페스트 검증 커맨드 실행 결과: `[OK] freeze manifest verified`
+  - PR/이슈:
+    - PR `#57` 생성/증적 코멘트 첨부/머지 완료
+      - PR: `https://github.com/yuhyun65/scm_rft/pull/57`
+      - 증적 코멘트: `https://github.com/yuhyun65/scm_rft/pull/57#issuecomment-4037053686`
+    - Issue `#53` 종료 완료 (`Merged via PR #57`)
