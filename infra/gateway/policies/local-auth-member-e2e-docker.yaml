@@ -1,0 +1,44 @@
+policyVersion: 1
+name: local-auth-member-e2e-docker
+
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 2
+    backoffMs: 200
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: false
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://scm-obs-auth:8081
+    authRequired: false
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+  - id: member
+    path: /api/member/**
+    target: http://scm-obs-member:8082
+    authRequired: true
+    rateLimitRps: 0
+    circuitBreaker:
+      enabled: false
+
+cutoverSwitches:
+  blockLegacyWrites: false
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: false
+    httpStatus: 503

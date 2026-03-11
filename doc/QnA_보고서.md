@@ -2357,3 +2357,53 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - SCM-234 완료 및 PR 머지
     - 릴리즈용 evidence manifest(커밋 가능 경로) 분리
     - `ci-gates.yml` 트리거에 `feature/to-be-dev-env-bootstrap` 또는 `workflow_dispatch + required checks` 정책 반영
+
+### Q142. 권장 순서(240→241→234→progress) 실행 지시 (2026-03-11)
+- 사용자 프롬프트:
+  - "다음의 권장 실행 순서에 따라 진행해줘 1.SCM-240 2.SCM-241 3.SCM-234 4.progress.json 최종 동기화"
+- Codex 답변(결과):
+  - SCM-240 상태 확인: 완료
+    - 반영 파일: `.github/workflows/ci-gates.yml`, `runbooks/merge-gates-checklist.md`
+    - 결과: PR `#61` 머지, Issue `#59` 종료 상태 확인
+  - SCM-241 상태 확인: 완료
+    - 반영 파일: `.gitignore`, `scripts/publish-evidence-manifest.ps1`, `migration/reports/releases/*`, `runbooks/evidence-manifest/*`
+    - 결과: PR `#62` 머지, Issue `#60` 종료 상태 확인
+  - SCM-234는 실측 미완료 상태로 확인되어 후속 복구 실행으로 전환
+
+### Q143. SCM-234 관측/알람 실측 복구 및 완료 (2026-03-11)
+- 사용자 프롬프트:
+  - "진행해줘" (SCM-234 포함 순차 실행)
+- Codex 답변(결과):
+  - 초기 실패 원인 분해:
+    - Prometheus `scm-core-alerts` 그룹 미로딩(`/etc/prometheus/alerts` 마운트 누락)
+    - auth/member/gateway 미기동
+    - gateway 라우팅 타깃이 컨테이너 내부 `localhost`로 고정되어 login 500 발생
+    - 구버전 이미지(`scm231-r1`)에서 `/actuator/prometheus` 404로 스크랩 실패
+  - 복구 조치:
+    - `docker-compose.staging.yml` 기준으로 `scm-stg-prometheus` 강제 재생성 후 alerts 마운트/룰 로딩 정상화
+    - `infra/gateway/policies/local-auth-member-e2e-docker.yaml` 신규 추가
+      - auth/member target을 컨테이너 네트워크 주소로 분리
+    - `infra/observability/prometheus/prometheus.yml` 보강
+      - `scm-obs-auth/member/gateway`, `scm-stg-rabbitmq:15692` 스크랩 타깃 추가
+    - auth/member/gateway 최신 이미지 재빌드
+      - `scm-rft/auth:scm234-r1`
+      - `scm-rft/member:scm234-r1`
+      - `scm-rft/gateway:scm234-r1`
+    - 세 서비스를 `scm-rft-staging_scm-staging-net`으로 재기동 후 health UP 확인
+  - 검증 결과:
+    - smoke: `scripts/smoke-gateway-auth-member-e2e.ps1` PASS
+    - observability: `scripts/scm234-observability-check.ps1 -RunId SCM-234-20260311-R11` PASS
+    - 최종 수집률: `8/8 (100%)`
+    - 증적:
+      - `runbooks/evidence/SCM-234-20260311-R11/scm234-observability-summary.md`
+      - `runbooks/evidence/SCM-234-20260311-R11/scm234-observability-summary.json`
+
+### Q144. progress.json 최종 동기화 (2026-03-11)
+- 사용자 프롬프트:
+  - "4.progress.json 최종 동기화"
+- Codex 답변(결과):
+  - 대상 파일: `doc/roadmap/progress.json`
+  - 반영 내용:
+    - `updated_at` 값을 `2026-03-11T18:26:00`으로 갱신
+  - 결과:
+    - 문서 기준 시점이 SCM-234 실측 완료 시점과 동기화됨
