@@ -2,10 +2,14 @@ name: ci-gates
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "feature/to-be-dev-env-bootstrap" ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/to-be-dev-env-bootstrap" ]
   workflow_dispatch:
+
+concurrency:
+  group: ci-gates-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

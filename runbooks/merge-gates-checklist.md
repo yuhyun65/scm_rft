@@ -32,6 +32,19 @@ git rebase origin/feature/to-be-dev-env-bootstrap
 git push --force-with-lease
 ```
 
+## 0-3) 기준 브랜치 Required Checks 설정 (필수)
+- GitHub Settings -> Branches -> Branch protection rules
+- 대상 브랜치: `feature/to-be-dev-env-bootstrap`
+- 필수 체크 7개를 Required로 고정:
+  - `build`
+  - `unit/integration test`
+  - `contract test`
+  - `lint/static analysis`
+  - `SAST + secret + dependency scan`
+  - `migration dry-run`
+  - `smoke test`
+- `Require branches to be up to date before merging` 활성화
+
 ## 1) 필수 게이트 실행/판정/즉시조치
 
 | Gate | 실행 커맨드 | 성공 판정 | 실패 시 즉시 조치 |
