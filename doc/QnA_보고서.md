@@ -2339,3 +2339,21 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `git push origin v2026.03.11-scm-rft-go` 성공
   - 이슈 종료:
     - Issue `#54` -> `CLOSED` (`Merged via PR #58 and tagged v2026.03.11-scm-rft-go`)
+
+### Q141. DoD 기준 대비 현재 시스템 갭 분석 (2026-03-11)
+- 사용자 프롬프트:
+  - "DOD 기준과 현재까지 개발된 시스템과의 갭을 분석하여 정리해줘"
+- Codex 답변(결과):
+  - 기준: `doc/dev_plan.md` 2.1~2.3 Definition of Done
+  - 판정 요약:
+    - 2.1 제품/기능: 대부분 충족 (8개 서비스 health + P0-F01~F07 PASS)
+    - 2.2 품질/보안: 부분 충족 (로컬 7게이트 PASS 증적은 존재하나, `ci-gates.yml` 트리거가 `main` 한정이라 현재 기준 브랜치 PR 체크 자동화는 공백)
+    - 2.3 데이터/전환: 충족 (R1~R3 정합성 8/8 PASS, Final GO signoff)
+  - 확인된 주요 갭:
+    - 운영 관측성 강화 이슈 `#50 (SCM-234)` OPEN
+    - 증적 영속성 갭: `runbooks/evidence/` 로컬 exclude, `migration/reports/*.md|*.state.json` gitignore로 원격 재현성 제한
+    - 진행 현황 문서 동기화 갭: `doc/roadmap/progress.json updated_at`가 최신 완료 시점(3/11) 미반영
+  - 우선 조치 제안:
+    - SCM-234 완료 및 PR 머지
+    - 릴리즈용 evidence manifest(커밋 가능 경로) 분리
+    - `ci-gates.yml` 트리거에 `feature/to-be-dev-env-bootstrap` 또는 `workflow_dispatch + required checks` 정책 반영
