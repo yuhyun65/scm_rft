@@ -86,3 +86,29 @@ Note: health probe result in each summary depends on service runtime state at me
 - `runbooks/gateway-routing-matrix.md`
 - `runbooks/rollback-playbook.md`
 - `runbooks/rollback-time-evidence-runbook.md`
+
+## 8) SCM-239 Final Release Sign-off (2026-03-11)
+
+### Final Inputs
+- [x] SCM-236 cutover migration automation GO evidence
+  - `migration/reports/SCM-236-20260310-R4-measured.md`
+  - `runbooks/evidence/SCM-236-20260310-R4/scm236-cutover-summary.md`
+- [x] SCM-237 production topology rehearsal R4 PASS evidence
+  - `runbooks/evidence/SCM-237-20260311-R4/scm237-rehearsal-summary.md`
+  - `migration/reports/dryrun-20260311-155313.state.json`
+- [x] SCM-238 cutover document freeze baseline
+  - `runbooks/cutover-document-freeze.md`
+  - `runbooks/cutover-document-freeze.manifest.json`
+
+### Final Release Decision
+- Final decision time: `2026-03-11 16:35:00 KST`
+- Decision: `GO (Production release line)`
+- Release tag to publish after merge: `v2026.03.11-scm-rft-go`
+
+### Final Sign-off
+| Role | Approver | Time (KST) | Decision | Evidence Link |
+|---|---|---|---|---|
+| Dev Owner | CMN-091 | 2026-03-11 16:35:00 | GO | `runbooks/cutover-document-freeze.md` |
+| Codex (Validation) | Codex | 2026-03-11 16:35:00 | GO | `runbooks/evidence/SCM-237-20260311-R4/scm237-rehearsal-summary.md` |
+| Ops Owner | CMN-091 | 2026-03-11 16:35:00 | GO | `migration/reports/SCM-236-20260310-R4-measured.md` |
+| QA/Business Owner | CMN-091 | 2026-03-11 16:35:00 | GO | `runbooks/cutover-document-freeze.manifest.json` |
