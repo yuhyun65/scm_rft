@@ -2240,3 +2240,20 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 다음 즉시 실행 항목:
     - PR `#55` 리뷰/머지
     - 머지 후 `feature/scm-237-prod-topology-rehearsal-r4` 브랜치 생성 및 착수
+
+### Q136. SCM-236 머지 및 SCM-237 착수 환경 준비 (2026-03-11)
+- 사용자 프롬프트:
+  - "다음 순서로 진행해줘: 1) Docker 비의존 작업 2) Docker 서비스 시작 3) 체크 통과 후 SCM-237 리허설 시작"
+- Codex 답변(결과):
+  - 1) Docker 비의존 작업 완료
+    - PR `#55` 머지 완료 (`MERGED`)
+    - Issue `#51` 종료 완료 (`CLOSED`, 코멘트: Merged via PR #55)
+    - 기준 브랜치 동기화 후 `feature/scm-237-prod-topology-rehearsal-r4` 생성/체크아웃
+  - 2) Docker 서비스 시작 시도 결과
+    - `Start-Service com.docker.service` 실패 (현재 세션 권한으로 서비스 시작 불가)
+    - `Docker Desktop.exe` 실행 시도 후에도 daemon 미기동
+    - `RunAs` UAC 상승 기동 자동 시도는 사용자 취소로 중단
+  - 3) 사전 체크 결과
+    - `docker info` 2회 실패, `docker ps` 실패 -> `DOCKER_READY=NO`
+    - 포트 `8081/8082/18080/1433`는 모두 FREE
+    - 상태 결론: SCM-237 리허설 시작 전 Docker daemon 정상화 필요
