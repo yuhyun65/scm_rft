@@ -2257,3 +2257,23 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `docker info` 2회 실패, `docker ps` 실패 -> `DOCKER_READY=NO`
     - 포트 `8081/8082/18080/1433`는 모두 FREE
     - 상태 결론: SCM-237 리허설 시작 전 Docker daemon 정상화 필요
+
+### Q137. Docker 관리자 실행 후 SCM-237 리허설 시작 (2026-03-11)
+- 사용자 프롬프트:
+  - "관리자 모드에서 Docker Desktop 실행했습니다."
+- Codex 답변(결과):
+  - Docker 접근 점검:
+    - 일반 권한 세션: `docker info/docker ps` 권한 거부(`permission denied`)
+    - 관리자 권한 실행 경로(승격 실행): `docker info`/`docker ps` 정상
+  - SCM-237 리허설 실행:
+    - 브랜치: `feature/scm-237-prod-topology-rehearsal-r4`
+    - `scripts/staging-up.ps1` 실행 성공 (staging 컨테이너 Running)
+    - `scripts/rehearsal-run.ps1 -SkipStagingUp -SkipBackup -FailOnMismatch` 실행 성공
+  - 생성 증적:
+    - `runbooks/evidence/SCM-237-20260311-R4/rehearsal-run.log`
+    - `runbooks/evidence/SCM-237-20260311-R4/scm237-rehearsal-summary.md`
+    - `migration/reports/dryrun-20260311-155313.state.json`
+    - `migration/reports/validation-20260311-155315.md`
+    - `migration/reports/validation-20260311-155316.md`
+  - 결과 요약:
+    - Big-Bang rehearsal sequence completed (`PASS`)
