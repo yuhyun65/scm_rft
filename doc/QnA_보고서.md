@@ -2211,3 +2211,32 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - SCM-236 파서 보강 커밋/푸시 완료 (`d43c432`)
   - 현재 잔여 상태:
     - `services/*/bin/` 실행 산출물 untracked (커밋 제외 유지)
+
+### Q135. SCM-236~239 진행을 위한 환경 준비 (2026-03-11)
+- 사용자 프롬프트:
+  - "이전 단계까지의 진행사항은 다음과 같습니다. 이후 진행을 위한 환경을 준비해줘요."
+  - 범위: `SCM-236 PR 증적 코멘트/리뷰/머지 -> SCM-237 착수 -> SCM-238 freeze -> SCM-239 signoff/tag`
+- Codex 답변(결과):
+  - 작업 기준 고정:
+    - 경로: `C:\Users\CMN-091\projects\SCM_RFT`
+    - 브랜치: `feature/scm-236-cutover-migration-automation`
+    - 워킹트리 정리: `services/*/bin` 삭제, 로컬 exclude 반영(`services/*/bin/` 등)
+  - GitHub 준비:
+    - 인증 확인: `gh auth status` 정상
+    - 이슈 생성:
+      - `#51` SCM-236: cutover migration automation merge
+      - `#52` SCM-237: production topology rehearsal R4
+      - `#53` SCM-238: cutover document freeze
+      - `#54` SCM-239: final go-no-go signoff and release tag
+    - PR 생성:
+      - `#55` `feat(scm-236): automate cutover migration validation workflow`
+      - base/head: `feature/to-be-dev-env-bootstrap` <- `feature/scm-236-cutover-migration-automation`
+    - PR 증적 코멘트 첨부:
+      - 코멘트 링크: `https://github.com/yuhyun65/scm_rft/pull/55#issuecomment-4036824788`
+      - RunId: `SCM-236-20260310-R4` (`DomainPass 8/8`, `FinalVerdict GO`)
+  - 현재 블로커:
+    - Docker daemon 미기동(`com.docker.service` stopped)
+    - 현 권한으로 서비스 시작 불가(관리자 권한 필요)
+  - 다음 즉시 실행 항목:
+    - PR `#55` 리뷰/머지
+    - 머지 후 `feature/scm-237-prod-topology-rehearsal-r4` 브랜치 생성 및 착수
