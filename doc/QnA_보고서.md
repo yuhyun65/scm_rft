@@ -2569,3 +2569,17 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `doc/reports/structure-before-status.txt`
     - `doc/reports/structure-after-status.txt`
     - `doc/reports/structure-filelist-after.txt`
+
+### Q153. 프론트엔드 현대화 절차서(frontend_process.md) 작성 (2026-03-12)
+- 사용자 프롬프트:
+  - "위내용을 기초로 프론트엔드 현대화(개선개발) 절차서를 frontend_process.md파일을 만들어줘"
+  - "추가해줘"
+- Codex 답변(결과):
+  - 신규 문서 생성:
+    - `doc/frontend_process.md`
+  - 반영 내용:
+    - 프론트엔드 현대화 목적/범위/완료기준(DoD 수치)
+    - 단계별 실행 절차(`SCM-245`~`SCM-250`)
+    - 구현 규칙(OpenAPI codegen 기반, 도메인 구조, 표준 에러/traceId 처리)
+    - 게이트 표준(기존 5 + 프론트 5) 및 로컬 실행 커맨드
+    - 산출물 경로 규칙/리스크 대응/착수 체크리스트
