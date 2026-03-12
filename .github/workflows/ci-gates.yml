@@ -40,7 +40,9 @@ jobs:
           $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
-          (Get-Content $wrapperFile -Raw) -replace "distributionUrl=.*", ("distributionUrl=" + $target.Replace(":", "\\:")) | Set-Content $wrapperFile -Encoding UTF8
+          $content = Get-Content $wrapperFile -Raw
+          $content = [regex]::Replace($content, "(?m)^distributionUrl=.*$", "distributionUrl=$target")
+          Set-Content -Path $wrapperFile -Value $content -Encoding utf8NoBOM
           Write-Host "[INFO] Gradle distribution URL: $target"
       - name: Run build gate
         shell: pwsh
@@ -67,7 +69,9 @@ jobs:
           $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
-          (Get-Content $wrapperFile -Raw) -replace "distributionUrl=.*", ("distributionUrl=" + $target.Replace(":", "\\:")) | Set-Content $wrapperFile -Encoding UTF8
+          $content = Get-Content $wrapperFile -Raw
+          $content = [regex]::Replace($content, "(?m)^distributionUrl=.*$", "distributionUrl=$target")
+          Set-Content -Path $wrapperFile -Value $content -Encoding utf8NoBOM
           Write-Host "[INFO] Gradle distribution URL: $target"
       - name: Run unit/integration gate
         shell: pwsh
@@ -101,7 +105,9 @@ jobs:
           $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
-          (Get-Content $wrapperFile -Raw) -replace "distributionUrl=.*", ("distributionUrl=" + $target.Replace(":", "\\:")) | Set-Content $wrapperFile -Encoding UTF8
+          $content = Get-Content $wrapperFile -Raw
+          $content = [regex]::Replace($content, "(?m)^distributionUrl=.*$", "distributionUrl=$target")
+          Set-Content -Path $wrapperFile -Value $content -Encoding utf8NoBOM
           Write-Host "[INFO] Gradle distribution URL: $target"
       - name: Run lint/static gate
         shell: pwsh
@@ -142,7 +148,9 @@ jobs:
           $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
-          (Get-Content $wrapperFile -Raw) -replace "distributionUrl=.*", ("distributionUrl=" + $target.Replace(":", "\\:")) | Set-Content $wrapperFile -Encoding UTF8
+          $content = Get-Content $wrapperFile -Raw
+          $content = [regex]::Replace($content, "(?m)^distributionUrl=.*$", "distributionUrl=$target")
+          Set-Content -Path $wrapperFile -Value $content -Encoding utf8NoBOM
           Write-Host "[INFO] Gradle distribution URL: $target"
 
       - name: Build for CodeQL (retry x3)
