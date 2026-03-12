@@ -72,9 +72,28 @@ Write-Host "Toolchain applied for current session."
 Write-Host "JAVA_HOME=$env:JAVA_HOME"
 Write-Host "java -version:"
 & (Join-Path $env:JAVA_HOME "bin\\java.exe") -version
+
+if (-not [string]::IsNullOrWhiteSpace([string]$lock.pnpm)) {
+  if (Get-Command corepack -ErrorAction SilentlyContinue) {
+    & corepack prepare ("pnpm@{0}" -f [string]$lock.pnpm) --activate
+    if ($LASTEXITCODE -eq 0) {
+      Write-Host "pnpm policy applied via corepack: $($lock.pnpm)"
+    }
+    else {
+      Write-Host "[WARN] corepack prepare pnpm failed. Check network/permissions."
+    }
+  }
+  else {
+    Write-Host "[WARN] corepack not found. pnpm policy cannot be auto-applied."
+  }
+}
+
 Write-Host ""
 Write-Host "Policy lock:"
 Write-Host "- Java: $($lock.java)"
 Write-Host "- Node: $($lock.node)"
+if (-not [string]::IsNullOrWhiteSpace([string]$lock.pnpm)) {
+  Write-Host "- pnpm: $($lock.pnpm)"
+}
 Write-Host "- Gradle: $($lock.gradle)"
 Write-Host "- Docker Compose: $($lock.docker_compose)"

@@ -2550,3 +2550,33 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - phase-1 item에 `CI external dependency stabilization (SCM-244)` 추가
   - PR:
     - `#65` 생성: `https://github.com/yuhyun65/scm_rft/pull/65`
+
+### Q154. frontend_process 기반 프론트 개발환경 준비(SCM-245 baseline) (2026-03-12)
+- 사용자 프롬프트:
+  - "이제 부터는 frontend_process.md 기반으로 프론트엔드를 개발할 계획입니다. 개발진행에 필요한 환경을 준비해줘"
+- Codex 답변(결과):
+  - 브랜치 생성:
+    - `feature/scm-245-frontend-baseline` (기준: `feature/to-be-dev-env-bootstrap`)
+  - 프론트 워크스페이스 신규 구성:
+    - `frontend/package.json`, `frontend/pnpm-workspace.yaml`, `frontend/tsconfig.base.json`, `frontend/README.md`
+    - `frontend/apps/web-portal/*` (React+Vite baseline + unit test + e2e smoke script)
+    - `frontend/packages/api-client/*` (OpenAPI 계약 카탈로그 생성 스크립트 포함)
+    - `frontend/packages/ui/*` (공통 유틸 baseline)
+  - 도구/스크립트 보강:
+    - `scripts/frontend-setup.ps1`, `scripts/frontend-dev.ps1` 추가
+    - `scripts/ci-run-gate.ps1`에 프론트 5게이트 추가:
+      - `frontend-build`, `frontend-unit-test`, `frontend-contract-test`, `frontend-e2e-smoke`, `frontend-security-scan`
+    - `scripts/check-prereqs.ps1`에 pnpm 점검 추가
+    - `scripts/use-toolchain.ps1`에 corepack pnpm 정책 적용 로직 추가
+    - `toolchain.lock.json`에 `pnpm` 정책 추가
+    - `Makefile`에 프론트 실행/게이트 타깃 추가
+  - 실행/검증 결과:
+    - `scripts/frontend-setup.ps1 -Install` 성공(pnpm lock 생성)
+    - 프론트 5게이트 연속 PASS
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+      - `frontend-contract-test` PASS (`shared/contracts` 8건 카탈로그 생성)
+      - `frontend-e2e-smoke` PASS
+      - `frontend-security-scan` PASS
+  - 이슈 해결:
+    - 초기 `frontend-unit-test` 실패 원인(워크스페이스 패키지 엔트리 dist 참조)을 소스 엔트리로 수정하여 재실행 PASS

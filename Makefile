@@ -1,4 +1,4 @@
-.PHONY: dev-up dev-up-gateway dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke migrate-dry-run migrate-validate rehearsal-run db-backup db-restore gradle-build gradle-test run-auth run-member run-gateway new-rehearsal-record new-migration-report
+.PHONY: dev-up dev-up-gateway dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke ci-frontend-build ci-frontend-test ci-frontend-contract ci-frontend-e2e ci-frontend-security migrate-dry-run migrate-validate rehearsal-run db-backup db-restore gradle-build gradle-test run-auth run-member run-gateway frontend-setup frontend-install frontend-build frontend-test frontend-lint frontend-contract frontend-dev new-rehearsal-record new-migration-report
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
@@ -54,6 +54,21 @@ ci-migration:
 ci-smoke:
 	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate smoke-test
 
+ci-frontend-build:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-build
+
+ci-frontend-test:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-unit-test
+
+ci-frontend-contract:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-contract-test
+
+ci-frontend-e2e:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-e2e-smoke
+
+ci-frontend-security:
+	powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-security-scan
+
 migrate-dry-run:
 	powershell -ExecutionPolicy Bypass -File .\migration\scripts\dry-run.ps1
 
@@ -83,6 +98,27 @@ run-member:
 
 run-gateway:
 	.\gradlew.bat :services:gateway:bootRun
+
+frontend-setup:
+	powershell -ExecutionPolicy Bypass -File .\scripts\frontend-setup.ps1
+
+frontend-install:
+	powershell -ExecutionPolicy Bypass -File .\scripts\frontend-setup.ps1 -Install
+
+frontend-build:
+	corepack pnpm -C .\frontend -r build
+
+frontend-test:
+	corepack pnpm -C .\frontend -r test
+
+frontend-lint:
+	corepack pnpm -C .\frontend -r lint
+
+frontend-contract:
+	corepack pnpm -C .\frontend --filter @scm-rft/api-client contract:generate
+
+frontend-dev:
+	powershell -ExecutionPolicy Bypass -File .\scripts\frontend-dev.ps1 -Install
 
 new-rehearsal-record:
 	powershell -ExecutionPolicy Bypass -File .\scripts\new-rehearsal-record.ps1 -RehearsalId $(REHEARSAL_ID)

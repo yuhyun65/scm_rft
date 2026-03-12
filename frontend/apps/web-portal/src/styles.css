@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f6f8fb 0%, #eef3f9 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #172638;
+}
+
+.shell {
+  max-width: 880px;
+  margin: 48px auto;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(14, 32, 52, 0.08);
+}
+
+h1 {
+  margin-top: 0;
+}
