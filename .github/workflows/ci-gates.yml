@@ -17,6 +17,7 @@ permissions:
   security-events: write
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   SCM_GRADLE_DIST_URL: ${{ vars.SCM_GRADLE_DIST_URL }}
   SCM_DEPENDENCY_REVIEW_ENFORCED: ${{ vars.SCM_DEPENDENCY_REVIEW_ENFORCED }}
 
