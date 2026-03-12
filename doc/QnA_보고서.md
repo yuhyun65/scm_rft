@@ -2580,3 +2580,25 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `frontend-security-scan` PASS
   - 이슈 해결:
     - 초기 `frontend-unit-test` 실패 원인(워크스페이스 패키지 엔트리 dist 참조)을 소스 엔트리로 수정하여 재실행 PASS
+
+### Q155. toolchain 자동 정렬(1+2 조합) 적용 (2026-03-12)
+- 사용자 프롬프트:
+  - "자동으로 실행할수 있도록 하는 방법은 없는지 정리해줘"
+  - "진행해줘"
+- Codex 답변(결과):
+  - 자동 실행 조합 반영:
+    1) 프로젝트 전용 진입 스크립트 추가
+       - `scripts/dev-shell.ps1`
+       - 동작: `use-toolchain` 적용 -> (옵션) frontend install -> 다음 실행 가이드 출력
+    2) 실행 스크립트 self-bootstrap 적용
+       - `scripts/ci-run-gate.ps1`: 실행 시작 시 `SCM_TOOLCHAIN_READY` 미설정이면 `use-toolchain.ps1` 자동 실행
+       - `scripts/frontend-setup.ps1`: 동일 자동 실행 적용
+       - `scripts/frontend-dev.ps1`: 동일 자동 실행 적용
+  - 보조 반영:
+    - `Makefile`에 `dev-shell` 타깃 추가
+    - `frontend/README.md`에 `dev-shell` 우선 실행 커맨드 추가
+  - 검증:
+    - `scripts/dev-shell.ps1 -InstallFrontend` PASS
+    - `scripts/ci-run-gate.ps1 -Gate frontend-build` 실행 로그에서
+      - `[INFO] Applying toolchain lock policy for this gate run...` 확인
+      - frontend build PASS 확인

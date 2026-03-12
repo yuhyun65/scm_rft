@@ -9,6 +9,7 @@ This workspace is the baseline for SCM frontend modernization (`SCM-245`).
 
 ## Commands
 ```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\dev-shell.ps1 -InstallFrontend
 corepack pnpm -C .\frontend install
 corepack pnpm -C .\frontend -r build
 corepack pnpm -C .\frontend -r test

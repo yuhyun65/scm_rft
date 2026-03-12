@@ -1,7 +1,10 @@
-.PHONY: dev-up dev-up-gateway dev-down dev-down-v staging-up staging-down staging-down-v check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke ci-frontend-build ci-frontend-test ci-frontend-contract ci-frontend-e2e ci-frontend-security migrate-dry-run migrate-validate rehearsal-run db-backup db-restore gradle-build gradle-test run-auth run-member run-gateway frontend-setup frontend-install frontend-build frontend-test frontend-lint frontend-contract frontend-dev new-rehearsal-record new-migration-report
+.PHONY: dev-up dev-up-gateway dev-down dev-down-v staging-up staging-down staging-down-v dev-shell check-prereqs roadmap-report agentic-new-run agentic-validate-run ci-build ci-test ci-contract ci-lint ci-security ci-migration ci-smoke ci-frontend-build ci-frontend-test ci-frontend-contract ci-frontend-e2e ci-frontend-security migrate-dry-run migrate-validate rehearsal-run db-backup db-restore gradle-build gradle-test run-auth run-member run-gateway frontend-setup frontend-install frontend-build frontend-test frontend-lint frontend-contract frontend-dev new-rehearsal-record new-migration-report
 
 check-prereqs:
 	powershell -ExecutionPolicy Bypass -File .\scripts\check-prereqs.ps1
+
+dev-shell:
+	powershell -ExecutionPolicy Bypass -File .\scripts\dev-shell.ps1 -InstallFrontend
 
 roadmap-report:
 	powershell -ExecutionPolicy Bypass -File .\scripts\roadmap-report.ps1

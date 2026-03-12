@@ -6,9 +6,21 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $frontendRoot = Join-Path $repoRoot "frontend"
 $lockPath = Join-Path $repoRoot "toolchain.lock.json"
+$toolchainScript = Join-Path $PSScriptRoot "use-toolchain.ps1"
 
 if (-not (Test-Path $frontendRoot)) {
   throw "frontend workspace not found: $frontendRoot"
+}
+
+if ($env:SCM_TOOLCHAIN_READY -ne "1") {
+  if (-not (Test-Path $toolchainScript)) {
+    throw "toolchain script not found: $toolchainScript"
+  }
+  & $toolchainScript
+  if ($LASTEXITCODE -ne 0) {
+    throw "toolchain bootstrap failed."
+  }
+  $env:SCM_TOOLCHAIN_READY = "1"
 }
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {

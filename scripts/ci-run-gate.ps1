@@ -7,6 +7,24 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $script:GradleUserHomeReady = $false
 $script:FrontendDepsReady = $false
 
+function Ensure-ToolchainSession {
+  if ($env:SCM_TOOLCHAIN_READY -eq "1") {
+    return
+  }
+
+  $toolchainScript = Join-Path $PSScriptRoot "use-toolchain.ps1"
+  if (-not (Test-Path $toolchainScript)) {
+    throw "[FAIL] toolchain bootstrap script not found: scripts/use-toolchain.ps1"
+  }
+
+  Write-Host "[INFO] Applying toolchain lock policy for this gate run..."
+  & $toolchainScript
+  if ($LASTEXITCODE -ne 0) {
+    throw "[FAIL] toolchain bootstrap failed."
+  }
+  $env:SCM_TOOLCHAIN_READY = "1"
+}
+
 function Test-DirectoryWritable {
   param(
     [Parameter(Mandatory = $true)][string]$Path
@@ -369,6 +387,7 @@ function Invoke-FrontendSecurityScan {
 
 Push-Location $repoRoot
 try {
+  Ensure-ToolchainSession
   switch ($Gate) {
     "build" {
       Invoke-GradleGate -Arguments @("build", "-x", "test") -GateName "build"
