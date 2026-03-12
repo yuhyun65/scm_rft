@@ -2550,3 +2550,22 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - phase-1 item에 `CI external dependency stabilization (SCM-244)` 추가
   - PR:
     - `#65` 생성: `https://github.com/yuhyun65/scm_rft/pull/65`
+
+### Q152. 저장소 디렉터리 구조화 실행 (2026-03-12)
+- 사용자 프롬프트:
+  - "이 프로젝트의 디텍토리를 모두 점검하여 깔끔하고 체계적으로 구조화 하는 방법을 정리해줘"
+  - "진행해줘"
+- Codex 답변(결과):
+  - 정리 브랜치 생성: `chore/dir-structure-cleanup-20260312`
+  - 루트 문서 이동:
+    - `20260305_after_process.md` -> `doc/reports/daily/20260305_after_process.md`
+    - `20260305_inspection.md` -> `doc/reports/daily/20260305_inspection.md`
+    - `20260306_progress.md` -> `doc/reports/progress/20260306_progress.md`
+    - `releas_plan_procces.md` -> `doc/releases/release-plan-process.md`
+  - 구조 정책 반영:
+    - `.gitignore`에 `.gradle-user/`, `runbooks/evidence/`, `services/*/bin/`, `services/*/build/` 추가
+    - `doc/reports/directory-structure-policy.md` 신설 (루트 레이아웃/생성산출물/레거시(HISCM) 규칙/네이밍)
+  - 추적 스냅샷 생성:
+    - `doc/reports/structure-before-status.txt`
+    - `doc/reports/structure-after-status.txt`
+    - `doc/reports/structure-filelist-after.txt`
