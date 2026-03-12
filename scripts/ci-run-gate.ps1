@@ -1,10 +1,29 @@
 param(
-  [Parameter(Mandatory = $true)][ValidateSet("build", "unit-integration-test", "contract-test", "lint-static-analysis", "security-scan", "migration-dry-run", "smoke-test")][string]$Gate
+  [Parameter(Mandatory = $true)][ValidateSet("build", "unit-integration-test", "contract-test", "lint-static-analysis", "security-scan", "migration-dry-run", "smoke-test", "frontend-build", "frontend-unit-test", "frontend-contract-test", "frontend-e2e-smoke", "frontend-security-scan")][string]$Gate
 )
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $script:GradleUserHomeReady = $false
+$script:FrontendDepsReady = $false
+
+function Ensure-ToolchainSession {
+  if ($env:SCM_TOOLCHAIN_READY -eq "1") {
+    return
+  }
+
+  $toolchainScript = Join-Path $PSScriptRoot "use-toolchain.ps1"
+  if (-not (Test-Path $toolchainScript)) {
+    throw "[FAIL] toolchain bootstrap script not found: scripts/use-toolchain.ps1"
+  }
+
+  Write-Host "[INFO] Applying toolchain lock policy for this gate run..."
+  & $toolchainScript
+  if ($LASTEXITCODE -ne 0) {
+    throw "[FAIL] toolchain bootstrap failed."
+  }
+  $env:SCM_TOOLCHAIN_READY = "1"
+}
 
 function Test-DirectoryWritable {
   param(
@@ -256,8 +275,119 @@ function Invoke-SmokeTest {
   }
 }
 
+function Get-FrontendRoot {
+  return (Join-Path $repoRoot "frontend")
+}
+
+function Get-PnpmCommand {
+  if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+    return @("pnpm")
+  }
+  if (Get-Command corepack -ErrorAction SilentlyContinue) {
+    return @("corepack", "pnpm")
+  }
+  throw "[FAIL] frontend gate: pnpm/corepack not found. Install Node 22 and enable corepack."
+}
+
+function Initialize-FrontendDependencies {
+  if ($script:FrontendDepsReady) {
+    return
+  }
+
+  $frontendRoot = Get-FrontendRoot
+  if (-not (Test-Path $frontendRoot)) {
+    throw "[FAIL] frontend gate: frontend workspace not found."
+  }
+
+  $toolchainLock = Join-Path $repoRoot "toolchain.lock.json"
+  if ((Get-Command corepack -ErrorAction SilentlyContinue) -and (Test-Path $toolchainLock)) {
+    $lock = Get-Content -Raw -Encoding UTF8 $toolchainLock | ConvertFrom-Json
+    if (-not [string]::IsNullOrWhiteSpace([string]$lock.pnpm)) {
+      & corepack prepare ("pnpm@{0}" -f [string]$lock.pnpm) --activate
+      if ($LASTEXITCODE -ne 0) {
+        throw "[FAIL] frontend gate: corepack prepare pnpm failed."
+      }
+    }
+  }
+
+  $pnpmCommand = Get-PnpmCommand
+  $pnpmExec = $pnpmCommand[0]
+  $pnpmPrefix = @()
+  if ($pnpmCommand.Count -gt 1) {
+    $pnpmPrefix += $pnpmCommand[1..($pnpmCommand.Count - 1)]
+  }
+
+  $lockFile = Join-Path $frontendRoot "pnpm-lock.yaml"
+  $installArgs = @()
+  if (Test-Path $lockFile) {
+    $installArgs = @("-C", $frontendRoot, "install", "--frozen-lockfile")
+  }
+  else {
+    $installArgs = @("-C", $frontendRoot, "install")
+  }
+
+  $installInvocation = $pnpmPrefix + $installArgs
+  Write-Host ("[INFO] frontend dependencies: {0} {1}" -f $pnpmExec, ($installInvocation -join " "))
+  & $pnpmExec @installInvocation
+  if ($LASTEXITCODE -ne 0) {
+    throw "[FAIL] frontend gate: dependency install failed."
+  }
+
+  $script:FrontendDepsReady = $true
+}
+
+function Invoke-FrontendGate {
+  param(
+    [Parameter(Mandatory = $true)][string[]]$Arguments,
+    [Parameter(Mandatory = $true)][string]$GateName
+  )
+
+  Initialize-FrontendDependencies
+
+  $frontendRoot = Get-FrontendRoot
+  $pnpmCommand = Get-PnpmCommand
+  $pnpmExec = $pnpmCommand[0]
+  $pnpmPrefix = @()
+  if ($pnpmCommand.Count -gt 1) {
+    $pnpmPrefix += $pnpmCommand[1..($pnpmCommand.Count - 1)]
+  }
+
+  $invocationArgs = $pnpmPrefix + @("-C", $frontendRoot) + $Arguments
+  Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $pnpmExec, ($invocationArgs -join " "))
+  & $pnpmExec @invocationArgs
+  if ($LASTEXITCODE -ne 0) {
+    throw "[FAIL] ${GateName}: frontend command failed."
+  }
+}
+
+function Invoke-FrontendSecurityScan {
+  $frontendRoot = Get-FrontendRoot
+  if (-not (Test-Path $frontendRoot)) {
+    throw "[FAIL] frontend-security-scan: frontend workspace not found."
+  }
+
+  if (-not (Get-Command rg -ErrorAction SilentlyContinue)) {
+    Write-Host "[SKIP] frontend-security-scan: rg not found."
+    return
+  }
+
+  $pattern = "(AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----)"
+  $matches = & rg --line-number --hidden --glob "!**/node_modules/**" --glob "!**/dist/**" $pattern $frontendRoot
+
+  if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($matches -join ""))) {
+    Write-Host $matches
+    throw "[FAIL] frontend-security-scan: potential secret patterns found."
+  }
+  if ($LASTEXITCODE -gt 1) {
+    throw "[FAIL] frontend-security-scan: rg execution error."
+  }
+
+  Write-Host "[OK] frontend-security-scan: no obvious secret pattern detected."
+}
+
 Push-Location $repoRoot
 try {
+  Ensure-ToolchainSession
   switch ($Gate) {
     "build" {
       Invoke-GradleGate -Arguments @("build", "-x", "test") -GateName "build"
@@ -279,6 +409,21 @@ try {
     }
     "smoke-test" {
       Invoke-SmokeTest
+    }
+    "frontend-build" {
+      Invoke-FrontendGate -Arguments @("-r", "build") -GateName "frontend-build"
+    }
+    "frontend-unit-test" {
+      Invoke-FrontendGate -Arguments @("-r", "test") -GateName "frontend-unit-test"
+    }
+    "frontend-contract-test" {
+      Invoke-FrontendGate -Arguments @("--filter", "@scm-rft/api-client", "contract:generate") -GateName "frontend-contract-test"
+    }
+    "frontend-e2e-smoke" {
+      Invoke-FrontendGate -Arguments @("--filter", "@scm-rft/web-portal", "e2e") -GateName "frontend-e2e-smoke"
+    }
+    "frontend-security-scan" {
+      Invoke-FrontendSecurityScan
     }
   }
 }

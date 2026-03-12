@@ -1,0 +1,17 @@
+{
+  "name": "scm-rft-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "contract:generate": "pnpm --filter @scm-rft/api-client contract:generate",
+    "e2e": "pnpm --filter @scm-rft/web-portal e2e"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

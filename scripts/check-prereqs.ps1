@@ -85,6 +85,10 @@ Write-Host ""
 $dockerLine = (Get-CommandLineOutput -Executable "docker" -Arguments @("--version") | Select-Object -First 1)
 $dockerComposeLine = (Get-CommandLineOutput -Executable "docker" -Arguments @("compose", "version") | Select-Object -First 1)
 $nodeLine = (Get-CommandLineOutput -Executable "node" -Arguments @("-v") | Select-Object -First 1)
+$pnpmLine = (Get-CommandLineOutput -Executable "pnpm" -Arguments @("--version") | Select-Object -First 1)
+if ([string]::IsNullOrWhiteSpace([string]$pnpmLine)) {
+  $pnpmLine = (Get-CommandLineOutput -Executable "corepack" -Arguments @("pnpm", "--version") | Select-Object -First 1)
+}
 $lockedGradleExe = Join-Path $env:USERPROFILE "tools\\gradle-$($lock.gradle)\\bin\\gradle.bat"
 if (Test-Path $lockedGradleExe) {
   $gradleLine = (Get-CommandLineOutput -Executable $lockedGradleExe -Arguments @("-v") | Where-Object { [string]$_ -match "Gradle" } | Select-Object -First 1)
@@ -108,10 +112,17 @@ if (-not $javaLine) {
 $dockerComposeVersion = Extract-SemVer -Text ([string]$dockerComposeLine)
 $javaVersion = Extract-SemVer -Text ([string]$javaLine)
 $nodeVersion = Extract-SemVer -Text ([string]$nodeLine)
+$pnpmVersion = Extract-SemVer -Text ([string]$pnpmLine)
 $gradleVersion = Extract-SemVer -Text ([string]$gradleLine)
 
 $javaOk = StartsWithVersion -Actual $javaVersion -Expected ([string]$lock.java)
 $nodeOk = StartsWithVersion -Actual $nodeVersion -Expected ([string]$lock.node)
+$pnpmExpected = [string]$lock.pnpm
+$pnpmPolicyEnabled = -not [string]::IsNullOrWhiteSpace($pnpmExpected)
+$pnpmOk = $true
+if ($pnpmPolicyEnabled) {
+  $pnpmOk = StartsWithVersion -Actual $pnpmVersion -Expected $pnpmExpected
+}
 $gradleOk = StartsWithVersion -Actual $gradleVersion -Expected ([string]$lock.gradle)
 $dockerComposeOk = StartsWithVersion -Actual $dockerComposeVersion -Expected ([string]$lock.docker_compose)
 
@@ -120,6 +131,11 @@ if (-not $javaOk) { $failCount++ }
 
 Write-Result -Name "Node.js" -Actual ([string]$nodeVersion) -Expected ([string]$lock.node) -Matched $nodeOk
 if (-not $nodeOk) { $failCount++ }
+
+if ($pnpmPolicyEnabled) {
+  Write-Result -Name "pnpm" -Actual ([string]$pnpmVersion) -Expected $pnpmExpected -Matched $pnpmOk
+  if (-not $pnpmOk) { $failCount++ }
+}
 
 Write-Result -Name "Gradle" -Actual ([string]$gradleVersion) -Expected ([string]$lock.gradle) -Matched $gradleOk
 if (-not $gradleOk) { $failCount++ }
