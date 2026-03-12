@@ -4,6 +4,59 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$script:GradleUserHomeReady = $false
+
+function Test-DirectoryWritable {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path
+  )
+
+  try {
+    New-Item -ItemType Directory -Force -Path $Path | Out-Null
+    $probe = Join-Path $Path (".write-probe-{0}.tmp" -f [guid]::NewGuid().ToString("N"))
+    Set-Content -Path $probe -Value "probe" -Encoding UTF8 -ErrorAction Stop
+    Remove-Item -Path $probe -Force -ErrorAction SilentlyContinue
+    return $true
+  }
+  catch {
+    return $false
+  }
+}
+
+function Ensure-GradleUserHome {
+  if ($script:GradleUserHomeReady) {
+    return
+  }
+
+  $requested = $env:GRADLE_USER_HOME
+  if (-not [string]::IsNullOrWhiteSpace($requested)) {
+    $target = $requested
+    try {
+      $target = (Resolve-Path -Path $requested -ErrorAction Stop).Path
+    }
+    catch {
+      # Keep raw path and attempt create/write test.
+    }
+
+    if (Test-DirectoryWritable -Path $target) {
+      $env:GRADLE_USER_HOME = $target
+      Write-Host ("[INFO] Gradle user home: {0}" -f $target)
+      $script:GradleUserHomeReady = $true
+      return
+    }
+
+    Write-Host ("[WARN] GRADLE_USER_HOME not writable: {0}" -f $requested)
+  }
+
+  $fallback = Join-Path $repoRoot ".gradle-user"
+  if (-not (Test-DirectoryWritable -Path $fallback)) {
+    throw ("[FAIL] unable to prepare fallback GRADLE_USER_HOME: {0}" -f $fallback)
+  }
+
+  $env:GRADLE_USER_HOME = $fallback
+  Write-Host ("[INFO] Gradle user home fallback applied: {0}" -f $fallback)
+  $script:GradleUserHomeReady = $true
+}
 
 function Get-GradleWrapper {
   if (Test-Path (Join-Path $repoRoot "gradlew.bat")) { return (Join-Path $repoRoot "gradlew.bat") }
@@ -39,6 +92,7 @@ function Invoke-GradleGate {
     return
   }
 
+  Ensure-GradleUserHome
   Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $wrapper, ($Arguments -join " "))
   & $wrapper @Arguments
   if ($LASTEXITCODE -ne 0) {

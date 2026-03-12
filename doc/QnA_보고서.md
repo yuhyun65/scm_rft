@@ -2438,3 +2438,23 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - `.tmp/` 정책 확정 및 정리:
     - `.gitignore`에 `.tmp/` 추가
     - `.tmp/` 디렉터리 삭제 완료(`TMP_REMOVED`)
+
+### Q147. ci-run-gate Gradle lock 경로 자동 fallback 패치 (2026-03-12)
+- 사용자 프롬프트:
+  - "ci-run-gate.ps1에 자동 fallback 패치해서 재발을 막을 수있도록 해줘"
+- Codex 답변(결과):
+  - 대상 파일: `scripts/ci-run-gate.ps1`
+  - 반영 내용:
+    - `Test-DirectoryWritable` 함수 추가
+    - `Ensure-GradleUserHome` 함수 추가
+      - `GRADLE_USER_HOME` 미설정 또는 쓰기 불가 시 `C:\Users\CMN-091\projects\SCM_RFT\.gradle-user`로 자동 fallback
+      - 실행 로그에 `[WARN]`/`[INFO]`로 경로 전환 근거 출력
+    - `Invoke-GradleGate` 실행 직전에 `Ensure-GradleUserHome` 호출
+  - 검증:
+    - 강제 재현 입력: `GRADLE_USER_HOME=C:\Users\CodexSandboxOffline\.gradle` (쓰기 불가 경로)
+    - 결과 로그:
+      - `[WARN] GRADLE_USER_HOME not writable ...`
+      - `[INFO] Gradle user home fallback applied: ...\.gradle-user`
+      - `build` 게이트 `BUILD SUCCESSFUL`
+  - 결론:
+    - Gradle lock 파일 경로 오류 재발 방지 동작 확인 완료.
