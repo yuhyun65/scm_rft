@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-12T12:40:00",
+  "updated_at": "2026-03-12T16:00:00",
   "phases": [
     {
       "id": "phase-1",
@@ -8,6 +8,7 @@
       "items": [
         { "name": "PR template and policy workflow", "done": true },
         { "name": "CI gate workflow", "done": true },
+        { "name": "CI external dependency stabilization (SCM-244)", "done": true },
         { "name": "toolchain lock and bootstrap scripts", "done": true },
         { "name": "agentic framework baseline", "done": true }
       ]

@@ -1,0 +1,16 @@
+{
+  "run_id": "SCM-244-20260312-CI3",
+  "generated_at": "2026-03-12T16:05:00+09:00",
+  "branch": "feature/scm-244-ci-dependency-stabilization",
+  "commit": "01bc5e559a7d006e00a860d3c0e69082b6146da0",
+  "workflow": "ci-gates",
+  "runs": [
+    22988350248,
+    22988620361,
+    22988793433
+  ],
+  "consecutive_success": 3,
+  "pattern": "HTTP 401|HTTP 502|Response status code does not indicate success: 401|Response status code does not indicate success: 502|Failed to download action|Failed to download",
+  "pattern_hits": 0,
+  "source_summary": "runbooks/evidence/SCM-244-20260312-CI3/verification-summary.md"
+}

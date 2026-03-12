@@ -2531,3 +2531,22 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 기준 브랜치: `feature/to-be-dev-env-bootstrap`
     - 워킹트리 clean
     - `SCM-233-7GATE-20260312-R1` 증적(manifest/release summary) + progress/QnA 동기화 반영 완료
+
+### Q151. SCM-244 CI 안정화/동기화 패키지 반영 (2026-03-12)
+- 사용자 프롬프트:
+  - "다음을 진행해줘: 1) SCM-244 PR 생성/머지 2) 검증요약 추적 경로 이관 3) QnA/진행상태 동기화 4) Node24 호환 + dependency review 정책 확정"
+- Codex 답변(결과):
+  - 워크플로 반영:
+    - `.github/workflows/ci-gates.yml`
+      - `actions/checkout@v5`, `actions/setup-java@v5`로 상향
+      - `SCM_DEPENDENCY_REVIEW_ENFORCED` 변수 기반 정책 확정
+      - Dependency review step: `continue-on-error: ${{ env.SCM_DEPENDENCY_REVIEW_ENFORCED != 'true' }}`
+  - 검증요약 이관:
+    - `migration/reports/releases/SCM-244-20260312-CI3-evidence-summary.md`
+    - `migration/reports/releases/SCM-244-20260312-CI3-evidence-summary.json`
+    - 요약 내용: 동일 SHA(`01bc5e5...`) 기준 `ci-gates` 3회 연속 성공(run `22988350248`, `22988620361`, `22988793433`)
+  - 진행상태 동기화:
+    - `doc/roadmap/progress.json` `updated_at` 갱신
+    - phase-1 item에 `CI external dependency stabilization (SCM-244)` 추가
+  - PR:
+    - `#65` 생성: `https://github.com/yuhyun65/scm_rft/pull/65`
