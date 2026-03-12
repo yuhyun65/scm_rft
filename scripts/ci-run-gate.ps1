@@ -48,14 +48,23 @@ function Ensure-GradleUserHome {
     Write-Host ("[WARN] GRADLE_USER_HOME not writable: {0}" -f $requested)
   }
 
-  $fallback = Join-Path $repoRoot ".gradle-user"
-  if (-not (Test-DirectoryWritable -Path $fallback)) {
-    throw ("[FAIL] unable to prepare fallback GRADLE_USER_HOME: {0}" -f $fallback)
+  $candidates = @()
+  $userProfile = [Environment]::GetFolderPath("UserProfile")
+  if (-not [string]::IsNullOrWhiteSpace($userProfile)) {
+    $candidates += (Join-Path $userProfile ".gradle-scm-rft")
+  }
+  $candidates += (Join-Path $repoRoot ".gradle-user")
+
+  foreach ($candidate in $candidates) {
+    if (Test-DirectoryWritable -Path $candidate) {
+      $env:GRADLE_USER_HOME = $candidate
+      Write-Host ("[INFO] Gradle user home fallback applied: {0}" -f $candidate)
+      $script:GradleUserHomeReady = $true
+      return
+    }
   }
 
-  $env:GRADLE_USER_HOME = $fallback
-  Write-Host ("[INFO] Gradle user home fallback applied: {0}" -f $fallback)
-  $script:GradleUserHomeReady = $true
+  throw ("[FAIL] unable to prepare fallback GRADLE_USER_HOME. candidates={0}" -f ($candidates -join ", "))
 }
 
 function Get-GradleWrapper {
@@ -93,8 +102,12 @@ function Invoke-GradleGate {
   }
 
   Ensure-GradleUserHome
-  Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $wrapper, ($Arguments -join " "))
-  & $wrapper @Arguments
+  $gradleArgs = @($Arguments)
+  if ($gradleArgs -notcontains "--no-daemon") {
+    $gradleArgs += "--no-daemon"
+  }
+  Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $wrapper, ($gradleArgs -join " "))
+  & $wrapper @gradleArgs
   if ($LASTEXITCODE -ne 0) {
     throw "[FAIL] ${GateName}: gradle command failed."
   }

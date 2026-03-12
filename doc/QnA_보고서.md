@@ -2458,3 +2458,34 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `build` 게이트 `BUILD SUCCESSFUL`
   - 결론:
     - Gradle lock 파일 경로 오류 재발 방지 동작 확인 완료.
+
+### Q148. SCM-233 7게이트 중단 원인 점검 및 복구 실행 (2026-03-12)
+- 사용자 프롬프트:
+  - "점검해줘" / "처리해줘"
+- Codex 답변(결과):
+  - 재현/원인:
+    - `unit-integration-test` 단계에서 `:services:gateway:compile(Java/TestJava)` 중 `java.nio.file.AccessDeniedException` 반복
+    - 경로 패턴: 저장소 내부 `\.gradle-user\caches\modules-2\...\*.jar`
+    - 추가로 `Tee-Object` 파이프라인 사용 시 JVM warning이 PowerShell `NativeCommandError`로 승격되어 게이트 판정이 왜곡됨
+  - 복구 조치:
+    - Gradle 캐시를 저장소 외부 전용 경로로 분리: `C:\Users\CMN-091\.gradle-ci-scm233`
+    - 게이트 로그 수집 방식을 `*>` 전체 스트림 리다이렉션으로 전환해 warning/오류 구분 안정화
+    - smoke 실패 원인(`auth` 미기동) 해소를 위해 `auth/member/gateway`를 SQL/정책 고정값으로 백그라운드 기동 후 smoke 재실행
+      - DB: `jdbc:sqlserver://localhost:11433;databaseName=MES_HI;encrypt=true;trustServerCertificate=true`
+      - policy: `infra/gateway/policies/local-auth-member-e2e.yaml`
+      - smoke 시드 컨테이너: `scm-stg-sqlserver`, env 파일: `.env.staging`
+  - 게이트 결과(동일 RunId 증적 경로):
+    - RunId: `SCM-233-7GATE-20260312-R1`
+    - build PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-build-rerun-20260312-122339.log`
+    - unit-integration-test PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-20260312-121202.log`
+    - contract-test PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-contract-test-rerun-20260312-121329.log`
+    - lint-static-analysis PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-lint-static-analysis-rerun-20260312-121333.log`
+    - security-scan PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-security-scan-rerun-20260312-121416.log`
+    - smoke-test PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-smoke-test-rerun-20260312-122006.log`
+    - migration-dry-run PASS: `runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-migration-dry-run-rerun-20260312-122027.log`
+  - 재발 방지 보강:
+    - 파일: `scripts/ci-run-gate.ps1`
+    - `Ensure-GradleUserHome` fallback 순서 보강
+      - 1순위: 사용자 홈 `~/.gradle-scm-rft`
+      - 2순위: 저장소 `./.gradle-user`
+    - `Invoke-GradleGate`는 `--no-daemon` 자동 부여 상태 유지
