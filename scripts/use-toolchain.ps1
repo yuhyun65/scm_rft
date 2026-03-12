@@ -15,6 +15,16 @@ $lock = Get-Content -Raw -Encoding UTF8 $lockPath | ConvertFrom-Json
 $jdkHome = $null
 $jdkCandidates = @()
 
+$processJavaHome = $env:JAVA_HOME
+if (-not [string]::IsNullOrWhiteSpace($processJavaHome) -and (Test-Path $processJavaHome)) {
+  $jdkCandidates += $processJavaHome
+}
+
+$processJava21Home = $env:JAVA_HOME_21_X64
+if (-not [string]::IsNullOrWhiteSpace($processJava21Home) -and (Test-Path $processJava21Home)) {
+  $jdkCandidates += $processJava21Home
+}
+
 $userJavaHome = [Environment]::GetEnvironmentVariable("JAVA_HOME", "User")
 if (-not [string]::IsNullOrWhiteSpace($userJavaHome) -and (Test-Path $userJavaHome)) {
   $jdkCandidates += $userJavaHome
