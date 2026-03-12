@@ -1,0 +1,9 @@
+﻿{
+    "runId":  "SCM-233-7GATE-20260312-R1",
+    "generatedAt":  "2026-03-12T13:31:00+09:00",
+    "branch":  "feature/to-be-dev-env-bootstrap",
+    "commit":  "7107423387dfcfb0b26f16c8f9fa146ec8fd7dd9",
+    "manifestJson":  "runbooks/evidence-manifest/SCM-233-7GATE-20260312-R1-manifest.json",
+    "manifestMd":  "runbooks/evidence-manifest/SCM-233-7GATE-20260312-R1-manifest.md",
+    "fileCount":  26
+}

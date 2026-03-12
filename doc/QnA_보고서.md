@@ -2489,3 +2489,26 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - 1순위: 사용자 홈 `~/.gradle-scm-rft`
       - 2순위: 저장소 `./.gradle-user`
     - `Invoke-GradleGate`는 `--no-daemon` 자동 부여 상태 유지
+
+### Q149. DoD 갭 보완 실행(1~5단계) (2026-03-12)
+- 사용자 프롬프트:
+  - "HTTPS 인증 오류 재발 방지를 위해 git pull은 권한 상승 경로로 실행하고 DoD 갭 해소를 위해 실패한 ci-gates 실행을 재실행하고 최종 상태를 확인해줘"
+- Codex 답변(결과):
+  - 1단계(기준선 고정):
+    - `feature/to-be-dev-env-bootstrap` checkout + `git pull --ff-only` 권한 상승 경로로 성공
+    - 상태: `Already up to date`, 워킹트리 clean
+  - 2단계(CI 재실행):
+    - `gh run rerun 22985334038` + `gh run watch --exit-status` 실행
+    - 최종: `ci-gates` run #22985334038 전체 `success`
+    - 핵심: `SAST + secret + dependency scan` 성공, `smoke test` skipped 없이 실행/성공
+  - 3단계(조건부 CI 수정):
+    - 재실행이 성공했으므로 워크플로 코드 수정은 `N/A` 처리
+  - 4단계(증적 영속화):
+    - `publish-evidence-manifest.ps1 -RunId SCM-233-7GATE-20260312-R1` 성공
+    - 산출물:
+      - `runbooks/evidence-manifest/SCM-233-7GATE-20260312-R1-manifest.json`
+      - `runbooks/evidence-manifest/SCM-233-7GATE-20260312-R1-manifest.md`
+      - `migration/reports/releases/SCM-233-7GATE-20260312-R1-evidence-summary.md`
+      - `migration/reports/releases/SCM-233-7GATE-20260312-R1-evidence-summary.json`
+  - 5단계(상태 문서 동기화, 1차):
+    - `doc/roadmap/progress.json`의 `updated_at`를 `2026-03-12T12:40:00`으로 갱신

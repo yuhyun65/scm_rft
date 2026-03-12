@@ -1,0 +1,166 @@
+﻿{
+    "runId":  "SCM-233-7GATE-20260312-R1",
+    "generatedAt":  "2026-03-12T13:31:00+09:00",
+    "branch":  "feature/to-be-dev-env-bootstrap",
+    "commit":  "7107423387dfcfb0b26f16c8f9fa146ec8fd7dd9",
+    "evidenceRoot":  "runbooks/evidence/SCM-233-7GATE-20260312-R1",
+    "fileCount":  26,
+    "files":  [
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/commit.txt",
+                      "sha256":  "2e942fabf0f26c068c7974a95873877527d8d29f5a4de928c932d48aea8e3f84",
+                      "sizeBytes":  86,
+                      "lastWriteTimeUtc":  "2026-03-12T02:37:08Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-build.log",
+                      "sha256":  "fa71ca1a958479f2bf939926730f07a3c45b698c0ab2243695dd46ab2433f690",
+                      "sizeBytes":  8692,
+                      "lastWriteTimeUtc":  "2026-03-12T02:38:22Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-build-rerun-095443.log",
+                      "sha256":  "421826e5e3e78f41847c4731d3d28244a20424fd8c81cb53f4ebec016f1f02a1",
+                      "sizeBytes":  11400,
+                      "lastWriteTimeUtc":  "2026-03-12T00:55:02Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-build-rerun-20260312-122339.log",
+                      "sha256":  "6beea61923f8a141d1ac50646299ca55c6b695d6e33927666411bca20a9041e1",
+                      "sizeBytes":  11916,
+                      "lastWriteTimeUtc":  "2026-03-12T03:24:16Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-contract-test-rerun-20260312-121329.log",
+                      "sha256":  "f518149d6b17ba94ce89e37e2f53dcf201bec73a95f2cc704918330d39e5bbc4",
+                      "sizeBytes":  104,
+                      "lastWriteTimeUtc":  "2026-03-12T03:13:33Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-lint-static-analysis-rerun-20260312-121333.log",
+                      "sha256":  "74224b65c5d7d888c75c2c8db6c1c4e3b1dde45c86595c88c02c89f5008432eb",
+                      "sizeBytes":  12094,
+                      "lastWriteTimeUtc":  "2026-03-12T03:14:16Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-migration-dry-run-rerun-20260312-122027.log",
+                      "sha256":  "d75e2fde1651df646c688710b84c49c5be140419c3f970154a4b5ae66a1ed456",
+                      "sizeBytes":  674,
+                      "lastWriteTimeUtc":  "2026-03-12T03:20:34Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-security-scan-rerun-20260312-121416.log",
+                      "sha256":  "48005369a4d484da758ba6cff7b44b92ea65d4d65076e7a9609353020d9df7d7",
+                      "sizeBytes":  116,
+                      "lastWriteTimeUtc":  "2026-03-12T03:14:23Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-smoke-test-rerun-20260312-121423.log",
+                      "sha256":  "703d0c26780e92ffdd9017b1b32a2ccaa457a01338982acc978d19b7869270e2",
+                      "sizeBytes":  586,
+                      "lastWriteTimeUtc":  "2026-03-12T03:14:31Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-smoke-test-rerun-20260312-122006.log",
+                      "sha256":  "22d9caca4bd3251c35d2b7ddedebcbcbeb563da986ad6e96f1eb3b14024d00b5",
+                      "sizeBytes":  1992,
+                      "lastWriteTimeUtc":  "2026-03-12T03:20:27Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-095515.log",
+                      "sha256":  "839232dddecceddbf02a185d4dea1d4c3a92625920a4dc7bf83bf1508a509c4b",
+                      "sizeBytes":  13524,
+                      "lastWriteTimeUtc":  "2026-03-12T00:56:34Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-100136.log",
+                      "sha256":  "52ed5462801237876cdbad561242f71b622dd9cc13e9eaa40405c39e20896bc8",
+                      "sizeBytes":  37696,
+                      "lastWriteTimeUtc":  "2026-03-12T01:03:47Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-103510.log",
+                      "sha256":  "e6ce917568aadf60a4399b4b845e90ca98717210bcdb40a49b67e252d9a269ac",
+                      "sizeBytes":  3865,
+                      "lastWriteTimeUtc":  "2026-03-12T01:35:54Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-103510.log.err",
+                      "sha256":  "c4b4bdf8a003dc5e3415fde8bd9ff6c8eaf4f9c5928c348616bf61f8c4bdee77",
+                      "sizeBytes":  14015,
+                      "lastWriteTimeUtc":  "2026-03-12T01:35:54Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-114812.log",
+                      "sha256":  "68d3a2127891c4f5052532516e304d4d8017651f22206cedc107277cd4c0254e",
+                      "sizeBytes":  37222,
+                      "lastWriteTimeUtc":  "2026-03-12T02:49:05Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-20260312-115410.log",
+                      "sha256":  "0b0906e05f8585beb7201ce4a5b743765ae0cc0bdbcb7381b4946f2ba9304382",
+                      "sizeBytes":  6950,
+                      "lastWriteTimeUtc":  "2026-03-12T02:56:05Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-20260312-120712.log",
+                      "sha256":  "fbfe873d03cbc7fd842ea1e395e6501800b534a35d650e0589c44dafed73a7b5",
+                      "sizeBytes":  7748,
+                      "lastWriteTimeUtc":  "2026-03-12T03:09:27Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gate-unit-integration-test-rerun-20260312-121202.log",
+                      "sha256":  "5552e912bb4d9d81ccd85380666b3dd25c008f63127c3bfca0093fd319f497cf",
+                      "sizeBytes":  11200,
+                      "lastWriteTimeUtc":  "2026-03-12T03:12:42Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/gateway-compileTestJava-debug.log",
+                      "sha256":  "46257607068cbfcc12095d2434f2a855c29af3fe2a59b7c628635ee7672fb20f",
+                      "sizeBytes":  149452,
+                      "lastWriteTimeUtc":  "2026-03-12T02:50:45Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-auth-bootrun.log",
+                      "sha256":  "89dc36caff15d1f53d848314546fe989316035506bfd179052acd4ba2a167831",
+                      "sizeBytes":  219802,
+                      "lastWriteTimeUtc":  "2026-03-12T03:36:31Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-auth-bootrun.log.err",
+                      "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "sizeBytes":  0,
+                      "lastWriteTimeUtc":  "2026-03-12T03:18:52Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-gateway-bootrun.log",
+                      "sha256":  "523adce1e7fa36f6b32ea1329b0e0ab8068cff5f9cbd716a3faa5265b97f2c5d",
+                      "sizeBytes":  259255,
+                      "lastWriteTimeUtc":  "2026-03-12T03:36:31Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-gateway-bootrun.log.err",
+                      "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                      "sizeBytes":  0,
+                      "lastWriteTimeUtc":  "2026-03-12T03:19:35Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-member-bootrun.log",
+                      "sha256":  "f2ef3766f55b9ef2f3e1b3a88a63329b5cb68498221ca78b4a90d8c6bc86298e",
+                      "sizeBytes":  215688,
+                      "lastWriteTimeUtc":  "2026-03-12T03:36:31Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-member-bootrun.log.err",
+                      "sha256":  "3b4159d588656d87a96cfbcc5eb125873b6fcd85c1fb971566f2a46c793ed4ad",
+                      "sizeBytes":  4363,
+                      "lastWriteTimeUtc":  "2026-03-12T03:36:31Z"
+                  },
+                  {
+                      "path":  "runbooks/evidence/SCM-233-7GATE-20260312-R1/service-pids-20260312-122034.txt",
+                      "sha256":  "c462a0d7ee0821844b4f4f5c582aadddac0d1a79d0a472aad1c364b45fdf17ea",
+                      "sizeBytes":  35,
+                      "lastWriteTimeUtc":  "2026-03-12T03:20:34Z"
+                  }
+              ]
+}
