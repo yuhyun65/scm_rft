@@ -1,0 +1,7 @@
+ M .gitignore
+ D 20260305_after_process.md
+ D 20260305_inspection.md
+ D 20260306_progress.md
+ D releas_plan_procces.md
+?? doc/releases/
+?? doc/reports/

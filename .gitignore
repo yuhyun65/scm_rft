@@ -50,3 +50,9 @@ migration/reports/*.out.txt
 !runbooks/evidence-manifest/
 !runbooks/evidence-manifest/*.md
 !runbooks/evidence-manifest/*.json
+
+# Workspace generated artifacts (SCM_RFT structure cleanup)
+.gradle-user/
+runbooks/evidence/
+services/*/bin/
+services/*/build/
