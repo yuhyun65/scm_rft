@@ -2602,3 +2602,19 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `scripts/ci-run-gate.ps1 -Gate frontend-build` 실행 로그에서
       - `[INFO] Applying toolchain lock policy for this gate run...` 확인
       - frontend build PASS 확인
+
+### Q156. 프론트 8단계 진행 요청 중 1단계만 확정 후 종료 (2026-03-12)
+- 사용자 프롬프트:
+  - "1번부터 8번까지 순차적으로 진행..."
+  - "오늘은 1) SCM-245 baseline 확정(PR #68 체크/머지/동기화) 까지 진행하고 오늘작업을 종료"
+- Codex 답변(결과):
+  - 1단계 수행 완료:
+    - PR #68 CI 실패 원인(`use-toolchain.ps1`의 CI JAVA_HOME 인식 누락) 수정
+    - 수정 커밋: process/env JAVA_HOME 후보(`JAVA_HOME`, `JAVA_HOME_21_X64`) 우선 인식 반영
+    - PR #68 체크 최종 PASS(7게이트 + CodeQL)
+    - PR #68 merge 완료 후 기준 브랜치 동기화 상태 확인
+  - 종료 조치:
+    - 사용자가 1단계까지만 진행 요청함에 따라 2~4단계 도중의 미커밋 프론트 변경은 전부 정리
+    - 기준 브랜치 `feature/to-be-dev-env-bootstrap` 워킹트리 clean 확인
+  - 다음 시작 기준:
+    - 차기 세션에서 `SCM-246`부터 재개
