@@ -30,7 +30,6 @@ export default function App() {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
       return;
     }
-    setCurrentMemberId("");
     window.localStorage.removeItem(TOKEN_STORAGE_KEY);
   }, [accessToken]);
 
