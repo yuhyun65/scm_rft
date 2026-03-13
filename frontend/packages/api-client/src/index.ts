@@ -52,6 +52,13 @@ export type MemberSearchResponse = {
   size: number;
 };
 
+function normalizeBaseUrl(baseUrl: string): string {
+  if (!baseUrl) {
+    return "";
+  }
+  return baseUrl.replace(/\/+$/, "");
+}
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -98,7 +105,7 @@ export class ScmApiClient {
   private readonly fetcher: typeof fetch;
 
   constructor(options: ApiClientOptions = {}) {
-    this.baseUrl = options.baseUrl ?? "";
+    this.baseUrl = normalizeBaseUrl(options.baseUrl ?? "");
     this.accessToken = options.accessToken;
     this.fetcher = options.fetcher ?? fetch;
   }
