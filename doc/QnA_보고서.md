@@ -2705,3 +2705,46 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `runbooks/evidence/SCM-246/`
   - 다음 단계 준비:
     - `SCM-247`은 `SCM-246` 변경 위에서 전용 브랜치로 분리 착수 예정
+
+### Q160. SCM-247 Order-Lot P0 UI MVP 1차 구현 완료 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음을 진행해줘"
+  - "2.이어서 SCM-247(Order-Lot P0 UI MVP) 구현 진행"
+- Codex 답변(결과):
+  - 작업 브랜치:
+    - `feature/scm-247-order-lot-p0-ui-mvp` 생성
+  - 프론트 구현:
+    - `frontend/packages/api-client/src/index.ts`
+      - Order/Lot DTO 추가:
+        - `OrderSummary`, `OrderSearchResponse`, `OrderDetail`, `LotDetail`
+        - `OrderStatusChangeRequest`, `OrderStatusChangeResponse`
+      - Order-Lot API 메서드 추가:
+        - `searchOrders`
+        - `getOrder`
+        - `getLot`
+        - `changeOrderStatus`
+    - `frontend/apps/web-portal/src/features/order-lot-panel.tsx`
+      - 주문 목록 조회
+      - 주문 상세 조회
+      - LOT 상세 조회
+      - 주문 상태 변경(write retry 금지 안내 포함)
+    - `frontend/apps/web-portal/src/features/auth-member-panel.tsx`
+      - 로그인 성공 시 `memberId`를 상위에 전달하도록 확장
+      - 로컬 smoke 기본 계정 `smoke-user/password` 반영
+      - 인코딩 깨진 안내 문구 정리
+    - `frontend/apps/web-portal/src/App.tsx`
+      - `OrderLotPanel` 연결
+      - `VITE_ORDER_LOT_API_BASE_URL` 오버라이드 지원 추가
+      - 현재 로그인 `memberId`를 status change `changedBy` 힌트로 전달
+    - `frontend/apps/web-portal/src/styles.css`
+      - Order-Lot 카드/주의문구/inline field 스타일 추가
+    - `frontend/packages/api-client/src/generated/contracts.ts`
+      - contract gate 재생성 반영
+  - 검증:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 참고:
+    - `SCM-247`은 UI 1차 구현까지 완료되었고, 실제 Order-Lot 백엔드 연동 smoke는 후속 단계에서 분리 검증 예정

@@ -157,6 +157,12 @@ button {
   gap: 8px;
 }
 
+.inlineFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .resultBlock summary {
   cursor: pointer;
   font-weight: 700;
@@ -180,6 +186,26 @@ button {
   font-weight: 700;
 }
 
+.warningBanner,
+.writeGuard,
+.hintText {
+  color: #694a11;
+}
+
+.warningBanner,
+.writeGuard {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(243, 164, 89, 0.14);
+  border: 1px solid rgba(180, 121, 55, 0.2);
+}
+
+.hintText {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
 @media (max-width: 720px) {
   .shell {
     padding-inline: 14px;
@@ -188,5 +214,9 @@ button {
   .hero,
   .panel {
     padding: 20px;
+  }
+
+  .inlineFields {
+    grid-template-columns: 1fr;
   }
 }
