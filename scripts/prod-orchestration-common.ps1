@@ -78,8 +78,8 @@ function Ensure-PortFree {
     [switch]$AllowForceStop
   )
 
-  $listeners = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-  if (-not $listeners -or $listeners.Count -eq 0) {
+  $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+  if ($listeners.Count -eq 0) {
     return
   }
 

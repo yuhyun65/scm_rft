@@ -41,6 +41,7 @@ configure(serviceProjects) {
     implementation "org.flywaydb:flyway-core"
 
     runtimeOnly "com.microsoft.sqlserver:mssql-jdbc"
+    runtimeOnly "org.flywaydb:flyway-sqlserver"
     runtimeOnly "com.h2database:h2"
     runtimeOnly "io.micrometer:micrometer-registry-prometheus"
 

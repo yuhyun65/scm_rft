@@ -3193,3 +3193,94 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `frontend-dev.ps1` helper bug 수정이 기준 브랜치에 반영 완료
   - 프론트 베이스라인 이후 발견된 보조 스크립트 결함까지 정리 완료
+
+### Q169. 시스템을 실제 운영 가능한 상태로 만들기 위한 실행 방법 정리 (2026-03-13)
+- 사용자 요청 맥락:
+  - 현재 구현된 SCM_RFT를 실제 운영 가능한 상태로 만들기 위한 방법 정리 요청
+- 현재 기준 판단:
+  - `doc/roadmap/progress.json` 기준 phase-1~5 `completed`
+  - `runbooks/go-nogo-signoff.md` 기준 `GO (Production release line)` 서명 완료
+  - 즉, 현재 남은 핵심은 신규 기능 개발보다 `운영 배포/전환/인수인계 실행` 단계
+- 운영 가능 상태로 만들기 위한 필수 실행 묶음:
+  1. release baseline 고정
+     - 기준 브랜치/릴리즈 태그/배포 대상 커밋 확정
+  2. 운영 환경 값 확정
+     - prod `.env`, secret, DB 접속정보, gateway route, 외부 연계 endpoint 확정
+  3. 운영 인프라 반영
+     - SQL Server / Redis / broker / gateway / 8개 서비스 / 관측 스택 배치
+  4. 배포 전 최종 게이트 재실행
+     - CI 7게이트 + P0 smoke + migration dry-run + security/test report 최종 확인
+  5. 실제 컷오버 실행
+     - `runbooks/cutover-operations-runbook.md`, `runbooks/cutover-checklist.md` 순서로 수행
+  6. 배포 직후 hypercare
+     - health / 5xx / latency / backlog / deadlock / auth failure 실시간 감시
+  7. rollback readiness 유지
+     - DB backup, restore, rollback-health 기준 즉시 재검증
+- 결과:
+  - 현재 저장소 상태는 `운영 준비 완료 직전`이 아니라 `운영 전환 실행 단계`로 보는 것이 맞음
+  - 남은 일은 설계/구현이 아니라 `배포 기준선 고정 + 운영 환경 반영 + 컷오버 실행 + 초기 안정화`임
+
+### Q170. 운영 전환 1~8 순서 실행용 산출물 일괄 정리 (2026-03-13)
+- 사용자 요청 맥락:
+  - 추천한 운영 순서 1~8을 실제 산출물 기준으로 순차 진행 요청
+- 수행 내용:
+  1. 운영 기준선 동결
+     - `runbooks/operational-baseline-freeze.md`
+     - `runbooks/operational-baseline-freeze.manifest.json`
+     - runtime commit: `f6528a5c3379c696169fcea64458398f230e1acd`
+  2. prod 환경 변수/시크릿 인벤토리 확정
+     - `runbooks/prod-env-secrets-inventory.md`
+  3. 운영 토폴로지 문서 확정
+     - `runbooks/prod-topology.md`
+  4. 컷오버 당일 시간표 runbook 작성
+     - `runbooks/cutover-day-runbook.md`
+  5. 운영 유사 리허설 패키지 정리
+     - `runbooks/prod-like-rehearsal-package.md`
+  6. 배포 직전 최종 게이트 세트 정리
+     - `runbooks/final-predeploy-gates.md`
+  7. 실제 실행형 컷오버 체크리스트 정리
+     - `runbooks/production-cutover-execution-checklist.md`
+  8. hypercare/rollback monitoring 체크리스트 정리
+     - `runbooks/hypercare-rollback-monitoring-checklist.md`
+- 결과:
+  - 현재 저장소는 `운영 전환 실행 단계`에 필요한 핵심 문서를 모두 갖춘 상태가 됨
+  - 다음 실질 단계는 `.env.production` 실값 확정 -> production-like rehearsal 1회 -> 최종 게이트 재실행 -> 실제 cutover 실행
+
+### Q171. `.env.production` 실값/정책값 확정, production-like rehearsal 실행, 문서 반영 준비 (2026-03-13)
+- 사용자 요청 맥락:
+  - `1. .env.production 실값/정책값 확정`
+  - `2. production-like rehearsal 준비 및 실행`
+  - `3. 문서 변경분 커밋/푸시`
+- 수행 내용:
+  1. `.env.production` 실값/정책값 확정
+     - `.env.production` 로컬 untracked 파일 생성
+     - `scripts/check-prod-secrets.ps1 -EnvFile .env.production` PASS
+     - local prod-like rehearsal 목적상 DB/브로커/관측용 강한 비밀값 반영
+     - gateway policy는 P0 write smoke 가능하도록 `infra/gateway/policies/local-all-domains-e2e.yaml` 사용
+  2. production-like infra 준비
+     - `docker compose --env-file .env.production -f docker-compose.yml up -d sqlserver redis rabbitmq loki prometheus tempo grafana`
+     - `SCM_RFT_PRODLIKE` DB 및 app login(`scm_prod_app`) 생성/권한 부여
+     - Gradle wrapper의 사내 Nexus DNS 의존을 우회하기 위해 로컬 Gradle 8.10.2로 9개 bootJar 재빌드
+  3. 리허설 차단 이슈 수정
+     - `scripts/prod-orchestration-common.ps1`
+       - `Ensure-PortFree`가 단일 리스너 객체에서 `.Count` 예외를 내던 문제 수정
+     - `build.gradle`
+       - `org.flywaydb:flyway-sqlserver` 추가
+       - 원인: `flyway-core`만으로는 SQL Server 2022(`Microsoft SQL Server 16.0`) 미지원
+  4. production-like rehearsal 실행
+     - RunId: `SCM-OPS-RH-20260313-174920`
+     - `scripts/prod-up.ps1 -RunId ... -EnvFile .env.production -StopExistingPorts` PASS
+     - `scripts/prod-rolling-restart.ps1 -RunId ... -EnvFile .env.production -StopExistingPorts` PASS
+       - `TotalRecoverySec: 215`
+     - `scripts/smoke-gateway-p0-e2e.ps1 -GatewayBaseUrl http://localhost:18080 -Database SCM_RFT_PRODLIKE -SqlContainerName scm-sqlserver -EnvFile .env.production` PASS
+       - `P0-F01 ~ P0-F07` 전부 PASS
+     - `scripts/prod-down.ps1 -RunId ...` PASS
+     - `docker compose --env-file .env.production -f docker-compose.yml down` 완료
+  5. 추적 문서 반영
+     - `runbooks/prod-like-rehearsal-package.md`
+       - 최신 실행 결과 섹션 추가
+     - `runbooks/prod-env-secrets-inventory.md`
+       - baseline/runtime 표기 깨짐 수정
+- 결과:
+  - `.env.production` 기준 local production-like rehearsal 1회가 end-to-end PASS로 완료됨
+  - 남은 조치는 이번 문서/스크립트/빌드 수정분 커밋 및 원격 푸시뿐임
