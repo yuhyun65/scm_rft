@@ -130,6 +130,66 @@ export type QualityDocumentAckResponse = {
   duplicateRequest?: boolean;
 };
 
+export type InventoryBalance = {
+  itemCode: string;
+  warehouseCode: string;
+  quantity: number;
+  updatedAt: string;
+};
+
+export type InventoryMovement = {
+  movementId: string;
+  itemCode: string;
+  warehouseCode: string;
+  movementType: string;
+  quantity: number;
+  referenceNo?: string;
+  movedAt: string;
+};
+
+export type InventoryBalanceSearchResponse = {
+  items: InventoryBalance[];
+  total: number;
+  page: number;
+  size: number;
+};
+
+export type InventoryMovementSearchResponse = {
+  items: InventoryMovement[];
+  total: number;
+  page: number;
+  size: number;
+};
+
+export type FileRegisterRequest = {
+  domainKey: string;
+  originalName: string;
+  storagePath: string;
+};
+
+export type FileMetadata = {
+  fileId: string;
+  domainKey: string;
+  originalName: string;
+  storagePath: string;
+};
+
+export type ReportJobCreateRequest = {
+  reportType: string;
+  requestedByMemberId?: string;
+};
+
+export type ReportJob = {
+  jobId: string;
+  reportType: string;
+  status: string;
+  requestedByMemberId?: string;
+  requestedAt: string;
+  completedAt?: string | null;
+  outputFileId?: string | null;
+  errorMessage?: string | null;
+};
+
 export type OrderSummary = {
   orderId: string;
   supplierId: string;
@@ -376,6 +436,54 @@ export class ScmApiClient {
       `/api/quality-doc/v1/documents/${encodeURIComponent(documentId)}/ack`,
       request
     );
+  }
+
+  searchInventoryBalances(params: {
+    itemCode?: string;
+    warehouseCode?: string;
+    page?: number;
+    size?: number;
+  }): Promise<InventoryBalanceSearchResponse> {
+    const query = buildQueryString({
+      itemCode: params.itemCode,
+      warehouseCode: params.warehouseCode,
+      page: params.page,
+      size: params.size
+    });
+    return this.request<InventoryBalanceSearchResponse>("GET", `/api/inventory/v1/balances${query}`);
+  }
+
+  searchInventoryMovements(params: {
+    itemCode?: string;
+    warehouseCode?: string;
+    movementType?: string;
+    page?: number;
+    size?: number;
+  }): Promise<InventoryMovementSearchResponse> {
+    const query = buildQueryString({
+      itemCode: params.itemCode,
+      warehouseCode: params.warehouseCode,
+      movementType: params.movementType,
+      page: params.page,
+      size: params.size
+    });
+    return this.request<InventoryMovementSearchResponse>("GET", `/api/inventory/v1/movements${query}`);
+  }
+
+  registerFile(request: FileRegisterRequest): Promise<FileMetadata> {
+    return this.request<FileMetadata>("POST", "/api/file/v1/files", request);
+  }
+
+  getFile(fileId: string): Promise<FileMetadata> {
+    return this.request<FileMetadata>("GET", `/api/file/v1/files/${encodeURIComponent(fileId)}`);
+  }
+
+  createReportJob(request: ReportJobCreateRequest): Promise<ReportJob> {
+    return this.request<ReportJob>("POST", "/api/report/v1/jobs", request);
+  }
+
+  getReportJob(jobId: string): Promise<ReportJob> {
+    return this.request<ReportJob>("GET", `/api/report/v1/jobs/${encodeURIComponent(jobId)}`);
   }
 }
 

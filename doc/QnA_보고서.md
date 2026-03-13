@@ -2946,3 +2946,62 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `SCM-248` UI MVP는 프론트 게이트와 실제 gateway smoke 기준으로 구현 완료
   - 다음 단계는 `SCM-249 Inventory + File + Report UI` 전용 이슈/브랜치로 진입
+
+### Q164. SCM-249 Inventory + File + Report UI MVP 구현 및 실측 검증 완료 (2026-03-13)
+- 사용자 요청 맥락:
+  - `SCM-248 -> SCM-249 -> SCM-250` 프론트 PR 라인 순차 진행
+- 수행 내용:
+  - 이슈/브랜치 생성:
+    - Issue `#76` 생성: `[SCM-249] Inventory + File + Report UI MVP`
+    - 브랜치: `feature/scm-249-inventory-file-report-ui`
+  - 프론트 변경:
+    - `frontend/packages/api-client/src/index.ts`
+      - Inventory 타입/메서드 추가:
+        - `searchInventoryBalances`
+        - `searchInventoryMovements`
+      - File 타입/메서드 추가:
+        - `registerFile`
+        - `getFile`
+      - Report 타입/메서드 추가:
+        - `createReportJob`
+        - `getReportJob`
+    - `frontend/apps/web-portal/src/features/inventory-file-report-panel.tsx` 추가
+      - Inventory balance/movement 조회 UI
+      - File metadata register/detail UI
+      - Report job create/detail UI
+      - 로그인 사용자 힌트를 `requestedByMemberId`에 자동 추적하되 수동 override는 유지
+    - `frontend/apps/web-portal/src/features/inventory-file-report-panel.test.ts` 추가
+      - tracked field 동기화 로직 테스트
+    - `frontend/apps/web-portal/src/App.tsx`
+      - 새 패널 연결
+      - `VITE_INVENTORY_API_BASE_URL`, `VITE_FILE_API_BASE_URL`, `VITE_REPORT_API_BASE_URL` 오버라이드 지원
+      - hero/meta에 도메인 base 정보 확장
+  - 프론트 게이트:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 실제 백엔드/게이트웨이 검증:
+    - 로컬 cached Gradle + `SCM_FLYWAY_ENABLED=false`로 `inventory`, `file`, `report` 기동
+    - health 확인:
+      - `inventory` `UP` (`8086`)
+      - `file` `UP` (`8087`)
+      - `report` `UP` (`8088`)
+      - `gateway` `UP` (`18080`)
+    - SQL seed + gateway smoke 실행 결과:
+      - login PASS (`memberId=smoke-user`)
+      - inventory balances PASS (`inventoryBalanceCount=1`)
+      - inventory movements PASS (`inventoryMovementCount=1`)
+      - file register PASS (`fileId=be65e81f-f6cb-47e8-9111-8cd57e222b51`)
+      - file detail PASS (`fileDetailId=be65e81f-f6cb-47e8-9111-8cd57e222b51`)
+      - report create PASS (`jobId=29d6fc65-2d6a-4f4a-8d4f-24c43aa12d56`)
+      - report detail PASS (`status=QUEUED`)
+- 산출물/근거:
+  - `runbooks/evidence/SCM-249-inventory.stdout.log`
+  - `runbooks/evidence/SCM-249-file.stdout.log`
+  - `runbooks/evidence/SCM-249-report.stdout.log`
+  - `runbooks/evidence/SCM-249-gateway-smoke-summary.json`
+- 결과:
+  - `SCM-249` UI MVP는 프론트 게이트와 실제 gateway smoke 기준으로 구현 완료
+  - 다음 단계는 `SCM-250` 통합 E2E + 컷오버 UI/런북 연계로 진입
