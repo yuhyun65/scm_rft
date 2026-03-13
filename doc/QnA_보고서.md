@@ -2817,4 +2817,10 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `SCM-246`의 `normalizeBaseUrl()`와 `SCM-247`의 order-lot client 확장을 병합하여 해결
     - 결과:
       - `SCM-247` 브랜치 rebase 완료
-      - 다음 단계는 force-push 후 PR `#72` base를 `feature/to-be-dev-env-bootstrap`로 변경하는 작업
+      - `#72`는 기존 base 브랜치(`feature/scm-246-auth-member-ui-mvp`)가 `#71` 머지 후 제거되면서 자동 `CLOSED`
+      - `#72` reopen 불가 확인
+      - 대체 PR `#73` 생성:
+        - title: `feat(scm-247): implement order-lot p0 ui mvp`
+        - base: `feature/to-be-dev-env-bootstrap`
+        - head: `feature/scm-247-order-lot-p0-ui-mvp`
+      - `SCM-247` review 준비는 `#73` 기준으로 전환
