@@ -2713,6 +2713,9 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - Codex 답변(결과):
   - 작업 브랜치:
     - `feature/scm-247-order-lot-p0-ui-mvp` 생성
+    - Draft PR `#72` 생성: `feat(scm-247): implement order-lot p0 ui mvp`
+      - base: `feature/scm-246-auth-member-ui-mvp`
+      - stacked PR로 생성하여 `SCM-246` diff와 분리
   - 프론트 구현:
     - `frontend/packages/api-client/src/index.ts`
       - Order/Lot DTO 추가:
