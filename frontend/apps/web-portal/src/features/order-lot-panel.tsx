@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createScmApiClient,
   formatApiError,
@@ -14,6 +14,28 @@ type OrderLotPanelProps = {
   changedByHint?: string;
 };
 
+type ResolveChangedByArgs = {
+  currentChangedBy: string;
+  changedByHint: string;
+  previousChangedByHint: string;
+};
+
+export function resolveChangedBy({
+  currentChangedBy,
+  changedByHint,
+  previousChangedByHint
+}: ResolveChangedByArgs) {
+  if (!changedByHint) {
+    return currentChangedBy;
+  }
+
+  if (!currentChangedBy || currentChangedBy === previousChangedByHint) {
+    return changedByHint;
+  }
+
+  return currentChangedBy;
+}
+
 export function OrderLotPanel({
   apiBaseUrl,
   accessToken,
@@ -28,6 +50,7 @@ export function OrderLotPanel({
   const [lotId, setLotId] = useState("");
   const [targetStatus, setTargetStatus] = useState("CONFIRMED");
   const [changedBy, setChangedBy] = useState(changedByHint);
+  const previousChangedByHintRef = useRef(changedByHint);
   const [reason, setReason] = useState("");
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<OrderSearchResponse | null>(null);
@@ -36,10 +59,15 @@ export function OrderLotPanel({
   const [statusResult, setStatusResult] = useState<OrderStatusChangeResponse | null>(null);
 
   useEffect(() => {
-    if (!changedBy && changedByHint) {
-      setChangedBy(changedByHint);
-    }
-  }, [changedBy, changedByHint]);
+    setChangedBy((currentChangedBy) =>
+      resolveChangedBy({
+        currentChangedBy,
+        changedByHint,
+        previousChangedByHint: previousChangedByHintRef.current
+      })
+    );
+    previousChangedByHintRef.current = changedByHint;
+  }, [changedByHint]);
 
   async function run<T>(action: () => Promise<T>, onSuccess: (result: T) => void) {
     setErrorText("");
