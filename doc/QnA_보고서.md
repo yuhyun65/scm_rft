@@ -2705,3 +2705,122 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
       - `runbooks/evidence/SCM-246/`
   - 다음 단계 준비:
     - `SCM-247`은 `SCM-246` 변경 위에서 전용 브랜치로 분리 착수 예정
+
+### Q160. SCM-247 Order-Lot P0 UI MVP 1차 구현 완료 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음을 진행해줘"
+  - "2.이어서 SCM-247(Order-Lot P0 UI MVP) 구현 진행"
+- Codex 답변(결과):
+  - 작업 브랜치:
+    - `feature/scm-247-order-lot-p0-ui-mvp` 생성
+    - Draft PR `#72` 생성: `feat(scm-247): implement order-lot p0 ui mvp`
+      - base: `feature/scm-246-auth-member-ui-mvp`
+      - stacked PR로 생성하여 `SCM-246` diff와 분리
+  - 프론트 구현:
+    - `frontend/packages/api-client/src/index.ts`
+      - Order/Lot DTO 추가:
+        - `OrderSummary`, `OrderSearchResponse`, `OrderDetail`, `LotDetail`
+        - `OrderStatusChangeRequest`, `OrderStatusChangeResponse`
+      - Order-Lot API 메서드 추가:
+        - `searchOrders`
+        - `getOrder`
+        - `getLot`
+        - `changeOrderStatus`
+    - `frontend/apps/web-portal/src/features/order-lot-panel.tsx`
+      - 주문 목록 조회
+      - 주문 상세 조회
+      - LOT 상세 조회
+      - 주문 상태 변경(write retry 금지 안내 포함)
+    - `frontend/apps/web-portal/src/features/auth-member-panel.tsx`
+      - 로그인 성공 시 `memberId`를 상위에 전달하도록 확장
+      - 로컬 smoke 기본 계정 `smoke-user/password` 반영
+      - 인코딩 깨진 안내 문구 정리
+    - `frontend/apps/web-portal/src/App.tsx`
+      - `OrderLotPanel` 연결
+      - `VITE_ORDER_LOT_API_BASE_URL` 오버라이드 지원 추가
+      - 현재 로그인 `memberId`를 status change `changedBy` 힌트로 전달
+    - `frontend/apps/web-portal/src/styles.css`
+      - Order-Lot 카드/주의문구/inline field 스타일 추가
+    - `frontend/packages/api-client/src/generated/contracts.ts`
+      - contract gate 재생성 반영
+  - 검증:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 참고:
+    - `SCM-247`은 UI 1차 구현까지 완료되었고, 실제 Order-Lot 백엔드 연동 smoke는 후속 단계에서 분리 검증 예정
+
+### Q161. #71 머지, SCM-247 실제 Order-Lot smoke 검증, #72 rebase 준비 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음의 작업을 순서대로 진행해줘"
+  - "1.#71 리뷰/체크 후 머지"
+  - "2.SCM-247 실제 Order-Lot 백엔드 smoke 검증"
+  - "3.#72 base를 기준 브랜치로 리베이스 후 리뷰 준비"
+- Codex 답변(결과):
+  - `#71` 리뷰/체크 후 머지:
+    - PR inline review comment 확인:
+      - `ScmApiClient`가 trailing slash base URL에서 `//api/...`를 만들 수 있다는 P2 코멘트 1건 확인
+    - 수정 반영:
+      - `frontend/packages/api-client/src/index.ts`
+      - `normalizeBaseUrl()` 추가 후 constructor에서 `baseUrl` 정규화
+    - 로컬 검증:
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+      - `frontend-contract-test` PASS
+    - PR 코멘트 반영:
+      - review fix commit `e9bd00d`
+      - 로컬 게이트 PASS 요약 남김
+    - GitHub 체크 결과:
+      - 기능 체크 전부 PASS
+      - `CodeQL` check-run은 독립적으로 failure 상태였으나 브랜치 보호 차단은 아니었음
+    - 머지:
+      - PR `#71` 상태 `MERGED`
+      - merge commit: `e062f9ee96d819e24586834e53e87728aac4061c`
+      - Issue `#70` 종료: `Merged via PR #71`
+  - `SCM-247` 실제 Order-Lot 백엔드 smoke 검증:
+    - 서비스 기동:
+      - `auth`(8081), `member`(8082) 기존 SQL 기반 프로세스 유지
+      - `order-lot`(8085) 로컬 SQL 기반으로 기동
+      - `gateway`(18080)는 `infra/gateway/policies/local-all-domains-e2e.yaml`로 재기동
+      - gateway Redis health `UP`를 위해 `SPRING_DATA_REDIS_PORT=16379` 적용
+    - 장애 원인 및 조치:
+      - 초기 smoke 실패 원인:
+        - auth seed hash가 PowerShell 변수 확장으로 잘려 저장됨
+        - 결과: login `401`, 이후 lock 누적으로 `423 Locked`
+      - 조치:
+        - `docker exec ... sqlcmd` direct update로 `password_hash`, `failed_count=0`, `locked_until=NULL` 강제 보정
+        - `orders/order_lots` seed를 `P0-ORDER-001`, `P0-LOT-001`, 상태 `PENDING/READY`로 보정
+    - 실제 smoke 결과:
+      - direct auth login PASS
+      - gateway login PASS
+      - token verify PASS
+      - order list PASS (`OrderCount=1`)
+      - order detail PASS (`OrderId=P0-ORDER-001`)
+      - lot detail PASS (`LotId=P0-LOT-001`)
+      - order status change PASS (`AfterStatus=CONFIRMED`)
+      - persisted order status PASS (`PersistedStatus=CONFIRMED`)
+    - 증적:
+      - `runbooks/evidence/SCM-247/order-lot.stdout.log`
+      - `runbooks/evidence/SCM-247/gateway.stdout.log`
+      - `runbooks/evidence/SCM-247/seed-order-lot-final-check.log`
+      - `runbooks/evidence/SCM-247/order-lot-smoke-summary.json`
+  - `#72` rebase 준비/실행:
+    - 기준 브랜치 최신화 확인:
+      - `origin/feature/to-be-dev-env-bootstrap` = `e062f9e...` (`#71` merge 반영)
+    - rebase 전략:
+      - branch point `a0c694b` 이후의 `SCM-247` 전용 커밋만 기준 브랜치 위로 이동
+      - 사용 명령: `git rebase --onto origin/feature/to-be-dev-env-bootstrap a0c694b`
+    - 충돌:
+      - `frontend/packages/api-client/src/index.ts` 1건
+      - `SCM-246`의 `normalizeBaseUrl()`와 `SCM-247`의 order-lot client 확장을 병합하여 해결
+    - 결과:
+      - `SCM-247` 브랜치 rebase 완료
+      - `#72`는 기존 base 브랜치(`feature/scm-246-auth-member-ui-mvp`)가 `#71` 머지 후 제거되면서 자동 `CLOSED`
+      - `#72` reopen 불가 확인
+      - 대체 PR `#73` 생성:
+        - title: `feat(scm-247): implement order-lot p0 ui mvp`
+        - base: `feature/to-be-dev-env-bootstrap`
+        - head: `feature/scm-247-order-lot-p0-ui-mvp`
+      - `SCM-247` review 준비는 `#73` 기준으로 전환

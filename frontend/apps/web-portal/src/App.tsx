@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { describePortalScope } from "@scm-rft/ui";
 import { readContractCatalog } from "@scm-rft/api-client";
 import { AuthMemberPanel } from "./features/auth-member-panel";
+import { OrderLotPanel } from "./features/order-lot-panel";
 
 const TOKEN_STORAGE_KEY = "scm-rft.access-token";
 
@@ -16,8 +17,10 @@ function readStoredToken() {
 export default function App() {
   const catalog = readContractCatalog();
   const [accessToken, setAccessToken] = useState(() => readStoredToken());
+  const [currentMemberId, setCurrentMemberId] = useState("");
   const title = formatPortalTitle(describePortalScope("scm-rft"));
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const orderLotApiBaseUrl = import.meta.env.VITE_ORDER_LOT_API_BASE_URL ?? apiBaseUrl;
 
   useEffect(() => {
     if (accessToken) {
@@ -33,12 +36,13 @@ export default function App() {
         <p className="eyebrow">Frontend Modernization</p>
         <h1>{title}</h1>
         <p className="heroText">
-          The first user-facing slice targets Auth and Member flows so SCM-246 can validate the
-          token contract before Order-Lot UI starts.
+          The portal now covers Auth and Member flows and extends into the Order-Lot P0 path for
+          order search, lot detail, and guarded status change.
         </p>
         <div className="heroMeta">
           <span>Contracts: {catalog.contracts.length}</span>
-          <span>Gateway base: {apiBaseUrl || "(same origin)"}</span>
+          <span>Auth/Member base: {apiBaseUrl || "(same origin)"}</span>
+          <span>Order-Lot base: {orderLotApiBaseUrl || "(same origin)"}</span>
         </div>
       </header>
 
@@ -46,6 +50,13 @@ export default function App() {
         apiBaseUrl={apiBaseUrl}
         accessToken={accessToken}
         onAccessTokenChange={setAccessToken}
+        onLoginSuccess={setCurrentMemberId}
+      />
+
+      <OrderLotPanel
+        apiBaseUrl={orderLotApiBaseUrl}
+        accessToken={accessToken}
+        changedByHint={currentMemberId}
       />
     </main>
   );
