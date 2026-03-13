@@ -2637,3 +2637,33 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `scripts/ci-run-gate.ps1 -Gate frontend-build` PASS
   - 참고:
     - 기존 로컬 untracked 파일 `doc/frontend_process.md`는 사용자 작업물로 간주하고 미변경 상태로 유지
+
+### Q158. SCM-246 Auth/Member UI MVP 구현 착수 및 1차 완료 (2026-03-13)
+- 사용자 프롬프트:
+  - "SCM-246(Auth/Member UI MVP) 구현을 시작해줘"
+- Codex 답변(결과):
+  - 프론트 Auth/Member MVP 구현:
+    - `frontend/packages/api-client/src/index.ts`
+      - Auth login/token verify
+      - Member by id/search
+      - backend error payload(`code/message/path/timestamp`) 흡수용 `ApiError`/`formatApiError` 추가
+    - `frontend/apps/web-portal/src/features/auth-member-panel.tsx`
+      - 로그인
+      - 토큰 검증
+      - 회원 단건 조회
+      - 회원 검색
+    - `frontend/apps/web-portal/src/App.tsx`
+      - token localStorage 유지
+      - Auth/Member 패널 연결
+    - `frontend/apps/web-portal/src/styles.css`
+      - Auth/Member MVP 화면 스타일 확장
+    - `frontend/apps/web-portal/src/App.test.ts`
+      - API error 포맷 테스트 추가
+  - 로컬 검증:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 참고:
+    - 기존 untracked `doc/frontend_process.md`는 사용자 작업물로 간주하고 미포함 유지

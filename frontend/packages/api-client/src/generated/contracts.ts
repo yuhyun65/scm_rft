@@ -4,7 +4,7 @@ export type ContractCatalog = {
 };
 
 export const contractCatalog: ContractCatalog = {
-  generatedAt: "2026-03-12T08:31:55.515Z",
+  generatedAt: "2026-03-13T01:15:54.969Z",
   contracts: [
     { name: "auth.openapi.yaml", path: "shared/contracts/auth.openapi.yaml" },
     { name: "board.openapi.yaml", path: "shared/contracts/board.openapi.yaml" },
