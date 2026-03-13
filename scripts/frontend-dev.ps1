@@ -19,7 +19,15 @@ if ($env:SCM_TOOLCHAIN_READY -ne "1") {
   $env:SCM_TOOLCHAIN_READY = "1"
 }
 
-& powershell -ExecutionPolicy Bypass -File $setupScript -Install:$Install
+$setupArgs = @(
+  "-ExecutionPolicy", "Bypass",
+  "-File", $setupScript
+)
+if ($Install) {
+  $setupArgs += "-Install"
+}
+
+& powershell @setupArgs
 if ($LASTEXITCODE -ne 0) {
   throw "frontend setup failed."
 }
