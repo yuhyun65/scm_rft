@@ -3165,3 +3165,31 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `frontend-dev.ps1` 후속 수정은 기능 라인과 분리된 독립 이슈/브랜치/PR로 정리 완료
   - 현재 대기 상태는 PR `#83` 리뷰/체크/머지
+
+### Q168. `SCM-251` PR `#83` 체크 PASS 확인 후 머지 및 Issue `#82` 종료 (2026-03-13)
+- 사용자 요청 맥락:
+  - `#83` 체크 확인
+  - 리뷰/머지
+  - `#82` 종료
+- 수행 내용:
+  - PR `#83` 점검:
+    - 조치 필요한 리뷰 없음
+    - GitHub checks PASS:
+      - build
+      - unit/integration test
+      - contract test
+      - lint/static analysis
+      - SAST + secret + dependency scan
+      - smoke test
+      - migration dry-run
+      - CodeQL
+  - 머지 결과:
+    - PR `#83 MERGED`
+    - merge commit: `f6528a5c3379c696169fcea64458398f230e1acd`
+  - 이슈 종료:
+    - Issue `#82 CLOSED` (`Merged via PR #83`)
+  - 기준 브랜치 동기화:
+    - `feature/to-be-dev-env-bootstrap` fast-forward 완료
+- 결과:
+  - `frontend-dev.ps1` helper bug 수정이 기준 브랜치에 반영 완료
+  - 프론트 베이스라인 이후 발견된 보조 스크립트 결함까지 정리 완료
