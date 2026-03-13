@@ -2751,3 +2751,70 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `frontend-security-scan` PASS
   - 참고:
     - `SCM-247`은 UI 1차 구현까지 완료되었고, 실제 Order-Lot 백엔드 연동 smoke는 후속 단계에서 분리 검증 예정
+
+### Q161. #71 머지, SCM-247 실제 Order-Lot smoke 검증, #72 rebase 준비 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음의 작업을 순서대로 진행해줘"
+  - "1.#71 리뷰/체크 후 머지"
+  - "2.SCM-247 실제 Order-Lot 백엔드 smoke 검증"
+  - "3.#72 base를 기준 브랜치로 리베이스 후 리뷰 준비"
+- Codex 답변(결과):
+  - `#71` 리뷰/체크 후 머지:
+    - PR inline review comment 확인:
+      - `ScmApiClient`가 trailing slash base URL에서 `//api/...`를 만들 수 있다는 P2 코멘트 1건 확인
+    - 수정 반영:
+      - `frontend/packages/api-client/src/index.ts`
+      - `normalizeBaseUrl()` 추가 후 constructor에서 `baseUrl` 정규화
+    - 로컬 검증:
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+      - `frontend-contract-test` PASS
+    - PR 코멘트 반영:
+      - review fix commit `e9bd00d`
+      - 로컬 게이트 PASS 요약 남김
+    - GitHub 체크 결과:
+      - 기능 체크 전부 PASS
+      - `CodeQL` check-run은 독립적으로 failure 상태였으나 브랜치 보호 차단은 아니었음
+    - 머지:
+      - PR `#71` 상태 `MERGED`
+      - merge commit: `e062f9ee96d819e24586834e53e87728aac4061c`
+      - Issue `#70` 종료: `Merged via PR #71`
+  - `SCM-247` 실제 Order-Lot 백엔드 smoke 검증:
+    - 서비스 기동:
+      - `auth`(8081), `member`(8082) 기존 SQL 기반 프로세스 유지
+      - `order-lot`(8085) 로컬 SQL 기반으로 기동
+      - `gateway`(18080)는 `infra/gateway/policies/local-all-domains-e2e.yaml`로 재기동
+      - gateway Redis health `UP`를 위해 `SPRING_DATA_REDIS_PORT=16379` 적용
+    - 장애 원인 및 조치:
+      - 초기 smoke 실패 원인:
+        - auth seed hash가 PowerShell 변수 확장으로 잘려 저장됨
+        - 결과: login `401`, 이후 lock 누적으로 `423 Locked`
+      - 조치:
+        - `docker exec ... sqlcmd` direct update로 `password_hash`, `failed_count=0`, `locked_until=NULL` 강제 보정
+        - `orders/order_lots` seed를 `P0-ORDER-001`, `P0-LOT-001`, 상태 `PENDING/READY`로 보정
+    - 실제 smoke 결과:
+      - direct auth login PASS
+      - gateway login PASS
+      - token verify PASS
+      - order list PASS (`OrderCount=1`)
+      - order detail PASS (`OrderId=P0-ORDER-001`)
+      - lot detail PASS (`LotId=P0-LOT-001`)
+      - order status change PASS (`AfterStatus=CONFIRMED`)
+      - persisted order status PASS (`PersistedStatus=CONFIRMED`)
+    - 증적:
+      - `runbooks/evidence/SCM-247/order-lot.stdout.log`
+      - `runbooks/evidence/SCM-247/gateway.stdout.log`
+      - `runbooks/evidence/SCM-247/seed-order-lot-final-check.log`
+      - `runbooks/evidence/SCM-247/order-lot-smoke-summary.json`
+  - `#72` rebase 준비/실행:
+    - 기준 브랜치 최신화 확인:
+      - `origin/feature/to-be-dev-env-bootstrap` = `e062f9e...` (`#71` merge 반영)
+    - rebase 전략:
+      - branch point `a0c694b` 이후의 `SCM-247` 전용 커밋만 기준 브랜치 위로 이동
+      - 사용 명령: `git rebase --onto origin/feature/to-be-dev-env-bootstrap a0c694b`
+    - 충돌:
+      - `frontend/packages/api-client/src/index.ts` 1건
+      - `SCM-246`의 `normalizeBaseUrl()`와 `SCM-247`의 order-lot client 확장을 병합하여 해결
+    - 결과:
+      - `SCM-247` 브랜치 rebase 완료
+      - 다음 단계는 force-push 후 PR `#72` base를 `feature/to-be-dev-env-bootstrap`로 변경하는 작업
