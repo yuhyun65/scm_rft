@@ -3130,3 +3130,38 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 기능 MVP 기준: `완료`
     - 기준 브랜치 통합/게이트 기준: `완료`
     - 추가 후속 권고: `scripts/frontend-dev.ps1`의 switch 전달 버그는 별도 정리 PR로 반영 필요
+
+### Q167. `frontend-dev.ps1` 후속 수정 이슈/PR 분리 및 로컬 기동 검증 (2026-03-13)
+- 사용자 요청 맥락:
+  - `QnA_보고서.md` 변경분 커밋/푸시
+  - `frontend-dev.ps1` 후속 수정은 별도 이슈/PR로 분리
+- 수행 내용:
+  - 기준 브랜치 기록 고정:
+    - `feature/to-be-dev-env-bootstrap`에서 `doc/QnA_보고서.md` 커밋/푸시
+    - commit: `d9cfa5f` (`docs(qna): log frontend merge line and verification`)
+  - 후속 이슈 분리:
+    - Issue `#82` 생성: `[SCM-251] Fix frontend dev helper switch bootstrap`
+    - 전용 브랜치 생성: `feature/scm-251-frontend-dev-helper-fix`
+  - 후속 수정 반영:
+    - 대상 파일: `scripts/frontend-dev.ps1`
+    - 수정 내용:
+      - `frontend-setup.ps1` 호출 시 `-Install:$Install` 문자열 전달 방식 제거
+      - argument array를 사용해 `-Install` switch를 실제 switch로만 전달하도록 수정
+  - 로컬 검증:
+    - `frontend-dev.ps1` 실행 -> `http://127.0.0.1:5173` `HTTP 200` 확인
+    - `frontend-dev.ps1 -Install` 실행 -> `http://127.0.0.1:5173` `HTTP 200` 확인
+    - 확인 포인트:
+      - `div#root` 존재
+      - `/src/main.tsx` 응답 본문 포함
+    - 로그:
+      - `.tmp/frontend-verify-scm251/without-install.stdout.log`
+      - `.tmp/frontend-verify-scm251/without-install.stderr.log`
+      - `.tmp/frontend-verify-scm251/with-install.stdout.log`
+      - `.tmp/frontend-verify-scm251/with-install.stderr.log`
+  - 커밋/브랜치 푸시:
+    - commit: `1fa6f68` (`fix(frontend): forward install switch to setup helper`)
+  - PR 생성:
+    - PR `#83`: `fix(scm-251): repair frontend dev helper bootstrap`
+- 결과:
+  - `frontend-dev.ps1` 후속 수정은 기능 라인과 분리된 독립 이슈/브랜치/PR로 정리 완료
+  - 현재 대기 상태는 PR `#83` 리뷰/체크/머지
