@@ -3005,3 +3005,63 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `SCM-249` UI MVP는 프론트 게이트와 실제 gateway smoke 기준으로 구현 완료
   - 다음 단계는 `SCM-250` 통합 E2E + 컷오버 UI/런북 연계로 진입
+
+### Q165. SCM-250 통합 P0 runner + 컷오버 참조 패널 구현 및 전체 P0 smoke 통과 (2026-03-13)
+- 사용자 요청 맥락:
+  - `SCM-248 -> SCM-249 -> SCM-250` 프론트 PR 라인 순차 진행
+- 수행 내용:
+  - 이슈/브랜치 생성:
+    - Issue `#78` 생성: `[SCM-250] Frontend integrated P0 runner + cutover references`
+    - 브랜치: `feature/scm-250-frontend-e2e-cutover`
+  - 프론트 변경:
+    - `frontend/apps/web-portal/src/features/cutover-runner-panel.tsx` 추가
+      - `Run P0 Gateway Scenario` 버튼으로 cross-domain gateway 호출을 순차 실행
+      - 포함 순서:
+        - token verify
+        - member search
+        - order/lot
+        - board
+        - quality-doc ACK
+        - inventory
+        - file register/detail
+        - report create/detail
+      - 컷오버/리허설 참조 경로 표시:
+        - `runbooks/rehearsal-R1-runbook.md`
+        - `runbooks/go-nogo-signoff.md`
+        - `runbooks/merge-gates-checklist.md`
+        - `runbooks/today-execution-R1.md`
+        - `doc/roadmap/scm-201-p0-scenarios.md`
+    - `frontend/apps/web-portal/src/features/cutover-runner-panel.test.ts` 추가
+      - scenario member fallback 테스트
+      - runbook reference 목록 테스트
+    - `frontend/apps/web-portal/src/App.tsx`
+      - hero 문구를 integrated runner 기준으로 확장
+      - `CutoverRunnerPanel` 연결
+    - `frontend/apps/web-portal/src/styles.css`
+      - disabled button / reference list 스타일 추가
+  - 프론트 게이트:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 통합 P0 실측:
+    - `powershell -ExecutionPolicy Bypass -File .\scripts\smoke-gateway-p0-e2e.ps1` 실행
+    - health:
+      - auth/member/board/quality-doc/order-lot/inventory/file/report/gateway 전부 `UP`
+    - 결과:
+      - `P0-F01` login + token verify + member search/detail PASS
+      - `P0-F02` order/lot flow PASS
+      - `P0-F03` file register/get PASS
+      - `P0-F04` board list/detail PASS
+      - `P0-F05` quality-doc list/detail/ack PASS
+      - `P0-F06` inventory balances/movements PASS
+      - `P0-F07` report create/get PASS
+      - 최종: `P0-F01~F07 gateway E2E smoke passed`
+- 산출물/근거:
+  - `scripts/smoke-gateway-p0-e2e.ps1` PASS 로그
+  - `runbooks/evidence/SCM-248-*`
+  - `runbooks/evidence/SCM-249-*`
+- 결과:
+  - 프론트 PR 라인 `SCM-248`, `SCM-249`, `SCM-250` 구현이 모두 완료됨
+  - 남은 작업은 각 PR 체크/리뷰/머지와 기준 브랜치 rebase 정리
