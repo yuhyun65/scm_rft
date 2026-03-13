@@ -12,14 +12,16 @@ type AuthMemberPanelProps = {
   apiBaseUrl: string;
   accessToken: string;
   onAccessTokenChange: (token: string) => void;
+  onLoginSuccess?: (memberId: string) => void;
 };
 
 export function AuthMemberPanel({
   apiBaseUrl,
   accessToken,
-  onAccessTokenChange
+  onAccessTokenChange,
+  onLoginSuccess
 }: AuthMemberPanelProps) {
-  const [loginId, setLoginId] = useState("demo");
+  const [loginId, setLoginId] = useState("smoke-user");
   const [password, setPassword] = useState("password");
   const [memberId, setMemberId] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -46,6 +48,7 @@ export function AuthMemberPanel({
       () => client.login({ loginId, password }),
       (result) => {
         onAccessTokenChange(result.accessToken);
+        onLoginSuccess?.(result.memberId);
         setLoginResult(result);
       }
     );
@@ -75,8 +78,8 @@ export function AuthMemberPanel({
         <p className="eyebrow">SCM-246</p>
         <h2>Auth + Member UI MVP</h2>
         <p className="panelIntro">
-          Gateway token issued by Auth is reused for Member 조회/검색. Error payload is surfaced
-          with backend code and message.
+          Gateway tokens issued by Auth are reused for member lookups. Backend error codes and
+          messages are surfaced directly so contract mismatches are visible immediately.
         </p>
       </div>
 

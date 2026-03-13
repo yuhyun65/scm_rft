@@ -52,6 +52,55 @@ export type MemberSearchResponse = {
   size: number;
 };
 
+export type PageMeta = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+};
+
+export type OrderSummary = {
+  orderId: string;
+  supplierId: string;
+  status: string;
+  orderedAt: string;
+};
+
+export type OrderSearchResponse = {
+  items: OrderSummary[];
+  page: PageMeta;
+};
+
+export type OrderDetail = {
+  orderId: string;
+  supplierId: string;
+  status: string;
+  orderedAt: string;
+  expectedDeliveryAt?: string | null;
+  totalLotCount?: number | null;
+};
+
+export type LotDetail = {
+  lotId: string;
+  orderId: string;
+  quantity: number;
+  status: string;
+};
+
+export type OrderStatusChangeRequest = {
+  targetStatus: string;
+  changedBy: string;
+  reason?: string;
+};
+
+export type OrderStatusChangeResponse = {
+  orderId: string;
+  beforeStatus: string;
+  afterStatus: string;
+  changedAt: string;
+};
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -158,6 +207,42 @@ export class ScmApiClient {
       size: params.size
     });
     return this.request<MemberSearchResponse>("GET", `/api/member/v1/members${query}`);
+  }
+
+  searchOrders(params: {
+    supplierId?: string;
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  }): Promise<OrderSearchResponse> {
+    const query = buildQueryString({
+      supplierId: params.supplierId,
+      status: params.status,
+      keyword: params.keyword,
+      page: params.page,
+      size: params.size
+    });
+    return this.request<OrderSearchResponse>("GET", `/api/order-lot/v1/orders${query}`);
+  }
+
+  getOrder(orderId: string): Promise<OrderDetail> {
+    return this.request<OrderDetail>("GET", `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}`);
+  }
+
+  getLot(lotId: string): Promise<LotDetail> {
+    return this.request<LotDetail>("GET", `/api/order-lot/v1/lots/${encodeURIComponent(lotId)}`);
+  }
+
+  changeOrderStatus(
+    orderId: string,
+    request: OrderStatusChangeRequest
+  ): Promise<OrderStatusChangeResponse> {
+    return this.request<OrderStatusChangeResponse>(
+      "POST",
+      `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}/status`,
+      request
+    );
   }
 }
 
