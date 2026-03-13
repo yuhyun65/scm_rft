@@ -2824,3 +2824,64 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
         - base: `feature/to-be-dev-env-bootstrap`
         - head: `feature/scm-247-order-lot-p0-ui-mvp`
       - `SCM-247` review 준비는 `#73` 기준으로 전환
+
+### Q162. #73 체크 완료 확인, 리뷰 코멘트 대응 후 머지, #69 종료 (2026-03-13)
+- 사용자 요청:
+  - `#73` 체크 완료 확인
+  - `#73` 리뷰/머지
+  - `#69` 종료
+- 수행 내용:
+  - `gh pr checks 73`로 상태 확인:
+    - 초기 상태: `unit/integration test`, `SAST + secret + dependency scan` 진행 중
+    - 리뷰 상태 확인 결과:
+      - Codex inline review 1건 존재
+      - 대상: `frontend/apps/web-portal/src/features/order-lot-panel.tsx`
+      - 내용: 로그인 사용자가 바뀌어도 `changedBy`가 이전 사용자로 남아 audit write 주체가 잘못 기록될 수 있음
+  - 코멘트 대응:
+    - 수정 파일:
+      - `frontend/apps/web-portal/src/features/order-lot-panel.tsx`
+      - `frontend/apps/web-portal/src/features/order-lot-panel.test.ts`
+    - 조치:
+      - `resolveChangedBy()` helper 추가
+      - `changedByHint` 변경 시 이전 힌트와 현재 입력값을 비교해 자동 추적 상태면 최신 로그인 ID로 동기화
+      - 사용자가 수동 입력한 값은 유지
+    - 회귀 테스트 추가:
+      - 이전 로그인 힌트를 추적 중일 때 새 로그인 ID로 갱신
+      - 빈 값일 때 현재 로그인 ID로 채움
+      - 수동 override는 유지
+    - 커밋/푸시:
+      - `053368f fix(frontend): sync order changedBy with login identity`
+  - 로컬 검증:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+  - PR 정리:
+    - PR 코멘트 추가:
+      - 수정 커밋, 로컬 게이트 PASS, 회귀 테스트 추가 사실 기록
+    - GraphQL mutation으로 review thread resolve 완료
+  - 최종 체크 결과:
+    - `build` PASS
+    - `unit/integration test` PASS
+    - `contract test` PASS
+    - `lint/static analysis` PASS
+    - `SAST + secret + dependency scan` PASS
+    - `smoke test` PASS
+    - `migration dry-run` PASS
+    - `CodeQL` PASS
+  - 머지/종료:
+    - `gh pr merge 73 --squash --delete-branch` 실행
+    - PR `#73` = `MERGED`
+    - merge commit = `0b8d7e77c005869b273caa397da8dda6775790ee`
+    - mergedAt = `2026-03-13T04:47:45Z`
+    - `gh issue close 69 --comment "Merged via PR #73"` 실행
+    - Issue `#69` = `CLOSED`
+- 산출물/근거:
+  - PR: `https://github.com/yuhyun65/scm_rft/pull/73`
+  - PR 코멘트: `https://github.com/yuhyun65/scm_rft/pull/73#issuecomment-4052111816`
+  - 실제 smoke 증적:
+    - `runbooks/evidence/SCM-247/order-lot-smoke-summary.json`
+    - `runbooks/evidence/SCM-247/order-lot.stdout.log`
+    - `runbooks/evidence/SCM-247/gateway.stdout.log`
+- 결과:
+  - `SCM-247 Order-Lot P0 UI MVP`가 기준 브랜치에 반영됨
+  - `SCM-246`, `SCM-247` 프론트 MVP가 모두 기준 브랜치 기준으로 정리됨
