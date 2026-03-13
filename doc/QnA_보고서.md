@@ -3065,3 +3065,68 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - 프론트 PR 라인 `SCM-248`, `SCM-249`, `SCM-250` 구현이 모두 완료됨
   - 남은 작업은 각 PR 체크/리뷰/머지와 기준 브랜치 rebase 정리
+
+### Q166. 프론트 PR 라인 `#75 -> #77/#79 replacement` 머지 완료 및 기준 브랜치 통합 검증 (2026-03-13)
+- 사용자 요청 맥락:
+  - `#75 -> #77 -> #79` 순서로 머지 진행
+  - `#77`, `#79`는 머지 직전 기준 브랜치/상위 PR 기준으로 rebase
+  - 머지 후 기준 브랜치에서 통합 웹 확인 및 최종 프론트 완료 판정
+- 수행 내용:
+  - `SCM-248`:
+    - PR `#75` 상태 재확인: all checks PASS, review thread resolved 상태 확인
+    - 결과: `#75 MERGED` 유지
+  - `SCM-249`:
+    - 기존 stacked PR `#77`은 `#75` base branch 삭제 영향으로 `CLOSED` 확인
+    - Codex 리뷰 코멘트 반영:
+      - `frontend/apps/web-portal/src/features/inventory-file-report-panel.tsx`
+      - logout 시 `memberIdHint`가 비워지면 `requestedByMemberId`도 함께 초기화되도록 수정
+      - `frontend/apps/web-portal/src/features/inventory-file-report-panel.test.ts`
+        - logout reset / next login tracking 회귀 테스트 추가
+    - 로컬 검증:
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+    - 기준 브랜치 재배치:
+      - `feature/scm-249-inventory-file-report-ui`를 `origin/feature/to-be-dev-env-bootstrap` 기준으로 rebase
+      - replacement PR `#80` 생성
+      - GitHub checks PASS:
+        - build / unit-integration / contract / lint-static / security / smoke / migration dry-run / CodeQL
+      - 결과:
+        - `#80 MERGED`
+        - Issue `#76 CLOSED` (`Merged via PR #80`)
+  - `SCM-250`:
+    - 기존 stacked PR `#79`는 `SCM-249` base branch 삭제 영향으로 `CLOSED` 확인
+    - `feature/scm-250-frontend-e2e-cutover`를 최신 기준 브랜치 위로 rebase
+    - 로컬 검증:
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+    - replacement PR `#81` 생성
+    - GitHub checks PASS:
+      - build / unit-integration / contract / lint-static / security / smoke / migration dry-run / CodeQL
+    - 결과:
+      - `#81 MERGED`
+      - Issue `#78 CLOSED` (`Merged via PR #81`)
+  - 기준 브랜치 통합 검증:
+    - `feature/to-be-dev-env-bootstrap` fast-forward 동기화 완료 (`HEAD=3d7ebbfb5d653a0d7e0cf85df008d9f30de4a0a1`)
+    - 프론트 5게이트 재확인:
+      - `frontend-build` PASS
+      - `frontend-unit-test` PASS
+      - `frontend-contract-test` PASS
+      - `frontend-e2e-smoke` PASS
+      - `frontend-security-scan` PASS
+    - 로컬 통합 웹 기동 확인:
+      - `scripts/frontend-dev.ps1` 첫 실행 실패 원인 진단
+      - 원인: switch 파라미터 `-Install:$Install`를 자식 PowerShell에 그대로 넘겨 타입 변환 오류 발생
+      - 로컬 보정 후 Vite dev server 기동 로그 확인
+      - `http://localhost:5173/` 응답 확인 및 기본 shell(`div#root`, `/src/main.tsx`) 확인
+- 산출물/근거:
+  - PR `#80`, `#81` 체크 결과 및 머지 이력
+  - `frontend/apps/web-portal/src/features/inventory-file-report-panel.tsx`
+  - `frontend/apps/web-portal/src/features/inventory-file-report-panel.test.ts`
+  - `.tmp/frontend-verify/frontend-dev.stdout.log`
+  - `.tmp/frontend-verify/frontend-dev.stderr.log`
+- 결과:
+  - `frontend_process.md` 기준 `SCM-246 ~ SCM-250` 범위는 기준 브랜치에 모두 반영 완료
+  - 최종 프론트 완료 판정:
+    - 기능 MVP 기준: `완료`
+    - 기준 브랜치 통합/게이트 기준: `완료`
+    - 추가 후속 권고: `scripts/frontend-dev.ps1`의 switch 전달 버그는 별도 정리 PR로 반영 필요
