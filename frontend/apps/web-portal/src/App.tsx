@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { describePortalScope } from "@scm-rft/ui";
 import { readContractCatalog } from "@scm-rft/api-client";
 import { AuthMemberPanel } from "./features/auth-member-panel";
+import { BoardQualityDocPanel } from "./features/board-qualitydoc-panel";
 import { OrderLotPanel } from "./features/order-lot-panel";
 
 const TOKEN_STORAGE_KEY = "scm-rft.access-token";
@@ -20,6 +21,8 @@ export default function App() {
   const [currentMemberId, setCurrentMemberId] = useState("");
   const title = formatPortalTitle(describePortalScope("scm-rft"));
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const boardApiBaseUrl = import.meta.env.VITE_BOARD_API_BASE_URL ?? apiBaseUrl;
+  const qualityDocApiBaseUrl = import.meta.env.VITE_QUALITY_DOC_API_BASE_URL ?? apiBaseUrl;
   const orderLotApiBaseUrl = import.meta.env.VITE_ORDER_LOT_API_BASE_URL ?? apiBaseUrl;
 
   useEffect(() => {
@@ -27,6 +30,7 @@ export default function App() {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
       return;
     }
+    setCurrentMemberId("");
     window.localStorage.removeItem(TOKEN_STORAGE_KEY);
   }, [accessToken]);
 
@@ -36,12 +40,14 @@ export default function App() {
         <p className="eyebrow">Frontend Modernization</p>
         <h1>{title}</h1>
         <p className="heroText">
-          The portal now covers Auth and Member flows and extends into the Order-Lot P0 path for
-          order search, lot detail, and guarded status change.
+          The portal now covers Auth, Member, Board, Quality-Doc, and Order-Lot MVP paths so the
+          main P0 workflows can be exercised against the gateway from one surface.
         </p>
         <div className="heroMeta">
           <span>Contracts: {catalog.contracts.length}</span>
           <span>Auth/Member base: {apiBaseUrl || "(same origin)"}</span>
+          <span>Board base: {boardApiBaseUrl || "(same origin)"}</span>
+          <span>Quality-Doc base: {qualityDocApiBaseUrl || "(same origin)"}</span>
           <span>Order-Lot base: {orderLotApiBaseUrl || "(same origin)"}</span>
         </div>
       </header>
@@ -51,6 +57,13 @@ export default function App() {
         accessToken={accessToken}
         onAccessTokenChange={setAccessToken}
         onLoginSuccess={setCurrentMemberId}
+      />
+
+      <BoardQualityDocPanel
+        boardApiBaseUrl={boardApiBaseUrl}
+        qualityDocApiBaseUrl={qualityDocApiBaseUrl}
+        accessToken={accessToken}
+        memberIdHint={currentMemberId}
       />
 
       <OrderLotPanel

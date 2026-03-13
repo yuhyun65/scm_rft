@@ -51,12 +51,83 @@ export type MemberSearchResponse = {
   page: number;
   size: number;
 };
+
 export type PageMeta = {
   page: number;
   size: number;
   totalElements: number;
   totalPages: number;
   hasNext: boolean;
+};
+
+export type AttachmentRef = {
+  fileId: string;
+  fileName?: string;
+};
+
+export type BoardPostSummary = {
+  postId: string;
+  boardType: string;
+  title: string;
+  status: string;
+  createdBy: string;
+  createdAt: string;
+};
+
+export type BoardPostDetail = BoardPostSummary & {
+  content?: string;
+  attachments?: AttachmentRef[];
+};
+
+export type BoardPostSearchResponse = {
+  items: BoardPostSummary[];
+  page: PageMeta;
+};
+
+export type BoardPostCreateRequest = {
+  boardType: string;
+  title: string;
+  content: string;
+  createdBy: string;
+  attachments?: Array<{ fileId: string }>;
+};
+
+export type BoardPostCreateResponse = {
+  postId: string;
+  createdAt: string;
+};
+
+export type QualityDocumentSummary = {
+  documentId: string;
+  title: string;
+  status: string;
+  issuedAt: string;
+};
+
+export type QualityDocumentDetail = QualityDocumentSummary & {
+  contentUrl?: string | null;
+  version?: string | null;
+  requiresAck: boolean;
+};
+
+export type QualityDocumentSearchResponse = {
+  items: QualityDocumentSummary[];
+  page: PageMeta;
+};
+
+export type QualityDocumentAckRequest = {
+  memberId: string;
+  ackType: string;
+  comment?: string;
+};
+
+export type QualityDocumentAckResponse = {
+  documentId: string;
+  memberId: string;
+  ackType: string;
+  acknowledged: boolean;
+  acknowledgedAt: string;
+  duplicateRequest?: boolean;
 };
 
 export type OrderSummary = {
@@ -163,7 +234,7 @@ export class ScmApiClient {
   }
 
   private async request<TResponse>(
-    method: "GET" | "POST",
+    method: "GET" | "POST" | "PUT",
     path: string,
     body?: unknown
   ): Promise<TResponse> {
@@ -247,6 +318,62 @@ export class ScmApiClient {
     return this.request<OrderStatusChangeResponse>(
       "POST",
       `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}/status`,
+      request
+    );
+  }
+
+  searchBoardPosts(params: {
+    boardType?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  }): Promise<BoardPostSearchResponse> {
+    const query = buildQueryString({
+      boardType: params.boardType,
+      keyword: params.keyword,
+      page: params.page,
+      size: params.size
+    });
+    return this.request<BoardPostSearchResponse>("GET", `/api/board/v1/posts${query}`);
+  }
+
+  getBoardPost(postId: string): Promise<BoardPostDetail> {
+    return this.request<BoardPostDetail>("GET", `/api/board/v1/posts/${encodeURIComponent(postId)}`);
+  }
+
+  createBoardPost(request: BoardPostCreateRequest): Promise<BoardPostCreateResponse> {
+    return this.request<BoardPostCreateResponse>("POST", "/api/board/v1/posts", request);
+  }
+
+  searchQualityDocuments(params: {
+    status?: string;
+    keyword?: string;
+    page?: number;
+    size?: number;
+  }): Promise<QualityDocumentSearchResponse> {
+    const query = buildQueryString({
+      status: params.status,
+      keyword: params.keyword,
+      page: params.page,
+      size: params.size
+    });
+    return this.request<QualityDocumentSearchResponse>("GET", `/api/quality-doc/v1/documents${query}`);
+  }
+
+  getQualityDocument(documentId: string): Promise<QualityDocumentDetail> {
+    return this.request<QualityDocumentDetail>(
+      "GET",
+      `/api/quality-doc/v1/documents/${encodeURIComponent(documentId)}`
+    );
+  }
+
+  acknowledgeQualityDocument(
+    documentId: string,
+    request: QualityDocumentAckRequest
+  ): Promise<QualityDocumentAckResponse> {
+    return this.request<QualityDocumentAckResponse>(
+      "PUT",
+      `/api/quality-doc/v1/documents/${encodeURIComponent(documentId)}/ack`,
       request
     );
   }
