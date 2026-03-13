@@ -2885,3 +2885,64 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `SCM-247 Order-Lot P0 UI MVP`가 기준 브랜치에 반영됨
   - `SCM-246`, `SCM-247` 프론트 MVP가 모두 기준 브랜치 기준으로 정리됨
+
+### Q163. SCM-248 Board + Quality-Doc UI MVP 착수 및 실측 검증 완료 (2026-03-13)
+- 사용자 요청:
+  - `SCM-248 Board + Quality-Doc UI MVP` 착수
+  - 프론트 PR 라인 기준으로 `SCM-248 -> SCM-249 -> SCM-250` 순차 진행
+- 수행 내용:
+  - 이슈/브랜치 생성:
+    - Issue `#74` 생성: `[SCM-248] Board + Quality-Doc UI MVP`
+    - 브랜치: `feature/scm-248-board-qualitydoc-ui-mvp`
+  - 구현 범위 고정:
+    - Board: 목록, 상세, 작성
+    - Quality-Doc: 목록, 상세, ACK(idempotent 확인용)
+    - 로그인 사용자 힌트(`memberId`)를 Board `createdBy`, Quality-Doc `memberId` 입력 필드에 자동 추적하되 수동 override는 유지
+  - 프론트 변경:
+    - `frontend/packages/api-client/src/index.ts`
+      - Board/Quality-Doc 타입 추가
+      - `searchBoardPosts`, `getBoardPost`, `createBoardPost`, `searchQualityDocuments`, `getQualityDocument`, `acknowledgeQualityDocument` 추가
+      - 공통 request method에 `PUT` 지원 추가
+    - `frontend/apps/web-portal/src/features/board-qualitydoc-panel.tsx` 추가
+      - Board 검색/상세/작성 UI
+      - Quality-Doc 검색/상세/ACK UI
+      - 첨부 연계는 `fileId` 참조 입력(one UUID per line) 방식으로 모델링
+    - `frontend/apps/web-portal/src/features/board-qualitydoc-panel.test.ts` 추가
+      - tracked field 동기화 로직 테스트
+      - attachment ref 파싱 테스트
+    - `frontend/apps/web-portal/src/App.tsx`
+      - 새 패널 연결
+      - `VITE_BOARD_API_BASE_URL`, `VITE_QUALITY_DOC_API_BASE_URL` 오버라이드 지원
+      - access token clear 시 `currentMemberId`도 같이 reset
+  - 프론트 게이트:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 실제 백엔드/게이트웨이 검증:
+    - 초기 blocker:
+      - `gradlew`가 `nexus.computermate.co.kr` 다운로드를 시도해 `UnknownHostException`
+      - 해결: 로컬 캐시된 `gradle-8.10.2\bin\gradle.bat` 직접 사용
+    - 두 번째 blocker:
+      - `board`, `quality-doc`가 `SCM_FLYWAY_ENABLED=true`일 때 `Unsupported Database: Microsoft SQL Server 16.0`로 기동 실패
+      - 해결: 기존 `MES_HI` 스키마를 사용하므로 로컬 smoke 한정으로 `SCM_FLYWAY_ENABLED=false`로 기동
+    - 최종 상태:
+      - `board` health `UP` (`8083`)
+      - `quality-doc` health `UP` (`8084`)
+      - `gateway` health `UP` (`18080`)
+    - SQL seed + gateway smoke 실행 결과:
+      - login PASS (`memberId=smoke-user`)
+      - board list PASS (`boardListCount=1`)
+      - board detail PASS (`postId=22222222-2222-2222-2222-222222222222`)
+      - board create PASS (`postId=8cd6aad8-fb96-47dc-a9fa-a3ba36657beb`)
+      - quality-doc list PASS (`qualityDocListCount=1`)
+      - quality-doc detail PASS (`documentId=11111111-1111-1111-1111-111111111111`)
+      - quality-doc ack PASS (`acknowledged=true`, `duplicateRequest=true`)
+- 산출물/근거:
+  - `runbooks/evidence/SCM-248-board.stdout.log`
+  - `runbooks/evidence/SCM-248-qualitydoc.stdout.log`
+  - `runbooks/evidence/SCM-248-gateway-smoke-summary.json`
+- 결과:
+  - `SCM-248` UI MVP는 프론트 게이트와 실제 gateway smoke 기준으로 구현 완료
+  - 다음 단계는 `SCM-249 Inventory + File + Report UI` 전용 이슈/브랜치로 진입
