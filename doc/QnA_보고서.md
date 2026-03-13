@@ -3284,3 +3284,28 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - `.env.production` 기준 local production-like rehearsal 1회가 end-to-end PASS로 완료됨
   - 남은 조치는 이번 문서/스크립트/빌드 수정분 커밋 및 원격 푸시뿐임
+
+### Q172. 2026-03-13 작업 종료 조치 및 다음 시작 기준 정리 (2026-03-13)
+- 사용자 요청 맥락:
+  - 오늘 작업 종료에 따라 종료 조치 진행 요청
+- 종료 시점 기준 상태:
+  - 기준 브랜치: `feature/to-be-dev-env-bootstrap`
+  - 최신 반영 커밋: `d16a387` (`ops(prod): finalize prod-like rehearsal package and fixes`)
+  - production-like rehearsal RunId: `SCM-OPS-RH-20260313-174920`
+  - local prod-like rehearsal 결과:
+    - prod secret precheck `PASS`
+    - prod-up `PASS`
+    - rolling restart `PASS`
+    - gateway P0 smoke `PASS`
+    - prod-down `PASS`
+  - 워킹트리:
+    - 추적 변경 없음
+    - 사용자 파일 `doc/frontend_process.md`만 untracked로 유지
+- 종료 조치:
+  - 오늘 리허설 결과 및 운영 준비 상태를 QnA에 기록
+  - 세션 종료 시점에 추가 정리/삭제는 수행하지 않음
+  - `.env.production`은 로컬 전용 파일로 유지하며 커밋하지 않음
+- 다음 시작 기준:
+  1. production-approved gateway policy 기준으로 최종 pre-deploy gate 재실행
+  2. 실제 운영 secret manager 값으로 `.env.production` 재렌더링
+  3. cutover day runbook 기준으로 실제 운영 전환 리허설 또는 배포 진행
