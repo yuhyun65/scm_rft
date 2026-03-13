@@ -28,7 +28,7 @@ export function resolveTrackedValue({
   previousHint
 }: ResolveTrackedValueArgs) {
   if (!nextHint) {
-    return currentValue;
+    return "";
   }
 
   if (!currentValue || currentValue === previousHint) {
