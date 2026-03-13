@@ -2618,3 +2618,90 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 기준 브랜치 `feature/to-be-dev-env-bootstrap` 워킹트리 clean 확인
   - 다음 시작 기준:
     - 차기 세션에서 `SCM-246`부터 재개
+
+### Q157. SCM-246 재개용 환경 준비 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음의 세션을 진행하기 위한 환경을 준비해줘요"
+  - "1.feature/to-be-dev-env-bootstrap 최신 상태에서 시작"
+  - "2.SCM-246(Auth/Member UI MVP)부터 재개"
+- Codex 답변(결과):
+  - 기준 브랜치 확인/동기화:
+    - `feature/to-be-dev-env-bootstrap` 최신 상태 확인 후 시작
+  - 작업 브랜치 준비:
+    - `feature/scm-246-auth-member-ui-mvp` 신규 생성 및 전환
+  - 프론트 개발 환경 정렬:
+    - `scripts/dev-shell.ps1 -InstallFrontend` 실행 성공
+    - toolchain lock 적용 확인(Java 21 / Node 22.20.0 / pnpm 10 / Gradle 8.10.2)
+    - frontend dependencies install 확인
+  - 검증:
+    - `scripts/ci-run-gate.ps1 -Gate frontend-build` PASS
+  - 참고:
+    - 기존 로컬 untracked 파일 `doc/frontend_process.md`는 사용자 작업물로 간주하고 미변경 상태로 유지
+
+### Q158. SCM-246 Auth/Member UI MVP 구현 착수 및 1차 완료 (2026-03-13)
+- 사용자 프롬프트:
+  - "SCM-246(Auth/Member UI MVP) 구현을 시작해줘"
+- Codex 답변(결과):
+  - 프론트 Auth/Member MVP 구현:
+    - `frontend/packages/api-client/src/index.ts`
+      - Auth login/token verify
+      - Member by id/search
+      - backend error payload(`code/message/path/timestamp`) 흡수용 `ApiError`/`formatApiError` 추가
+    - `frontend/apps/web-portal/src/features/auth-member-panel.tsx`
+      - 로그인
+      - 토큰 검증
+      - 회원 단건 조회
+      - 회원 검색
+    - `frontend/apps/web-portal/src/App.tsx`
+      - token localStorage 유지
+      - Auth/Member 패널 연결
+    - `frontend/apps/web-portal/src/styles.css`
+      - Auth/Member MVP 화면 스타일 확장
+    - `frontend/apps/web-portal/src/App.test.ts`
+      - API error 포맷 테스트 추가
+  - 로컬 검증:
+    - `frontend-build` PASS
+    - `frontend-unit-test` PASS
+    - `frontend-contract-test` PASS
+    - `frontend-e2e-smoke` PASS
+    - `frontend-security-scan` PASS
+  - 참고:
+    - 기존 untracked `doc/frontend_process.md`는 사용자 작업물로 간주하고 미포함 유지
+
+### Q159. SCM-246 PR 생성 및 실제 백엔드 연동 검증 완료, SCM-247 착수 준비 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음을 진행해줘"
+  - "1.SCM-246 PR 생성과 실제 백엔드 연동 확인"
+  - "2.이어서 SCM-247(Order-Lot P0 UI MVP) 구현 진행"
+- Codex 답변(결과):
+  - GitHub work item 정리:
+    - Issue `#70` 생성: `SCM-246 Auth/Member UI MVP`
+    - Issue `#69` 생성: `SCM-247 Order-Lot P0 UI MVP`
+    - PR `#71` 생성: `feat(scm-246): implement auth/member ui mvp`
+  - 실제 백엔드 연동 검증:
+    - 로컬 SQL 컨테이너 확인:
+      - `scm-stg-sqlserver` on `localhost:11433`
+    - auth/member/gateway 실기동 경로 정리:
+      - auth/member는 SQL Server(`MES_HI`) + JWT secret 환경값으로 로컬 프로세스 기동
+      - gateway는 `infra/gateway/policies/local-auth-member-e2e.yaml` 정책으로 기동
+    - 장애 원인 및 조치:
+      - Gradle wrapper가 `nexus.computermate.co.kr` 재다운로드를 시도해 실패
+      - 로컬 캐시된 `gradle-8.10.2` 바이너리 직접 사용으로 우회
+      - gateway `/actuator/health` 503 원인은 Redis health check 실패였음
+      - `SPRING_DATA_REDIS_PORT=16379`로 맞춰 재기동 후 gateway health `UP` 복구
+    - E2E 검증 실행:
+      - `scripts/smoke-gateway-auth-member-e2e.ps1 -SqlContainerName scm-stg-sqlserver -Database MES_HI -EnvFile .env`
+      - PASS 항목:
+        - auth health `UP`
+        - member health `UP`
+        - gateway health `UP`
+        - smoke seed data upsert 완료
+        - login via gateway 성공
+        - token verify via gateway 성공
+        - member search via gateway 성공(`total=2`)
+        - member by id via gateway 성공
+        - no-token/invalid-token `401` 경계 확인
+    - 로컬 증적 경로:
+      - `runbooks/evidence/SCM-246/`
+  - 다음 단계 준비:
+    - `SCM-247`은 `SCM-246` 변경 위에서 전용 브랜치로 분리 착수 예정
