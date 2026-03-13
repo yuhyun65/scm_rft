@@ -3,6 +3,7 @@ import { describePortalScope } from "@scm-rft/ui";
 import { readContractCatalog } from "@scm-rft/api-client";
 import { AuthMemberPanel } from "./features/auth-member-panel";
 import { BoardQualityDocPanel } from "./features/board-qualitydoc-panel";
+import { CutoverRunnerPanel } from "./features/cutover-runner-panel";
 import { InventoryFileReportPanel } from "./features/inventory-file-report-panel";
 import { OrderLotPanel } from "./features/order-lot-panel";
 
@@ -45,8 +46,8 @@ export default function App() {
         <h1>{title}</h1>
         <p className="heroText">
           The portal now covers Auth, Member, Board, Quality-Doc, Inventory, File, Report, and
-          Order-Lot MVP paths so the main P0 workflows can be exercised against the gateway from
-          one surface.
+          Order-Lot MVP paths, plus an integrated P0 runner so the main gateway workflow can be
+          exercised from one surface.
         </p>
         <div className="heroMeta">
           <span>Contracts: {catalog.contracts.length}</span>
@@ -86,6 +87,12 @@ export default function App() {
         apiBaseUrl={orderLotApiBaseUrl}
         accessToken={accessToken}
         changedByHint={currentMemberId}
+      />
+
+      <CutoverRunnerPanel
+        apiBaseUrl={apiBaseUrl}
+        accessToken={accessToken}
+        memberIdHint={currentMemberId}
       />
     </main>
   );
