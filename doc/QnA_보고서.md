@@ -2618,3 +2618,22 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - 기준 브랜치 `feature/to-be-dev-env-bootstrap` 워킹트리 clean 확인
   - 다음 시작 기준:
     - 차기 세션에서 `SCM-246`부터 재개
+
+### Q157. SCM-246 재개용 환경 준비 (2026-03-13)
+- 사용자 프롬프트:
+  - "다음의 세션을 진행하기 위한 환경을 준비해줘요"
+  - "1.feature/to-be-dev-env-bootstrap 최신 상태에서 시작"
+  - "2.SCM-246(Auth/Member UI MVP)부터 재개"
+- Codex 답변(결과):
+  - 기준 브랜치 확인/동기화:
+    - `feature/to-be-dev-env-bootstrap` 최신 상태 확인 후 시작
+  - 작업 브랜치 준비:
+    - `feature/scm-246-auth-member-ui-mvp` 신규 생성 및 전환
+  - 프론트 개발 환경 정렬:
+    - `scripts/dev-shell.ps1 -InstallFrontend` 실행 성공
+    - toolchain lock 적용 확인(Java 21 / Node 22.20.0 / pnpm 10 / Gradle 8.10.2)
+    - frontend dependencies install 확인
+  - 검증:
+    - `scripts/ci-run-gate.ps1 -Gate frontend-build` PASS
+  - 참고:
+    - 기존 로컬 untracked 파일 `doc/frontend_process.md`는 사용자 작업물로 간주하고 미변경 상태로 유지
