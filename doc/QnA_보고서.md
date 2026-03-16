@@ -3541,3 +3541,129 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - 최신 HEAD 기준 품질/검증 DoD 갭 대부분 해소
   - 남은 핵심 blocker는 `actual cutover topology` 1건으로 압축됨
+
+### Q178. actual cutover topology 리허설 실행용 체크리스트/커맨드/증적 경로 문서 생성 (2026-03-16)
+- 사용자 요청 맥락:
+  - 마지막 남은 blocker(`cutover-isolation.yaml` 기준 actual topology 검증)를 바로 실행할 수 있도록
+    1. 실행 체크리스트
+    2. 필요 커맨드
+    3. 증적 파일 경로
+    를 한 번에 만들기 요청
+- 수행 내용:
+  - 파일 생성: `runbooks/actual-cutover-topology-rehearsal-runbook.md`
+  - 포함 내용:
+    1. 실행 체크리스트
+       - baseline/policy
+       - topology mode 선택(container-network 권장, hosts/DNS 대안)
+       - runtime/rollback
+       - validation 항목
+    2. 필요 커맨드
+       - RunId/evidence root 생성
+       - `.env.production`를 `cutover-isolation.yaml`로 복귀
+       - Mode A container-network 검증 명령
+       - Mode B hosts/DNS 검증 명령
+       - `backup-db`, `migration-dry-run`, `prod-up`, `smoke-test`, `smoke-gateway-p0-e2e`, `prod-down`, `restore-db`
+    3. 증적 파일 경로
+       - mandatory evidence
+       - topology proof evidence
+       - optional decision/rollback notes
+    4. PASS 기준 / 중단 조건 / 최종 판정 규칙
+- 결과:
+  - actual topology 리허설은 더 이상 구두 설명이 아니라 실행형 runbook 기준으로 진행 가능
+  - 남은 최종 blocker는 해당 runbook 기준 actual topology 리허설 1회 PASS임
+
+### Q179. Mode A(container-network) actual topology 검증 실행 결과 및 최종 blocker 확인 (2026-03-16)
+- 사용자 요청 맥락:
+  - 다음 순서 실행 요청
+    1. Mode A(container-network)로 고정
+    2. gateway 포함 8개 서비스를 같은 network에서 name resolution 가능하게 구성
+    3. `.env.production`를 `cutover-isolation.yaml`로 설정
+    4. `migration-dry-run`
+    5. `smoke-test`
+    6. `smoke-gateway-p0-e2e.ps1`
+    7. PASS 시 signoff/QnA/progress 갱신
+- 수행 내용:
+  1. container-network 구성 자산 추가
+     - 파일: `docker-compose.actual-topology.yml`
+     - 내용:
+       - auth/member/board/quality-doc/order-lot/inventory/file/report/gateway 컨테이너 정의
+       - 기존 `docker-compose.yml`의 infra(sqlserver/redis/rabbitmq/observability)와 동일 `scm-net` 사용
+       - gateway는 `GATEWAY_POLICY_PATH=/workspace/infra/gateway/policies/cutover-isolation.yaml`
+       - gateway auth verify URI는 `http://auth:8081/api/auth/v1/tokens/verify`
+       - board file-service base URL은 `http://file:8087`
+       - app services DB URL은 `jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;...`
+       - app container 내 Flyway는 `SCM_FLYWAY_ENABLED=false`로 비활성화
+  2. `.env.production` 운영 정책 복귀
+     - `GATEWAY_POLICY_PATH=infra/gateway/policies/cutover-isolation.yaml`
+  3. bootJar 최신화
+     - `:services:auth:bootJar ... :services:gateway:bootJar` 재확인 PASS
+  4. actual topology 기동
+     - RunId: `SCM-ACTUAL-TOPOLOGY-20260316-142220`
+     - `docker compose -f docker-compose.yml -f docker-compose.actual-topology.yml up -d` PASS
+  5. topology 증빙
+     - `gateway-name-resolution.log` PASS
+     - gateway 내부에서 `auth/member/board/quality-doc/order-lot/inventory/file/report/sqlserver/redis/rabbitmq` 이름 해석 성공
+     - `gateway-auth-health.log`, `gateway-member-health.log`, `gateway-orderlot-health.log` PASS
+  6. validation 실행
+     - `migration-dry-run` PASS
+     - `smoke-test` PASS
+     - `smoke-gateway-p0-e2e.ps1` 실행
+  7. 결과
+     - P0는 `order-lot` 상태 변경 시점에서 `HTTP 503`으로 실패
+     - 직접 원인:
+       - `infra/gateway/policies/cutover-isolation.yaml`
+       - `cutoverSwitches.blockLegacyWrites: true`
+       - `order-lot.writeProtection.enabledDuringCutover: true`
+       - blocked methods: `POST, PUT, PATCH, DELETE`
+     - 즉, 남은 문제는 topology가 아니라 정책 설계
+  8. 종료 정리
+     - `decision-summary.md` 생성
+     - actual topology runtime down 완료
+- 결과:
+  - actual topology blocker 중 `service discovery / network alignment`는 해소됨
+  - 최신 남은 최종 blocker는 `cutover-isolation.yaml`이 P0 write를 막는 정책 설계 1건
+  - 따라서 이번 실행은 `PARTIAL PASS / FINAL NO-GO FOR FULL P0`
+  - signoff/progress는 PASS 조건 미충족으로 미갱신 유지
+
+## Q180. post-cutover-write-open 정책 추가 + actual topology 최종 리허설 재실행 (2026-03-16)
+- 요청:
+  - `post-cutover-write-open.yaml` 생성
+  - actual topology runbook 갱신
+  - `cutover-isolation -> post-cutover-write-open` 2단계 정책 전환으로 container-network actual topology 재실행
+- 수행:
+  1. 정책 파일 추가
+     - 파일: `infra/gateway/policies/post-cutover-write-open.yaml`
+     - 기준: `cutover-isolation.yaml` 복사 후
+       - `name: post-cutover-write-open`
+       - `cutoverSwitches.blockLegacyWrites: false`
+     - 나머지 timeout/retry/circuit-breaker/rate-limit/write method 정책은 유지
+  2. actual topology 오버레이 보강
+     - 파일: `docker-compose.actual-topology.yml`
+     - gateway `GATEWAY_POLICY_PATH`를 `/workspace/${GATEWAY_POLICY_PATH}`로 변경하여 `.env.production` 정책 전환 반영 가능하게 수정
+  3. runbook 갱신
+     - 파일: `runbooks/actual-cutover-topology-rehearsal-runbook.md`
+     - Phase A(`cutover-isolation`) + Phase B(`post-cutover-write-open`) 2단계 절차 반영
+     - service discovery 검증을 서비스별 `docker exec gateway getent hosts <service>`로 수정
+     - gateway 재기동 후 readiness wait 단계 반영
+  4. actual topology 재실행
+     - RunId: `SCM-ACTUAL-TOPOLOGY-20260316-145704`
+     - topology: `Mode A / container-network`
+     - Phase A: `migration-dry-run` PASS, `smoke-test` PASS
+     - Phase B: gateway-only restart 후 `smoke-gateway-p0-e2e.ps1` PASS
+     - 핵심 PASS:
+       - `P0-F01 login/member`
+       - `P0-F02 order-lot read/write`
+       - `P0-F03 file`
+       - `P0-F04 board`
+       - `P0-F05 quality-doc`
+       - `P0-F06 inventory`
+       - `P0-F07 report`
+  5. 증적
+     - `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/decision-summary.md`
+     - `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/smoke-gateway-p0-e2e.log`
+     - `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/gate-migration-dry-run.log`
+     - `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/gate-smoke-test.log`
+- 결과:
+  - 기존 남은 최종 blocker였던 `actual production-topology validation` 해소
+  - 현재 기준 DoD blocker 0건
+  - `go-nogo-signoff.md`, `progress.json` 최신 증적으로 동기화

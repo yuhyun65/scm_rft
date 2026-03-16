@@ -1,0 +1,176 @@
+﻿policyVersion: 1
+name: post-cutover-write-open
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 2
+    backoffMs: 200
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: true
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://auth:8081
+    authRequired: false
+    requestTimeoutMs: 3000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 100
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 40
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 120
+
+  - id: member
+    path: /api/member/**
+    target: http://member:8082
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 100
+
+  - id: file
+    path: /api/file/**
+    target: http://file:8087
+    authRequired: true
+    requestTimeoutMs: 8000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 60
+
+  - id: inventory
+    path: /api/inventory/**
+    target: http://inventory:8086
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 90
+
+  - id: report
+    path: /api/report/**
+    target: http://report:8088
+    authRequired: true
+    requestTimeoutMs: 12000
+    retry:
+      enabled: false
+      attempts: 0
+      backoffMs: 0
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 30
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 40
+
+  - id: order-lot
+    path: /api/order-lot/**
+    target: http://order-lot:8085
+    authRequired: true
+    writeProtection:
+      enabledDuringCutover: true
+      methods: [POST, PUT, PATCH, DELETE]
+    methodPolicies:
+      - id: read
+        methods: [GET]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: true
+          attempts: 1
+          backoffMs: 150
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 30
+          slowCallRateThreshold: 50
+          waitDurationInOpenStateMs: 10000
+        rateLimitRps: 70
+      - id: write
+        methods: [POST, PUT, PATCH, DELETE]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: false
+          attempts: 0
+          backoffMs: 0
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 30
+          slowCallRateThreshold: 50
+          waitDurationInOpenStateMs: 10000
+        rateLimitRps: 30
+
+  - id: board
+    path: /api/board/**
+    target: http://board:8083
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 70
+
+  - id: quality-doc
+    path: /api/quality-doc/**
+    target: http://quality-doc:8084
+    authRequired: true
+    requestTimeoutMs: 6000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 40
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 60
+
+cutoverSwitches:
+  blockLegacyWrites: false
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: true
+    httpStatus: 503
+

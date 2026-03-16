@@ -1,0 +1,180 @@
+﻿services:
+  auth:
+    image: eclipse-temurin:21-jre
+    container_name: auth
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./services/auth/build/libs/auth-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  member:
+    image: eclipse-temurin:21-jre
+    container_name: member
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./services/member/build/libs/member-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  board:
+    image: eclipse-temurin:21-jre
+    container_name: board
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+      BOARD_FILE_SERVICE_BASE_URL: http://file:8087
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./services/board/build/libs/board-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+      - file
+    networks:
+      - scm-net
+
+  quality-doc:
+    image: eclipse-temurin:21-jre
+    container_name: quality-doc
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./services/quality-doc/build/libs/quality-doc-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  order-lot:
+    image: eclipse-temurin:21-jre
+    container_name: order-lot
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./services/order-lot/build/libs/order-lot-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  inventory:
+    image: eclipse-temurin:21-jre
+    container_name: inventory
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./services/inventory/build/libs/inventory-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  file:
+    image: eclipse-temurin:21-jre
+    container_name: file
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8087:8087"
+    volumes:
+      - ./services/file/build/libs/file-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  report:
+    image: eclipse-temurin:21-jre
+    container_name: report
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      SCM_DB_URL: jdbc:sqlserver://sqlserver:1433;databaseName=SCM_RFT_PRODLIKE;encrypt=true;trustServerCertificate=true
+      SCM_FLYWAY_ENABLED: "false"
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./services/report/build/libs/report-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+    depends_on:
+      - sqlserver
+    networks:
+      - scm-net
+
+  gateway:
+    image: eclipse-temurin:21-jre
+    container_name: gateway
+    command: ["java", "-jar", "/app/service.jar", "--spring.profiles.active=prod"]
+    env_file:
+      - .env.production
+    environment:
+      GATEWAY_POLICY_PATH: /workspace/${GATEWAY_POLICY_PATH}
+      GATEWAY_AUTH_VERIFY_URI: http://auth:8081/api/auth/v1/tokens/verify
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "18080:18080"
+    volumes:
+      - ./services/gateway/build/libs/gateway-0.1.0-SNAPSHOT.jar:/app/service.jar:ro
+      - ./infra/gateway/policies:/workspace/infra/gateway/policies:ro
+    depends_on:
+      - auth
+      - member
+      - board
+      - quality-doc
+      - order-lot
+      - inventory
+      - file
+      - report
+      - redis
+    networks:
+      - scm-net
+
+networks:
+  scm-net:
+    external: false
+

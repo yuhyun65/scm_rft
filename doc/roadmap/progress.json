@@ -1,58 +1,112 @@
-{
-  "updated_at": "2026-03-16T12:05:00",
-  "phases": [
-    {
-      "id": "phase-1",
-      "title": "Repository foundation, templates, CI gates",
-      "status": "completed",
-      "items": [
-        { "name": "PR template and policy workflow", "done": true },
-        { "name": "CI gate workflow", "done": true },
-        { "name": "CI external dependency stabilization (SCM-244)", "done": true },
-        { "name": "toolchain lock and bootstrap scripts", "done": true },
-        { "name": "agentic framework baseline", "done": true }
-      ]
-    },
-    {
-      "id": "phase-2",
-      "title": "Auth/Member + Gateway first",
-      "status": "completed",
-      "items": [
-        { "name": "p0 scenarios and architecture lock", "done": true },
-        { "name": "auth/member OpenAPI and ADR", "done": true },
-        { "name": "gateway route policy baseline", "done": true },
-        { "name": "contract and smoke pass", "done": true }
-      ]
-    },
-    {
-      "id": "phase-3",
-      "title": "OrderLot + File core domain",
-      "status": "completed",
-      "items": [
-        { "name": "order-lot/file OpenAPI and ADR", "done": true },
-        { "name": "critical flow smoke scenarios", "done": true },
-        { "name": "migration mapping and report", "done": true }
-      ]
-    },
-    {
-      "id": "phase-4",
-      "title": "Board/QualityDoc/Inventory/Report integration",
-      "status": "completed",
-      "items": [
-        { "name": "remaining domain contracts", "done": true },
-        { "name": "integration tests", "done": true },
-        { "name": "security/test report update", "done": true }
-      ]
-    },
-    {
-      "id": "phase-5",
-      "title": "Rehearsal x3 and Big-Bang cutover",
-      "status": "completed",
-      "items": [
-        { "name": "3 rehearsal runs completed", "done": true },
-        { "name": "validation mismatch zero critical", "done": true },
-        { "name": "Go/No-Go checklist signed", "done": true }
-      ]
-    }
-  ]
+﻿{
+    "updated_at":  "2026-03-16T14:57:04",
+    "phases":  [
+                   {
+                       "id":  "phase-1",
+                       "title":  "Repository foundation, templates, CI gates",
+                       "status":  "completed",
+                       "items":  [
+                                     {
+                                         "name":  "PR template and policy workflow",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "CI gate workflow",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "CI external dependency stabilization (SCM-244)",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "toolchain lock and bootstrap scripts",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "agentic framework baseline",
+                                         "done":  true
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-2",
+                       "title":  "Auth/Member + Gateway first",
+                       "status":  "completed",
+                       "items":  [
+                                     {
+                                         "name":  "p0 scenarios and architecture lock",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "auth/member OpenAPI and ADR",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "gateway route policy baseline",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "contract and smoke pass",
+                                         "done":  true
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-3",
+                       "title":  "OrderLot + File core domain",
+                       "status":  "completed",
+                       "items":  [
+                                     {
+                                         "name":  "order-lot/file OpenAPI and ADR",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "critical flow smoke scenarios",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "migration mapping and report",
+                                         "done":  true
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-4",
+                       "title":  "Board/QualityDoc/Inventory/Report integration",
+                       "status":  "completed",
+                       "items":  [
+                                     {
+                                         "name":  "remaining domain contracts",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "integration tests",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "security/test report update",
+                                         "done":  true
+                                     }
+                                 ]
+                   },
+                   {
+                       "id":  "phase-5",
+                       "title":  "Rehearsal x3 and Big-Bang cutover",
+                       "status":  "completed",
+                       "items":  [
+                                     {
+                                         "name":  "3 rehearsal runs completed",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "validation mismatch zero critical",
+                                         "done":  true
+                                     },
+                                     {
+                                         "name":  "Go/No-Go checklist signed",
+                                         "done":  true
+                                     }
+                                 ]
+                   }
+               ]
 }

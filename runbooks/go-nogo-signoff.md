@@ -1,4 +1,4 @@
-# SCM-214 Go/No-Go Sign-off (R1~R3)
+﻿# SCM-214 Go/No-Go Sign-off (R1~R3)
 
 ## 1) Run Meta
 - RunSet: `SCM-225-20260305-R1`, `SCM-225-20260305-R2`, `SCM-225-20260305-R3`
@@ -140,3 +140,24 @@ Note: health probe result in each summary depends on service runtime state at me
 ### Remaining Open Gap
 - This supplemental PASS does not replace actual production-topology validation.
 - `infra/gateway/policies/cutover-isolation.yaml` still needs one final validation run in the real cutover topology (container-network or production-equivalent name resolution).
+
+## 10) Actual Cutover Topology Validation (2026-03-16)
+
+### Actual Topology Inputs
+- Base SHA: `6d5c3dc23c4c7c7a6552d6bfe8a5872ffe90ef26`
+- Evidence root: `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/`
+- Phase A policy: `infra/gateway/policies/cutover-isolation.yaml`
+- Phase B policy: `infra/gateway/policies/post-cutover-write-open.yaml`
+- Topology mode: `container-network`
+
+### Actual Topology Result
+- `migration-dry-run`: PASS
+- `smoke-test`: PASS
+- `smoke-gateway-p0-e2e.ps1`: PASS
+- gateway policy switch (`freeze -> write-open`) with gateway-only restart: PASS
+- P0 write-open validation (`order-lot` status change 포함): PASS
+
+### DoD Impact
+- The remaining open gap from section 9 is closed.
+- `cutover-isolation.yaml` + actual container-network topology validation is complete.
+- Final current state: `GO (actual production-topology validation completed)`
