@@ -3948,3 +3948,27 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 로컬 actual-topology 및 infra 컨테이너 정리 완료
   - 증적: `runbooks/evidence/CLEANUP-20260316-172852/actual-topology-down.log`
   - 증적: `runbooks/evidence/CLEANUP-20260316-172852/infra-down.log`
+
+## Q197. 데모 전용 seed 스크립트 추가 및 사용자 시연 데이터 확장 (2026-03-16)
+- 요청:
+  1. 최소 데모용 가상 데이터 생성은 가능
+  2. 사용자 시연 품질을 높이려면 demo 전용 seed 스크립트를 추가
+- 수행:
+  1. `scripts/seed-demo-data.ps1` 추가
+  2. smoke/P0 계정 호환성을 유지하면서 members/orders/order_lots/board_posts/quality_documents/inventory/upload_files/report_jobs를 데모용 카탈로그로 확장
+  3. 실행 후 `runbooks/evidence/DEMO-SEED-<timestamp>/demo-seed-summary.md`를 생성하도록 구성
+  4. `runbooks/demo-data-runbook.md`, `runbooks/user-demo-runbook.md`, `runbooks/browser-click-test-checklist.md`를 데모 seed 흐름 기준으로 갱신
+- 결과:
+  - 최소 데모 데이터뿐 아니라 브라우저 시연에 충분한 검색/상세/상태 분포를 가진 demo 전용 seed 흐름이 준비됨
+
+## Q198. demo 전용 seed 스크립트 실제 실행 검증 (2026-03-16)
+- 요청:
+  - demo 전용 seed가 실제 로컬 SQL Server 컨테이너에서 동작하는지 검증
+- 수행:
+  1. `docker compose --env-file .env.production -f docker-compose.yml up -d sqlserver`로 SQL 컨테이너 실행
+  2. `scripts/seed-demo-data.ps1 -Database "SCM_RFT_PRODLIKE" -SqlContainerName "scm-sqlserver" -EnvFile ".env.production"` 실행
+  3. 초기 실패 원인인 `quality_document_acks.ack_type` 누락을 수정하고 migration 적용 범위를 V1~V7로 보정
+  4. `runbooks/evidence/DEMO-SEED-20260316-175655/demo-seed-summary.md` 생성 확인
+- 결과:
+  - demo 전용 seed 스크립트가 로컬 SQL Server 컨테이너 기준으로 PASS
+  - summary 파일에 데모 계정, 검색 키, 샘플 ID가 정리되어 브라우저 시연에 바로 사용 가능

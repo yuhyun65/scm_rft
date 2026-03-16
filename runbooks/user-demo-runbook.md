@@ -8,6 +8,8 @@
 - Demo accounts:
   - `smoke-user / password`
   - `smoke-admin / password`
+  - `demo-buyer-001 / password`
+  - `demo-quality-001 / password`
 
 ## Demo Mode
 - Read-only demo:
@@ -34,7 +36,20 @@ docker compose --env-file .env.production -f docker-compose.yml up -d sqlserver 
 docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.actual-topology.yml up -d
 ```
 
-## Terminal 1. Seed Demo Data
+## Terminal 1. Seed Rich Demo Data
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\seed-demo-data.ps1 `
+  -Database "SCM_RFT_PRODLIKE" `
+  -SqlContainerName "scm-sqlserver" `
+  -EnvFile ".env.production"
+```
+
+Expected result:
+- a summary file is written to `runbooks/evidence/DEMO-SEED-<timestamp>/demo-seed-summary.md`
+- smoke accounts remain usable
+- demo search/detail results now have enough rows for an actual walkthrough
+
+## Terminal 1. Validate Auth + Member Path
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\smoke-gateway-auth-member-e2e.ps1 `
   -GatewayBaseUrl "http://localhost:18080" `
@@ -43,7 +58,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-gateway-auth-member-e2e
   -GatewayHealthUrl "http://localhost:18080/actuator/health" `
   -Database "SCM_RFT_PRODLIKE" `
   -SqlContainerName "scm-sqlserver" `
-  -EnvFile ".env.production"
+  -EnvFile ".env.production" `
+  -SeedData:$false
 ```
 
 Expected result:
@@ -64,9 +80,21 @@ Expected result:
 
 ## Browser Open
 - Open `http://localhost:5173`
-- Login with:
+- Login with one of:
   - `smoke-user / password`
-  - or `smoke-admin / password`
+  - `smoke-admin / password`
+  - `demo-buyer-001 / password`
+  - `demo-quality-001 / password`
+
+## Suggested Walkthrough Inputs
+- Member keyword: `demo`
+- Order detail ID: `DEMO-ORDER-1002`
+- Lot detail ID: `DEMO-LOT-1002-A`
+- Board keyword: `Demo`
+- Quality-doc keyword: `Demo`
+- Inventory item: `ITEM-001`, warehouse: `WH-01`
+- File detail ID: `44444444-4444-4444-4444-000000000003`
+- Report job detail ID: `77777777-7777-7777-7777-000000000001`
 
 ## Demo Flow Order
 1. Auth + Member
