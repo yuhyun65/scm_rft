@@ -3992,3 +3992,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - runbooks/evidence/BROWSER-DEMO-20260316-180520/browser-demo-summary.md
   - runbooks/evidence/BROWSER-DEMO-20260316-180520/browser-screenshot.png
   - runbooks/evidence/BROWSER-DEMO-20260316-180520/proxy-login-response.json
+
+## Q200. 2026-03-16 작업 종료 정리 (2026-03-16)
+- 요청:
+  - 오늘은 여기까지 진행하고 종료. 모든 세션 종료를 위한 정리와 다음 턴 제안 요청.
+- 수행:
+  1. docker compose down으로 actual-topology 및 infra 컨테이너 전체 종료
+  2. 포트 5173 Vite dev server(node) 종료
+  3. docker ps 결과 0건 확인
+  4. 데모 포트(5173, 18080, 8081~8088) 리스너 0건 확인
+  5. 워킹트리는 사용자 파일 doc/frontend_process.md untracked 1건만 남김
+- 결과:
+  - 오늘 로컬 데모/통합테스트용 세션 정리 완료
+  - 다음 턴은 clean한 로컬 런타임 상태에서 재시작 가능
