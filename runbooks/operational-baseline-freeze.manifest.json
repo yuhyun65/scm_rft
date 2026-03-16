@@ -1,38 +1,49 @@
 ﻿{
-    "freeze_id":  "OPS-FREEZE-20260313-R1",
-    "effective_at":  "2026-03-13 16:40:00 +09:00",
+    "freeze_id":  "OPS-FREEZE-20260316-R2",
+    "effective_at":  "2026-03-16 15:10:00 +09:00",
     "baseline_branch":  "feature/to-be-dev-env-bootstrap",
-    "runtime_commit":  "f6528a5c3379c696169fcea64458398f230e1acd",
-    "documentation_commit":  "4a012b67150d579c5dbb0bb784433d3105332778",
-    "release_candidate_tag":  "v2026.03.13-scm-rft-operational-rc1",
+    "baseline_commit":  "e464c20",
+    "release_tag":  "v2026.03.16-scm-rft-operational-go",
     "files":  [
                   {
                       "path":  "runbooks/release-note.md",
-                      "sha256":  "7ee6bb8ed0fc793bf433165ec1b9dc0d84830c0cfa6edf94962b3bdb2024d57d"
+                      "sha256":  "b2b7e4c74399e53e847311cdcf18e6d9a8ed93f208f09ccc7bba4b96efc74413"
                   },
                   {
                       "path":  "runbooks/go-nogo-signoff.md",
-                      "sha256":  "e443fb8f31abb39748aaeb05ff30afa43f8f2ed1de07023038b41bd211fc2d4a"
+                      "sha256":  "aac2826d806087d12882439e2c3adc99fba078231e600ced0eaaaa24f0036322"
                   },
                   {
                       "path":  "runbooks/prod-deploy-orchestration-runbook.md",
                       "sha256":  "d241c550e0cf3387e51fb1f4db72e526024f5615d4c8c0a075f612294e54f7dc"
                   },
                   {
-                      "path":  "runbooks/cutover-operations-runbook.md",
-                      "sha256":  "96bb4b71cd30c2311373c6d1a477f6021c684bf18b7ab37d355e73250aa4ded8"
+                      "path":  "runbooks/cutover-day-runbook.md",
+                      "sha256":  "2052133f1f2f956260819d24ec55783b763f92b4266c4dc616a21bf5090c6675"
                   },
                   {
-                      "path":  "runbooks/cutover-checklist.md",
-                      "sha256":  "8ea22f265d1d1e671770410ba5f5f0b18468f6f58669b5648ad085e173235b36"
+                      "path":  "runbooks/production-cutover-execution-checklist.md",
+                      "sha256":  "68e8200134dc6538c86a07848bfded5464ac0415dc9be4a137836363765e3827"
                   },
                   {
-                      "path":  "runbooks/cutover-document-freeze.md",
-                      "sha256":  "2e172aaf8449fe8994c3a9fd154db644bd62de0f5610c2ec8f87477f610f84ea"
+                      "path":  "runbooks/actual-cutover-topology-rehearsal-runbook.md",
+                      "sha256":  "ea1f95e36ef6a120a37b7344c4a6df654ed663e4ee823f12845a95f7fb3d6c13"
+                  },
+                  {
+                      "path":  "docker-compose.actual-topology.yml",
+                      "sha256":  "7a1a47fc4ab8b2206fe0aca89b4f0ff735cd4bbe209cdf20aa68db3f41bb96ff"
+                  },
+                  {
+                      "path":  "infra/gateway/policies/cutover-isolation.yaml",
+                      "sha256":  "119f63f9d8aa666206d26626114683b42192a02f0cfd33c9c1764d24f9cde5cd"
+                  },
+                  {
+                      "path":  "infra/gateway/policies/post-cutover-write-open.yaml",
+                      "sha256":  "814de4582969e40616068652f30ed05dd91325016642fce277f47c1e7bf573aa"
                   },
                   {
                       "path":  "doc/roadmap/progress.json",
-                      "sha256":  "66737d5c087a2557559a0b0c5283148bc9b49d4d1ceece48282bf080466c892d"
+                      "sha256":  "1ada44d1596c20c1123718ba7065a5d873ce391744d31bb7988d0b4cf448d4df"
                   }
               ]
 }

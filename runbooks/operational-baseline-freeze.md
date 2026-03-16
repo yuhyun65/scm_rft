@@ -1,41 +1,47 @@
-﻿# Operational Baseline Freeze
+# Operational Baseline Freeze
 
 ## Freeze Metadata
-- Freeze ID: $freezeId
-- Effective At: $effectiveAt
-- Baseline Branch: $baselineBranch
-- Runtime Commit: $runtimeCommit
-- Documentation Commit: $docCommit
-- Release Candidate Tag: $releaseCandidateTag
+- Freeze ID: `OPS-FREEZE-20260316-R2`
+- Effective At: `2026-03-16 15:10:00 +09:00`
+- Baseline Branch: `feature/to-be-dev-env-bootstrap`
+- Baseline Commit: `e464c20`
+- Release Tag: `v2026.03.16-scm-rft-operational-go`
 
 ## Purpose
-- Freeze the deployable runtime baseline after SCM-251 helper stabilization.
-- Use this baseline as the reference point for production env completion, topology confirmation, cutover day preparation, and hypercare planning.
-- Any runtime code change after this point must go through Issue -> Branch -> PR and trigger a new freeze revision.
-
-## Freeze Scope
-- Runtime baseline is fixed at commit $runtimeCommit.
-- Documentation baseline is fixed at commit $docCommit for current operational evidence and release references.
-- The files below are the minimum frozen artifacts that define release, cutover, signoff, and progress status.
+- Freeze the final operational baseline after actual production-topology validation.
+- Use this baseline for production secret rendering, cutover execution, and hypercare.
+- Any runtime or gateway policy change after this point requires a new Issue -> Branch -> PR -> tag.
 
 ## Frozen Files (SHA256)
 | File | SHA256 |
 |---|---|
-| runbooks/release-note.md | 7ee6bb8ed0fc793bf433165ec1b9dc0d84830c0cfa6edf94962b3bdb2024d57d |
-| runbooks/go-nogo-signoff.md | e443fb8f31abb39748aaeb05ff30afa43f8f2ed1de07023038b41bd211fc2d4a |
-| runbooks/prod-deploy-orchestration-runbook.md | d241c550e0cf3387e51fb1f4db72e526024f5615d4c8c0a075f612294e54f7dc |
-| runbooks/cutover-operations-runbook.md | 96bb4b71cd30c2311373c6d1a477f6021c684bf18b7ab37d355e73250aa4ded8 |
-| runbooks/cutover-checklist.md | 8ea22f265d1d1e671770410ba5f5f0b18468f6f58669b5648ad085e173235b36 |
-| runbooks/cutover-document-freeze.md | 2e172aaf8449fe8994c3a9fd154db644bd62de0f5610c2ec8f87477f610f84ea |
-| doc/roadmap/progress.json | 66737d5c087a2557559a0b0c5283148bc9b49d4d1ceece48282bf080466c892d |
+| runbooks/release-note.md | _see manifest_ |
+| runbooks/go-nogo-signoff.md | _see manifest_ |
+| runbooks/prod-deploy-orchestration-runbook.md | _see manifest_ |
+| runbooks/cutover-day-runbook.md | _see manifest_ |
+| runbooks/production-cutover-execution-checklist.md | _see manifest_ |
+| runbooks/actual-cutover-topology-rehearsal-runbook.md | _see manifest_ |
+| docker-compose.actual-topology.yml | _see manifest_ |
+| infra/gateway/policies/cutover-isolation.yaml | _see manifest_ |
+| infra/gateway/policies/post-cutover-write-open.yaml | _see manifest_ |
+| doc/roadmap/progress.json | _see manifest_ |
+
+Reference: `runbooks/operational-baseline-freeze.manifest.json`
 
 ## Decision Rules
-1. Runtime changes after this freeze require a new RC tag and freeze revision.
-2. Documentation-only updates are allowed if they do not alter runtime behavior, but they must be recorded in doc/QnA_보고서.md.
-3. Production execution must use this runtime commit unless a new freeze supersedes it.
+1. Runtime changes after this freeze require a new release tag and freeze revision.
+2. Documentation-only updates are allowed only if they do not change runtime behavior and are logged in `doc/QnA_보고서.md`.
+3. Production execution must use baseline commit `e464c20` or a superseding approved freeze.
+
+## Validation Baseline
+- Actual topology evidence root: `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/`
+- `migration-dry-run`: PASS
+- `smoke-test`: PASS
+- `smoke-gateway-p0-e2e.ps1`: PASS
+- Current DoD blockers: `0`
 
 ## Immediate Next Actions
-1. Finalize production env/secrets inventory.
-2. Finalize production topology and ownership.
-3. Write cutover day execution timeline.
-4. Execute one production-like rehearsal package against this baseline.
+1. Render `.env.production` from the approved secret manager values on the target runtime.
+2. Execute final production cutover by `runbooks/cutover-day-runbook.md`.
+3. Start hypercare monitoring by `runbooks/hypercare-rollback-monitoring-checklist.md`.
+﻿

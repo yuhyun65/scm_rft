@@ -3667,3 +3667,24 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 기존 남은 최종 blocker였던 `actual production-topology validation` 해소
   - 현재 기준 DoD blocker 0건
   - `go-nogo-signoff.md`, `progress.json` 최신 증적으로 동기화
+
+## Q181. 최종 운영 전환 기준선 태그/배포 문서 고정 (2026-03-16)
+- 요청:
+  - 이번 변경분 커밋/푸시
+  - 운영 전환 기준선 최종 태그/배포 문서 고정
+- 수행:
+  1. runtime baseline 커밋 생성
+     - 커밋: e464c20
+     - 메시지: ops(cutover): validate actual topology with post-cutover policy
+  2. 최종 운영 태그 기준 결정
+     - 태그명: 2026.03.16-scm-rft-operational-go
+     - 기준 commit: e464c20
+  3. 배포 문서 고정
+     - unbooks/release-note.md 갱신
+     - unbooks/operational-baseline-freeze.md / .manifest.json 갱신
+  4. 기준 증적 연결
+     - unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/decision-summary.md
+     - unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/smoke-gateway-p0-e2e.log
+- 결과:
+  - actual-topology PASS 기준의 최종 운영 전환 baseline 문서화 완료
+  - release tag와 operational freeze manifest가 같은 baseline commit(e464c20)를 참조하도록 정리
