@@ -112,3 +112,31 @@ Note: health probe result in each summary depends on service runtime state at me
 | Codex (Validation) | Codex | 2026-03-11 16:35:00 | GO | `runbooks/evidence/SCM-237-20260311-R4/scm237-rehearsal-summary.md` |
 | Ops Owner | CMN-091 | 2026-03-11 16:35:00 | GO | `migration/reports/SCM-236-20260310-R4-measured.md` |
 | QA/Business Owner | CMN-091 | 2026-03-11 16:35:00 | GO | `runbooks/cutover-document-freeze.manifest.json` |
+
+## 9) Supplemental Current-HEAD Validation (2026-03-16)
+
+### Supplemental Inputs
+- Base SHA: `6d5c3dc23c4c7c7a6552d6bfe8a5872ffe90ef26`
+- Evidence root: `runbooks/evidence/SCM-FINAL-PREDEPLOY-20260316-115844/`
+- Policy mode: `infra/gateway/policies/cutover-isolation-localhost.yaml` (host-process pre-deploy only)
+
+### Supplemental Result
+- Final pre-deploy 13-gate sequence: PASS
+- Confirmed gates:
+  - `check-prod-secrets`
+  - `build`
+  - `unit-integration-test`
+  - `contract-test`
+  - `lint-static-analysis`
+  - `security-scan`
+  - `migration-dry-run`
+  - `frontend-build`
+  - `frontend-unit-test`
+  - `frontend-contract-test`
+  - `frontend-e2e-smoke`
+  - `frontend-security-scan`
+  - `smoke-test`
+
+### Remaining Open Gap
+- This supplemental PASS does not replace actual production-topology validation.
+- `infra/gateway/policies/cutover-isolation.yaml` still needs one final validation run in the real cutover topology (container-network or production-equivalent name resolution).

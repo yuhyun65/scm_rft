@@ -3488,3 +3488,56 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - localhost pre-deploy 정책 기준 gateway auth/member smoke blocker 해소
   - 최종 증적 경로: `runbooks/evidence/SCM-PREDEPLOY-20260316-104348/`
   - 다음 단계는 이번 수정분을 커밋/푸시하여 기준 브랜치에 반영하는 것
+
+### Q177. current HEAD 기준 final pre-deploy 13게이트 재증빙 및 남은 운영 갭 정리 (2026-03-16)
+- 사용자 요청 맥락:
+  - `DoD 기준 프로젝트 완료에 어떤 문제가 있는지 진단`
+  - 진단 결과를 닫기 위해 최신 HEAD에서 재증빙 가능한 항목부터 실행 요청
+- 수행 내용:
+  1. 기준선 고정
+     - 브랜치: `feature/to-be-dev-env-bootstrap`
+     - SHA: `6d5c3dc23c4c7c7a6552d6bfe8a5872ffe90ef26`
+     - 워킹트리: 사용자 파일 `doc/frontend_process.md`만 untracked
+  2. final pre-deploy 13게이트 재실행 시도
+     - RunId 1차: `SCM-FINAL-PREDEPLOY-20260316-115536`
+     - 결과:
+       - `security-scan`에서 실패
+       - 원인: `scripts/ci-run-gate.ps1`의 `rg` 보안 스캔이 `.gradle-user` lock 파일까지 스캔하면서 `os error 33` 발생
+  3. 보안 스캔 범위 수정
+     - 파일: `scripts/ci-run-gate.ps1`
+     - 제외 추가:
+       - `.gradle/**`
+       - `.gradle-user/**`
+       - `.tmp/**`
+       - `build/**`
+       - `services/*/build/**`
+       - `services/*/bin/**`
+       - `runbooks/evidence/**`
+  4. fresh RunId로 전체 13게이트 재실행
+     - RunId 2차: `SCM-FINAL-PREDEPLOY-20260316-115844`
+     - 증적 경로: `runbooks/evidence/SCM-FINAL-PREDEPLOY-20260316-115844/`
+     - PASS 항목:
+       - `check-prod-secrets`
+       - `build`
+       - `unit-integration-test`
+       - `contract-test`
+       - `lint-static-analysis`
+       - `security-scan`
+       - `migration-dry-run`
+       - `frontend-build`
+       - `frontend-unit-test`
+       - `frontend-contract-test`
+       - `frontend-e2e-smoke`
+       - `frontend-security-scan`
+       - `smoke-test`
+     - `prod-up`, `prod-down`, `infra-up`, `infra-down`까지 같은 RunId로 종료
+  5. 운영 갭 재판단
+     - 닫힌 갭:
+       - 최신 HEAD 기준 pre-deploy 13게이트 재증빙
+       - gateway rate-limiter 결함 수정 반영
+     - 남은 갭:
+       - `cutover-isolation.yaml` 기준 actual production topology 검증은 아직 미완료
+       - 현재 PASS는 host-process pre-deploy용 `cutover-isolation-localhost.yaml` 기준
+- 결과:
+  - 최신 HEAD 기준 품질/검증 DoD 갭 대부분 해소
+  - 남은 핵심 blocker는 `actual cutover topology` 1건으로 압축됨
