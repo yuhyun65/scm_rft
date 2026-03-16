@@ -81,7 +81,9 @@ if ($Persist) {
 Write-Host "Toolchain applied for current session."
 Write-Host "JAVA_HOME=$env:JAVA_HOME"
 Write-Host "java -version:"
-& (Join-Path $env:JAVA_HOME "bin\\java.exe") -version
+$javaExe = Join-Path $env:JAVA_HOME "bin\\java.exe"
+$javaVersionOutput = cmd /c """$javaExe"" -version 2>&1"
+$javaVersionOutput | ForEach-Object { Write-Host $_ }
 
 if (-not [string]::IsNullOrWhiteSpace([string]$lock.pnpm)) {
   if (Get-Command corepack -ErrorAction SilentlyContinue) {

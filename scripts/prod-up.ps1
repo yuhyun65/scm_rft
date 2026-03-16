@@ -2,6 +2,7 @@ param(
   [string]$RunId = "",
   [string]$EnvFile = ".env.production",
   [int]$StartupTimeoutSec = 300,
+  [int]$DatabaseReadyTimeoutSec = 180,
   [int]$PollIntervalSec = 2,
   [switch]$StopExistingPorts,
   [switch]$BuildIfMissing
@@ -23,6 +24,46 @@ $catalog = Get-ProdServiceCatalog
 $envPath = Join-Path $repoRoot $EnvFile
 $envMap = Parse-EnvFile -EnvFilePath $envPath
 Set-ProcessEnvMap -EnvMap $envMap
+
+function Wait-LocalSqlServerReady {
+  param(
+    [Parameter(Mandatory = $true)][hashtable]$EnvironmentMap,
+    [Parameter(Mandatory = $true)][int]$TimeoutSec
+  )
+
+  $dbUrl = [string]$EnvironmentMap["SCM_DB_URL"]
+  $saPassword = [string]$EnvironmentMap["MSSQL_SA_PASSWORD"]
+  if ([string]::IsNullOrWhiteSpace($dbUrl) -or [string]::IsNullOrWhiteSpace($saPassword)) {
+    return
+  }
+
+  if ($dbUrl -notmatch "jdbc:sqlserver://localhost:1433") {
+    return
+  }
+
+  if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    return
+  }
+
+  $running = @(docker ps --format "{{.Names}}")
+  if ($LASTEXITCODE -ne 0 -or (@($running | Where-Object { $_ -eq "scm-sqlserver" }).Count -eq 0)) {
+    return
+  }
+
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  while ((Get-Date) -lt $deadline) {
+    cmd /c "docker exec scm-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ""$saPassword"" -C -Q ""SELECT 1"" >nul 2>nul"
+    if ($LASTEXITCODE -eq 0) {
+      Write-Host "[OK] local SQL Server readiness check passed."
+      return
+    }
+    Start-Sleep -Seconds 2
+  }
+
+  throw "local SQL Server did not become ready within $TimeoutSec seconds."
+}
+
+Wait-LocalSqlServerReady -EnvironmentMap $envMap -TimeoutSec $DatabaseReadyTimeoutSec
 
 if ($BuildIfMissing) {
   & (Join-Path $repoRoot "gradlew.bat") @(

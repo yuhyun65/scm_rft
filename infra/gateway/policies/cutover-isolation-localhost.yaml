@@ -1,0 +1,181 @@
+policyVersion: 1
+name: cutover-isolation-localhost
+
+# Pre-deploy only:
+# - Keep the exact control values from cutover-isolation.yaml
+# - Replace route targets with localhost host-process endpoints
+# - Do not use this file for actual production cutover
+
+defaults:
+  requestTimeoutMs: 5000
+  connectTimeoutMs: 2000
+  retry:
+    enabled: true
+    attempts: 2
+    backoffMs: 200
+  circuitBreaker:
+    enabled: true
+    failureRateThreshold: 50
+    slowCallRateThreshold: 50
+    waitDurationInOpenStateMs: 10000
+
+trafficControl:
+  globalRateLimit:
+    enabled: true
+    requestsPerSecond: 300
+    burstCapacity: 600
+
+routes:
+  - id: auth
+    path: /api/auth/**
+    target: http://localhost:8081
+    authRequired: false
+    requestTimeoutMs: 3000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 100
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 40
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 120
+
+  - id: member
+    path: /api/member/**
+    target: http://localhost:8082
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 100
+
+  - id: file
+    path: /api/file/**
+    target: http://localhost:8087
+    authRequired: true
+    requestTimeoutMs: 8000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 60
+
+  - id: inventory
+    path: /api/inventory/**
+    target: http://localhost:8086
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 90
+
+  - id: report
+    path: /api/report/**
+    target: http://localhost:8088
+    authRequired: true
+    requestTimeoutMs: 12000
+    retry:
+      enabled: false
+      attempts: 0
+      backoffMs: 0
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 30
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 40
+
+  - id: order-lot
+    path: /api/order-lot/**
+    target: http://localhost:8085
+    authRequired: true
+    writeProtection:
+      enabledDuringCutover: true
+      methods: [POST, PUT, PATCH, DELETE]
+    methodPolicies:
+      - id: read
+        methods: [GET]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: true
+          attempts: 1
+          backoffMs: 150
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 30
+          slowCallRateThreshold: 50
+          waitDurationInOpenStateMs: 10000
+        rateLimitRps: 70
+      - id: write
+        methods: [POST, PUT, PATCH, DELETE]
+        requestTimeoutMs: 10000
+        retry:
+          enabled: false
+          attempts: 0
+          backoffMs: 0
+        circuitBreaker:
+          enabled: true
+          failureRateThreshold: 30
+          slowCallRateThreshold: 50
+          waitDurationInOpenStateMs: 10000
+        rateLimitRps: 30
+
+  - id: board
+    path: /api/board/**
+    target: http://localhost:8083
+    authRequired: true
+    requestTimeoutMs: 5000
+    retry:
+      enabled: true
+      attempts: 2
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 50
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 70
+
+  - id: quality-doc
+    path: /api/quality-doc/**
+    target: http://localhost:8084
+    authRequired: true
+    requestTimeoutMs: 6000
+    retry:
+      enabled: true
+      attempts: 1
+      backoffMs: 200
+    circuitBreaker:
+      enabled: true
+      failureRateThreshold: 40
+      slowCallRateThreshold: 50
+      waitDurationInOpenStateMs: 10000
+    rateLimitRps: 60
+
+cutoverSwitches:
+  blockLegacyWrites: true
+  allowReadOnlyFallback: true
+  emergencyStop:
+    enabled: true
+    httpStatus: 503

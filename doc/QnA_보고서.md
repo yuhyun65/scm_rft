@@ -3309,3 +3309,182 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   1. production-approved gateway policy 기준으로 최종 pre-deploy gate 재실행
   2. 실제 운영 secret manager 값으로 `.env.production` 재렌더링
   3. cutover day runbook 기준으로 실제 운영 전환 리허설 또는 배포 진행
+
+### Q173. 운영 전환 다음 단계 진행을 위한 환경 준비 (2026-03-16)
+- 사용자 요청 맥락:
+  - 다음 3개 실행 항목을 진행하기 위한 환경 준비 요청
+    1. production-approved gateway policy 기준 최종 pre-deploy gate 재실행
+    2. 실제 운영 secret manager 값으로 `.env.production` 재렌더링
+    3. cutover day runbook 기준 실제 운영 전환 리허설 또는 배포 진행
+- 수행 내용:
+  1. 기준 상태 확인
+     - 브랜치: `feature/to-be-dev-env-bootstrap`
+     - 워킹트리: 사용자 파일 `doc/frontend_process.md`만 untracked
+     - 로컬 `.env.production` 존재 확인
+  2. toolchain/prereqs 정렬
+     - `scripts/use-toolchain.ps1` 실행
+     - `scripts/check-prereqs.ps1` 실행
+     - 결과: Java 21 / Node 22 / pnpm 10 / Gradle 8.10.2 / Docker Compose 2.40.3 모두 lock 일치
+  3. Docker 준비
+     - Docker Desktop 기동
+     - `docker info` 재확인
+     - 결과: daemon `UP`
+  4. `.env.production` 검증
+     - `scripts/check-prod-secrets.ps1 -EnvFile .env.production` PASS
+     - `git ls-files .env.production` 결과 없음
+  5. gateway policy 기준 전환
+     - `.env.production`의 `GATEWAY_POLICY_PATH`를
+       `infra/gateway/policies/cutover-isolation.yaml`로 전환
+     - 운영 승인 정책 기준으로 pre-deploy gate를 돌릴 수 있는 상태로 정렬
+  6. pre-deploy 증적 경로 준비
+     - RunId: `SCM-PREDEPLOY-20260316-104348`
+     - 경로: `runbooks/evidence/SCM-PREDEPLOY-20260316-104348`
+     - `.tmp/current-predeploy-runid.txt` 생성
+- 결과:
+  - pre-deploy gate 재실행 전 선행 환경은 모두 준비됨
+  - 남은 실질 작업은
+    1. 실제 운영 secret manager 값으로 `.env.production` 재렌더링
+    2. production-approved policy 기준 final pre-deploy gates 실행
+    3. cutover runbook 기준 리허설 또는 배포 수행
+
+### Q174. `.env.production` 재렌더링 시도 및 final pre-deploy gates 실행 결과 (2026-03-16)
+- 사용자 요청 맥락:
+  - `1. .env.production 실제 운영값 재렌더링`
+  - `2. final pre-deploy gates 실행`
+- 수행 내용:
+  1. secret manager 재렌더링 경로 확인
+     - 저장소 내 secret manager 연계 스크립트/런북 탐색
+     - 로컬 CLI 확인:
+       - `vault` 없음
+       - `op` 없음
+       - `az` 없음
+       - `aws` 없음
+     - 결과:
+       - 현재 세션/저장소 기준으로는 `실제 secret manager에서 값을 pull하여 .env.production 재렌더링`하는 자동 경로가 없음
+       - 따라서 `.env.production`은 기존 로컬 secure copy를 유지한 채 검증만 수행
+  2. pre-deploy gate 실행 기반 보강
+     - `scripts/ci-run-gate.ps1`
+       - Gradle wrapper가 `nexus.computermate.co.kr` DNS 실패 시
+         로컬 `Gradle 8.10.2`로 fallback 하도록 수정
+     - `scripts/prod-up.ps1`
+       - local SQL Server cold start race 완화를 위한 readiness wait 추가
+       - single-object `.Count` 예외 수정
+     - `scripts/use-toolchain.ps1`
+       - `java -version` stderr를 PowerShell 오류로 승격하지 않도록 수정
+  3. final pre-deploy RunId 생성
+     - RunId: `SCM-PREDEPLOY-20260316-104348`
+     - 증적 경로: `runbooks/evidence/SCM-PREDEPLOY-20260316-104348`
+  4. gate 실행 결과
+     - `check-prod-secrets` PASS
+     - `build` PASS (local Gradle fallback 경로)
+     - `unit-integration-test` PASS
+     - `contract-test` PASS
+     - `lint-static-analysis` PASS (local Gradle fallback 경로)
+     - `security-scan` PASS
+     - `migration-dry-run` PASS
+     - `frontend-build` PASS
+     - `frontend-unit-test` PASS
+     - `frontend-contract-test` PASS
+     - `frontend-e2e-smoke` PASS
+     - `frontend-security-scan` PASS
+  5. production-approved policy 기준 smoke-test 시도
+     - `.env.production`의 `GATEWAY_POLICY_PATH`를
+       `infra/gateway/policies/cutover-isolation.yaml`로 전환
+     - infra 기동 + `prod-up` PASS
+     - direct auth login (`http://localhost:8081/api/auth/v1/login`) = `200`
+     - gateway login (`http://localhost:18080/api/auth/v1/login`) = `500`
+     - 원인:
+       - `cutover-isolation.yaml`의 target host가 `http://auth:8081`, `http://member:8082` 등 운영 네트워크 이름
+       - 현재 pre-deploy 실행 형태는 host process 기반(`localhost`)이라 gateway가 해당 hostnames를 해석하지 못함
+       - 즉, 정책 자체의 timeout/retry/cb 값 문제가 아니라 `운영 정책 target 주소와 로컬 실행 토폴로지의 불일치`
+  6. 종료 정리
+     - `scripts/prod-down.ps1 -RunId SCM-PREDEPLOY-20260316-104348` PASS
+     - `docker compose --env-file .env.production -f docker-compose.yml down` 완료
+- 결과:
+  - final pre-deploy gate는 `smoke-test` 1건을 제외하고 모두 PASS
+  - 잔여 blocker는 `production-approved gateway policy`를 현재 host-process pre-deploy 토폴로지에서 그대로 사용할 수 없다는 점
+  - 해결 방향은 2가지로 압축됨:
+    1. gateway가 production policy를 그대로 쓰도록 local hostname mapping 또는 containerized service topology 마련
+    2. production policy와 동일 제어값을 유지하되 local pre-deploy 전용 target(`localhost`) 변형 정책 마련
+
+### Q175. pre-deploy localhost 정책 생성 및 topology 정합화 실행안 작성 (2026-03-16)
+- 사용자 요청 맥락:
+  - 다음 턴 우선순위로 정리한 2개 작업을 순서대로 진행 요청
+    1. `pre-deploy 전용 cutover-isolation-localhost 정책 생성`
+    2. `hosts/container topology 정합화 방법 실행안 작성`
+- 수행 내용:
+  1. pre-deploy 전용 정책 추가
+     - 파일: `infra/gateway/policies/cutover-isolation-localhost.yaml`
+     - 원칙:
+       - `cutover-isolation.yaml`의 제어값(timeout/retry/circuit-breaker/rate-limit/writeProtection) 유지
+       - route `target`만 `localhost` 포트로 치환
+       - 실제 운영 cutover에는 사용하지 않음
+  2. final pre-deploy runbook 보강
+     - 파일: `runbooks/final-predeploy-gates.md`
+     - 추가 내용:
+       - host-process pre-deploy에서는 `cutover-isolation-localhost.yaml` 사용
+       - actual cutover에서는 원래 `cutover-isolation.yaml`로 복귀
+       - `.env.production`의 `GATEWAY_POLICY_PATH` 치환 명령 예시 추가
+  3. topology 정합화 실행안 문서화
+     - 파일: `runbooks/topology-alignment-execution-plan.md`
+     - 포함:
+       - 현재 gap 설명
+       - Option A: hosts-based name alignment
+       - Option B: container/network topology alignment
+       - 권장 순서:
+         - 단기: localhost 전용 pre-deploy 정책 사용
+         - 중기: container/network 기반 정합화
+- 결과:
+  - pre-deploy smoke blocker를 우회하지 않고 구조적으로 분리된 정책으로 다룰 준비가 완료됨
+  - 다음 실질 실행은 `cutover-isolation-localhost.yaml` 기준으로 pre-deploy smoke 재실행임
+
+### Q176. localhost 정책 기준 smoke-test 재실행 PASS 및 gateway rate-limiter 초기화 수정 (2026-03-16)
+- 사용자 요청 맥락:
+  - `1. localhost 정책으로 smoke-test 재실행`
+  - `2. PASS 시 변경분 정리 후 커밋/푸시`
+- 수행 내용:
+  1. gateway `500` 원인 재확인
+     - `runbooks/evidence/SCM-PREDEPLOY-20260316-104348/up-gateway.out.log` 분석
+     - 예외: `IllegalStateException: RedisRateLimiter is not initialized`
+     - 판단:
+       - Java DSL에서 `new RedisRateLimiter(...)`만 호출하고 Spring `ApplicationContext` 초기화를 거치지 않아 발생
+  2. gateway runtime 수정
+     - 파일: `services/gateway/src/main/java/kr/co/computermate/scmrft/gateway/GatewayRouteConfiguration.java`
+     - 수정:
+       - `ApplicationContext`를 주입받아 `buildRedisRateLimiter(...)` helper 추가
+       - helper 내부에서 `RedisRateLimiter#setApplicationContext(...)` 호출 후 route filter에 연결
+  3. 회귀 테스트 추가
+     - 파일: `services/gateway/src/test/java/kr/co/computermate/scmrft/gateway/GatewayRouteConfigurationTests.java`
+     - 검증:
+       - mock `ApplicationContext` + mock Redis beans로 `buildRedisRateLimiter(...).isAllowed(...)` 성공 확인
+       - 실행: `:services:gateway:test --tests kr.co.computermate.scmrft.gateway.GatewayRouteConfigurationTests` PASS
+  4. pre-deploy smoke 재실행 준비
+     - `infra/gateway/policies/cutover-isolation-localhost.yaml` 유지
+     - `scripts/prod-up.ps1`는 기본으로 재빌드하지 않으므로 gateway `bootJar`를 명시적으로 재생성
+     - 실행: `:services:gateway:bootJar` PASS
+  5. prod-like 재기동 및 smoke 재실행
+     - infra 재기동: `docker compose --env-file .env.production -f docker-compose.yml up -d ...`
+     - app 재기동: `scripts/prod-up.ps1 -RunId SCM-PREDEPLOY-20260316-104348 -EnvFile .env.production`
+     - smoke 실행:
+       - `SCM_ENABLE_GATEWAY_E2E_SMOKE=1`
+       - `SCM_SQL_CONTAINER_NAME=scm-sqlserver`
+       - `SCM_ENV_FILE=.env.production`
+       - `SCM_DB_NAME=SCM_RFT_PRODLIKE`
+       - `scripts/ci-run-gate.ps1 -Gate smoke-test`
+  6. 실행 결과
+     - `smoke-test` PASS
+     - 세부 PASS:
+       - `login pre-warm request completed`
+       - `login via gateway succeeded`
+       - `token verify via gateway succeeded`
+       - `member search via gateway succeeded`
+       - `member by id via gateway succeeded`
+       - `member search without token: HTTP 401`
+       - `member search with invalid token: HTTP 401`
+  7. 종료 정리
+     - `scripts/prod-down.ps1 -RunId SCM-PREDEPLOY-20260316-104348` PASS
+     - `docker compose --env-file .env.production -f docker-compose.yml down` 완료
+- 결과:
+  - localhost pre-deploy 정책 기준 gateway auth/member smoke blocker 해소
+  - 최종 증적 경로: `runbooks/evidence/SCM-PREDEPLOY-20260316-104348/`
+  - 다음 단계는 이번 수정분을 커밋/푸시하여 기준 브랜치에 반영하는 것

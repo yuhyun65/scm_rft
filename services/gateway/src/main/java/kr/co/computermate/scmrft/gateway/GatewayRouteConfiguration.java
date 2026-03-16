@@ -20,6 +20,7 @@ import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,7 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class GatewayRouteConfiguration {
   private static final Logger log = LoggerFactory.getLogger(GatewayRouteConfiguration.class);
+
   @Bean
   public GatewayPolicyDocument gatewayPolicy(GatewayPolicyLoader loader) {
     return loader.load();
@@ -56,7 +58,8 @@ public class GatewayRouteConfiguration {
       GatewayPolicyDocument policy,
       GatewayRoutePolicyResolver resolver,
       KeyResolver keyResolver,
-      AuthVerificationClient authVerificationClient
+      AuthVerificationClient authVerificationClient,
+      ApplicationContext applicationContext
   ) {
     var routes = builder.routes();
 
@@ -72,10 +75,9 @@ public class GatewayRouteConfiguration {
         return routePredicate
             .filters(filters -> {
               if (route.rateLimitRps() > 0) {
-                int replenishRate = route.rateLimitRps();
-                int burstCapacity = Math.max(replenishRate, replenishRate * 2);
                 filters.requestRateLimiter(config ->
-                    config.setRateLimiter(new RedisRateLimiter(replenishRate, burstCapacity)).setKeyResolver(keyResolver)
+                    config.setRateLimiter(buildRedisRateLimiter(route.rateLimitRps(), applicationContext))
+                        .setKeyResolver(keyResolver)
                 );
               }
 
@@ -124,6 +126,13 @@ public class GatewayRouteConfiguration {
       response.setStatusCode(status);
       return response.setComplete();
     };
+  }
+
+  static RedisRateLimiter buildRedisRateLimiter(int replenishRate, ApplicationContext applicationContext) {
+    int burstCapacity = Math.max(replenishRate, replenishRate * 2);
+    RedisRateLimiter rateLimiter = new RedisRateLimiter(replenishRate, burstCapacity);
+    rateLimiter.setApplicationContext(applicationContext);
+    return rateLimiter;
   }
 
   private GatewayFilter writeProtectionFilter(

@@ -8,6 +8,12 @@ Define the exact gate sequence that must pass immediately before production cuto
 - Runtime baseline: `f6528a5c3379c696169fcea64458398f230e1acd`
 - Gate runner: `scripts/ci-run-gate.ps1`
 
+## Host-Process Pre-Deploy Policy Rule
+- If gateway and upstream services run as host processes on `localhost`, do not point pre-deploy smoke to `infra/gateway/policies/cutover-isolation.yaml` directly.
+- Use `infra/gateway/policies/cutover-isolation-localhost.yaml` for pre-deploy only.
+- Keep all timeout/retry/circuit-breaker/rate-limit/write-protection values identical to `cutover-isolation.yaml`.
+- Actual cutover must switch back to `infra/gateway/policies/cutover-isolation.yaml`.
+
 ## 1) Required Gate Order
 ### Backend / Platform Gates
 1. `build`
@@ -45,6 +51,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate fronten
 powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-e2e-smoke
 powershell -ExecutionPolicy Bypass -File .\scripts\ci-run-gate.ps1 -Gate frontend-security-scan
 powershell -ExecutionPolicy Bypass -File .\scripts\check-prod-secrets.ps1 -EnvFile .env.production
+```
+
+If the pre-deploy runtime is host-process based, set:
+```powershell
+(Get-Content .\.env.production) `
+  -replace '^GATEWAY_POLICY_PATH=.*$', 'GATEWAY_POLICY_PATH=infra/gateway/policies/cutover-isolation-localhost.yaml' `
+  | Set-Content .\.env.production -Encoding UTF8
 ```
 
 ## 3) Pass Criteria

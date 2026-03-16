@@ -92,6 +92,44 @@ function Get-GradleWrapper {
   return $null
 }
 
+function Get-LocalGradleExecutable {
+  $lockFile = Join-Path $repoRoot "toolchain.lock.json"
+  $version = ""
+  if (Test-Path $lockFile) {
+    try {
+      $lock = Get-Content -Raw -Encoding UTF8 $lockFile | ConvertFrom-Json
+      if ($lock.gradle) {
+        $version = [string]$lock.gradle
+      }
+    }
+    catch {
+      # Fall back to command discovery below.
+    }
+  }
+
+  $candidates = @()
+  $userProfile = [Environment]::GetFolderPath("UserProfile")
+  if (-not [string]::IsNullOrWhiteSpace($version) -and -not [string]::IsNullOrWhiteSpace($userProfile)) {
+    $candidates += (Join-Path $userProfile ("tools\gradle-{0}\bin\gradle.bat" -f $version))
+  }
+  $candidates += "gradle"
+
+  foreach ($candidate in $candidates) {
+    if ($candidate -eq "gradle") {
+      if (Get-Command gradle -ErrorAction SilentlyContinue) {
+        return "gradle"
+      }
+      continue
+    }
+
+    if (Test-Path $candidate) {
+      return $candidate
+    }
+  }
+
+  return $null
+}
+
 function Get-GradleBuildFiles {
   $targets = @("build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts")
   $files = @()
@@ -125,8 +163,23 @@ function Invoke-GradleGate {
   if ($gradleArgs -notcontains "--no-daemon") {
     $gradleArgs += "--no-daemon"
   }
-  Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $wrapper, ($gradleArgs -join " "))
-  & $wrapper @gradleArgs
+
+  if ($wrapper) {
+    Write-Host ("[INFO] {0}: running {1} {2}" -f $GateName, $wrapper, ($gradleArgs -join " "))
+    & $wrapper @gradleArgs
+    if ($LASTEXITCODE -eq 0) {
+      return
+    }
+    Write-Warning ("wrapper gradle invocation failed for {0}; attempting local Gradle fallback." -f $GateName)
+  }
+
+  $localGradle = Get-LocalGradleExecutable
+  if (-not $localGradle) {
+    throw "[FAIL] ${GateName}: gradle command failed and no local fallback was found."
+  }
+
+  Write-Host ("[INFO] {0}: running fallback {1} {2}" -f $GateName, $localGradle, ($gradleArgs -join " "))
+  & $localGradle @gradleArgs
   if ($LASTEXITCODE -ne 0) {
     throw "[FAIL] ${GateName}: gradle command failed."
   }
