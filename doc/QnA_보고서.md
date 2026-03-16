@@ -3790,3 +3790,52 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - 실제 운영 비밀값/운영 접속 정보만 채우면 cutover 실행 전 입력물 확인 가능 상태로 정리 완료
   - 이 세션에서는 실제 secret manager와 운영 접속 대상을 사실로 확정할 수 없으므로, 준비 문서/체크리스트 수준까지 완료
+
+## Q186. 실제 production secret manager 렌더링 및 cutover 실행 시도 차단 사유 정리 (2026-03-16)
+- 요청:
+  1. production-secret-access-confirmation.md의 TBD 항목 채우기
+  2. deploy host에서 실제 secret manager 값으로 .env.production 렌더링
+  3. production-cutover-execution-checklist.md 기준으로 실제 cutover 실행
+- 확인 결과:
+  1. unbooks/production-secret-access-confirmation.md의 운영 항목이 모두 TBD 상태였다.
+  2. 실제 secret manager CLI/접속 경로가 세션에 없었다.
+     - ault, op, ws, z 미설치
+     - kubectl는 있으나 current-context is not set
+  3. unbooks/production-cutover-execution-checklist.md의 0단계(Secret Manager / Operational Access Confirmation)를 충족하지 못했다.
+  4. 로컬 .env.production은 존재하고 scripts/check-prod-secrets.ps1 -EnvFile .env.production는 PASS였으나, 이는 실제 secret manager 재렌더링 증적이 아니다.
+- 판단:
+  - 현재 세션에서는 실제 운영 secret source와 deploy host/bastion 정보가 없어 1~3단계를 안전하게 실행할 수 없다.
+- 다음 필요 입력:
+  1. 실제 secret manager 종류와 경로
+  2. deploy host 또는 bastion 접속 경로와 방식
+  3. DBA backup owner / Ops cutover owner / Go-NoGo approver
+
+## Q187. DoD 충족 이후 실제 운영 실행 갭 정리 문서화 (2026-03-16)
+- 요청:
+  - 현재 DoD 충족 이후 실제 운영 실행 갭을 실행 순서, 입력값, 담당자 기준으로 정리
+- 수행:
+  1. unbooks/production-cutover-gap-closure.md 생성
+  2. 남은 운영 실행 갭을 7단계로 분해
+     - secret source 확정
+     - deploy host/bastion 확정
+     - owner/maintenance window 확정
+     - .env.production deploy host 렌더
+     - cutover entry check
+     - actual production cutover 실행
+     - hypercare/final closeout
+  3. 각 단계별 입력값, 담당자, 완료조건, 증적 경로를 명시
+- 결과:
+  - 개발 DoD와 실제 운영 실행 readiness를 분리해서 관리할 수 있는 gap-closure 기준 문서가 준비됨
+  - 현재 blocker는 코드가 아니라 운영 정보/접속/승인 정보 부족으로 명확화됨
+
+## Q188. production-secret-access-confirmation.md 실제 작성용 템플릿 구체화 (2026-03-16)
+- 요청:
+  - 실제 운영 입력을 바로 채울 수 있도록 production-secret-access-confirmation.md를 실제 작성용 양식으로 구체화
+- 수행:
+  1. TBD 중심 표를 Actual Value / Format / Owner / Status 구조로 재작성
+  2. secret source, deploy host, owner, maintenance window, production DB name 항목을 분리
+  3. secret access check / deploy host access check / .env.production validation 명령 자리와 성공조건을 추가
+  4. cutover entry criteria와 final sign section을 추가
+- 결과:
+  - 실제 운영 정보만 입력하면 cutover entry 문서로 바로 사용할 수 있는 확인서 양식이 준비됨
+  - secret 값 자체는 문서에 쓰지 않고 secret path와 access route만 기록하도록 고정함
