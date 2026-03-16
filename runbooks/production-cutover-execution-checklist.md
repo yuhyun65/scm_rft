@@ -1,5 +1,17 @@
 ﻿# Production Cutover Execution Checklist
 
+## 0) Secret Manager / Operational Access Confirmation
+- [ ] secret manager type fixed (`Vault` / `AWS Secrets Manager` / `Azure Key Vault` / `Kubernetes Secret` / approved equivalent)
+- [ ] secret manager access path fixed (vault path, secret name, key vault name, namespace/secret, or equivalent)
+- [ ] deploy host or bastion fixed
+- [ ] deploy host access method fixed (`WinRM` / `SSH` / approved runner)
+- [ ] `.env.production` rendered on deploy host from the approved secret source
+- [ ] `git ls-files .env.production` output = none
+- [ ] `scripts/check-prod-secrets.ps1 -EnvFile .env.production` PASS
+- [ ] DBA backup/restore owner fixed
+- [ ] Ops cutover owner fixed
+- [ ] maintenance window and Go/No-Go approver confirmed
+
 ## 1) Go / No-Go
 - [ ] `runbooks/go-nogo-signoff.md` latest decision is `GO`
 - [ ] `runbooks/operational-baseline-freeze.md` matches target runtime commit

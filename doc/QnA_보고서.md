@@ -3688,3 +3688,105 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - actual-topology PASS 기준의 최종 운영 전환 baseline 문서화 완료
   - release tag와 operational freeze manifest가 같은 baseline commit(e464c20)를 참조하도록 정리
+
+## Q182. 실제 secret manager 렌더링 / 실제 운영 cutover 실행 가능 여부 점검 (2026-03-16)
+- 요청:
+  - 실제 secret manager 값으로 .env.production 렌더링
+  - cutover-day-runbook.md 기준 실제 운영 전환 실행
+- 점검:
+  1. secret manager 경로 확인
+     - ault/op/aws/az CLI 없음
+     - kubectl만 존재하지만 kubectl config current-context 결과: current-context is not set
+     - 저장소 내 secret pull/render 자동화 스크립트 없음
+  2. 현재 로컬 운영 env 상태
+     - .env.production 존재 확인: True
+     - scripts/check-prod-secrets.ps1 -EnvFile .env.production PASS
+     - 즉, 로컬 secure copy는 유효하나 실제 secret manager에서 재렌더링한 증적은 아님
+  3. 실제 운영 전환 실행 가능 여부
+     - cutover-day-runbook.md는 운영 절차를 정의하지만, 실제 운영 대상 접속/권한/maintenance window/DBA backup owner가 이 세션에서 확정되지 않음
+     - 현재 세션에서 prod-up/prod-down을 실행해도 로컬 또는 rehearsal 환경일 뿐, 실제 운영 cutover 실행으로 간주할 수 없음
+- 결과:
+  - 이 세션에서는 실제 secret manager 값으로 .env.production 렌더링 실행 불가
+  - 이 세션에서는 실제 운영 전환 실행 불가
+  - 추가 필요 입력: 실제 secret manager 종류/접속 경로, 운영 대상 환경 접속 경로, cutover 승인 창구
+
+## Q183. 내 PC + Docker 환경 기준 통합테스트 가능 여부 점검 (2026-03-16)
+- 요청:
+  - 현재 프로젝트를 내 PC + Docker 환경에서 실행되는지 통합테스트 가능 여부 검토
+- 점검 결과:
+  1. Docker 상태
+     - docker info PASS
+     - Docker daemon 정상
+     - 서버 기준 Running: 9
+  2. 로컬 통합테스트 런북/스크립트 존재
+     - unbooks/integration-test-runbook.md
+     - scripts/ci-run-gate.ps1
+     - scripts/smoke-gateway-p0-e2e.ps1
+     - scripts/prod-up.ps1
+     - docker-compose.actual-topology.yml
+  3. 로컬에서 가능한 범위
+     - staging 기반 7게이트 통합테스트
+     - gateway auth/member smoke
+     - full P0 gateway E2E(F01~F07)
+     - .env.production 기반 production-like / actual-topology rehearsal
+  4. 로컬에서 불가능한 범위
+     - 실제 secret manager에서 production secret pull
+     - 실제 운영 대상 서버/클러스터에 대한 cutover 실행
+  5. 현재 판단
+     - 내 PC + Docker 환경에서는 개발/리허설 수준 통합테스트 가능
+     - 실운영 cutover는 별도 운영 접속/권한/secret manager 경로가 있어야 가능
+- 결론:
+  - 로컬 PC + Docker 기준 통합테스트는 가능
+  - 다만 그것은 staging/prod-like/actual-topology rehearsal 범위이며 실운영 전환 실행과는 구분해야 함
+
+## Q184. 로컬 통합테스트 1회 실행 + cutover-day-runbook 기준선 최신화 (2026-03-16)
+- 요청:
+  - 로컬 통합테스트 1회 실제 실행
+  - cutover-day-runbook.md 기준선 최신화
+- 수행:
+  1. 로컬 통합테스트 실행
+     - 방식: local PC + Docker actual-topology
+     - RunId: LOCAL-IT-20260316-153544
+     - 단계:
+       - check-prod-secrets PASS
+       - actual-topology compose 기동 PASS
+       - migration-dry-run PASS
+       - smoke-test PASS
+       - gateway 정책 전환(cutover-isolation -> post-cutover-write-open) PASS
+       - smoke-gateway-p0-e2e.ps1 PASS
+     - 핵심 결과:
+       - P0-F01~F07 gateway E2E smoke passed.
+  2. 기준 문서 최신화
+     - 파일: unbooks/cutover-day-runbook.md
+     - 반영:
+       - runtime baseline e464c20로 갱신
+       - release tag 2026.03.16-scm-rft-operational-go 추가
+       - full traffic open 단계에 post-cutover-write-open.yaml 전환 명시
+- 증적:
+  - unbooks/evidence/LOCAL-IT-20260316-153544/local-integration-summary.md
+  - unbooks/evidence/LOCAL-IT-20260316-153544/smoke-gateway-p0-e2e.log
+- 결과:
+  - 현재 PC + Docker 환경에서 actual-topology 기준 로컬 통합테스트 1회 PASS
+  - cutover-day runbook 기준선이 최종 운영 baseline과 일치하도록 보정 완료
+
+## Q185. 실제 운영 secret manager / 운영 접속 경로 확정 전 cutover 준비 문서화 (2026-03-16)
+- 요청:
+  - 실제 운영 secret manager / 운영 접속 경로 확정 후 cutover 실행 준비
+- 수행:
+  1. 최신 baseline 반영
+     - unbooks/prod-env-secrets-inventory.md의 runtime baseline을 e464c20 + release tag 2026.03.16-scm-rft-operational-go로 갱신
+  2. cutover 체크리스트 보강
+     - unbooks/production-cutover-execution-checklist.md
+     - section  ) Secret Manager / Operational Access Confirmation 추가
+  3. 별도 확인 문서 추가
+     - unbooks/production-secret-access-confirmation.md
+     - 항목:
+       - secret manager 종류
+       - secret location
+       - deploy host / bastion
+       - access method
+       - DBA / Ops / Go-NoGo owner
+       - .env.production 렌더/검증 기준
+- 결과:
+  - 실제 운영 비밀값/운영 접속 정보만 채우면 cutover 실행 전 입력물 확인 가능 상태로 정리 완료
+  - 이 세션에서는 실제 secret manager와 운영 접속 대상을 사실로 확정할 수 없으므로, 준비 문서/체크리스트 수준까지 완료

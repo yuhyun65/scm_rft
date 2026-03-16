@@ -2,12 +2,14 @@
 
 ## Scope
 - Baseline branch: `feature/to-be-dev-env-bootstrap`
-- Runtime baseline: `f6528a5c3379c696169fcea64458398f230e1acd`
+- Runtime baseline: `e464c2084eded932aeb07cb51300a67c19ecf62d`
+- Release tag: `v2026.03.16-scm-rft-operational-go`
 - Reference docs:
   - `runbooks/cutover-operations-runbook.md`
   - `runbooks/cutover-checklist.md`
   - `runbooks/go-nogo-signoff.md`
   - `runbooks/prod-deploy-orchestration-runbook.md`
+  - `runbooks/actual-cutover-topology-rehearsal-runbook.md`
 
 ## Timebox Overview
 | Time | Step | Owner | Command / Action | Stop Condition |
@@ -19,7 +21,7 @@
 | T-30m | Production startup | Dev + Ops | `scripts/prod-up.ps1 -RunId <RunId> -EnvFile .env.production -StopExistingPorts` | any service health FAIL |
 | T-20m | Gateway route open (read first) | Dev | enable read paths, auth verify, keep emergency stop ready | auth verify fail or 5xx spike |
 | T-15m | P0 smoke | Dev + QA | login/member/order-lot/file/board/quality-doc/inventory/report smoke | any P0 failure |
-| T-5m | Full traffic open | Ops | disable freeze, open standard gateway policy | latency/error threshold breach |
+| T-5m | Full traffic open | Ops | switch gateway from `cutover-isolation.yaml` to `post-cutover-write-open.yaml` | latency/error threshold breach |
 | T+15m | Hypercare wave 1 | Ops + Dev | watch 5xx/latency/backlog/deadlock/auth failures | threshold breach > 5 min |
 | T+60m | Hypercare wave 2 | Ops + Dev | confirm stability and close emergency posture | unresolved alert or rollback criteria met |
 
@@ -69,7 +71,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\prod-up.ps1 -RunId CUTOVER-$(
 - Stop if any smoke step fails once.
 
 ### 7) Full Traffic Open (T-5m)
-- Open standard production gateway policy.
+- Switch gateway policy from `cutover-isolation.yaml` to `post-cutover-write-open.yaml`.
 - Keep emergency stop reversible for the full hypercare window.
 - Stop if 5xx, latency, or auth failure exceeds threshold.
 

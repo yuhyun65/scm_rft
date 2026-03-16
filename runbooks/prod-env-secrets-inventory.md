@@ -2,7 +2,8 @@
 
 ## Scope
 - Baseline branch: `feature/to-be-dev-env-bootstrap`
-- Runtime baseline: `f6528a5c3379c696169fcea64458398f230e1acd`
+- Runtime baseline: `e464c2084eded932aeb07cb51300a67c19ecf62d`
+- Release tag: `v2026.03.16-scm-rft-operational-go`
 - Validation script: scripts/check-prod-secrets.ps1
 - Target env file name: .env.production (must remain untracked)
 
@@ -59,15 +60,15 @@
 | Broker / observability admin creds | Ops Owner | service connect + dashboard login |
 
 ## 4) Validation Commands
-`powershell
+```powershell
 Set-Location C:\Users\CMN-091\projects\SCM_RFT
 powershell -ExecutionPolicy Bypass -File .\scripts\check-prod-secrets.ps1 -EnvFile .env.production
-`
+```
 
-`powershell
+```powershell
 git -C C:\Users\CMN-091\projects\SCM_RFT ls-files .env.production
 # expected: no output
-`
+```
 
 ## 5) Deployment Notes
 - Production should not reuse .env, .env.staging, or any dev/staging passwords.
