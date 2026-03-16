@@ -3839,3 +3839,55 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - 실제 운영 정보만 입력하면 cutover entry 문서로 바로 사용할 수 있는 확인서 양식이 준비됨
   - secret 값 자체는 문서에 쓰지 않고 secret path와 access route만 기록하도록 고정함
+
+## Q190. production-secret-access-confirmation 실제 입력 / cutover entry check 실행 시도 (2026-03-16)
+- 요청:
+  1. production-secret-access-confirmation.md 실제 운영값 입력
+  2. 실제 cutover entry check 진행
+- 수행:
+  1. 현재 문서와 저장소를 다시 확인하여 실제 운영값 자동 발견 가능 여부 점검
+  2. .env.production에서 확인 가능한 값은 local rehearsal DB명 SCM_RFT_PRODLIKE뿐이었고, secret manager/운영 host/owner 정보는 저장소에서 발견되지 않음
+  3. git ls-files .env.production와 scripts/check-prod-secrets.ps1 -EnvFile .env.production를 실행
+  4. unbooks/production-secret-access-confirmation.md의 <fill> 잔여 개수를 스캔하여 cutover entry readiness를 판정
+- 결과:
+  - .env.production Git 추적 없음
+  - check-prod-secrets.ps1 PASS
+  - 그러나 production-secret-access-confirmation.md에 실제 운영 입력값이 남아 있지 않아 entry check 최종 판정은 BLOCKED
+- 증적:
+  - unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/env-precheck.log
+  - unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-check-summary.md
+- 남은 필수 입력:
+  1. secret manager 종류/경로
+  2. deploy host 또는 bastion 접속 정보
+  3. execution account
+  4. DBA backup/restore owner
+  5. Ops cutover owner
+  6. Go/No-Go approver
+  7. maintenance window
+
+## Q191. 프론트 dev용 Vite proxy를 gateway(localhost:18080)로 반영 (2026-03-16)
+- 요청:
+  - 프론트 dev용 Vite proxy를 localhost:18080으로 붙여 브라우저 기능 확인을 안정화
+- 수행:
+  1. rontend/apps/web-portal/vite.config.ts에 /api -> http://localhost:18080 proxy 추가
+  2. 기본 proxyTarget은 http://localhost:18080, 필요 시 VITE_GATEWAY_PROXY_TARGET으로 override 가능하도록 설정
+  3. Vite dev server가 host: 0.0.0.0, port: 5173에서 same-origin /api/* 요청을 gateway로 전달하도록 구성
+- 기대효과:
+  - 브라우저에서 http://localhost:5173로 접속해도 /api/* 호출이 Vite proxy를 통해 gateway로 전달되어 CORS 없이 기능 확인 가능
+
+## Q192. Vite proxy(`/api -> localhost:18080`) 실제 동작 검증 (2026-03-16)
+- 요청:
+  - Vite proxy를 gateway로 붙여 브라우저 기능 확인을 안정화하고 실제 동작까지 검증
+- 수행:
+  1. `frontend/apps/web-portal/vite.config.ts`에 `/api -> http://localhost:18080` proxy 추가
+  2. `strictPort: true`를 추가해 5173 포트 고정 실패를 즉시 드러나게 조정
+  3. actual-topology backend 기동 + `smoke-gateway-auth-member-e2e.ps1`로 seed/auth smoke 수행
+  4. Vite를 `node.exe vite.js --host 127.0.0.1 --port 5173 --strictPort`로 직접 기동
+  5. `http://127.0.0.1:5173/api/auth/v1/login` proxied login 확인
+- 결과:
+  - proxied login이 성공했고 `accessToken`이 반환됨
+  - 즉, 브라우저에서 `http://localhost:5173`로 접속하면 `/api/*` 호출이 gateway(`localhost:18080`)로 전달되는 경로가 검증됨
+- 증적:
+  - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/proxy-login-response.json`
+  - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/vite-direct.stdout.log`
+  - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/gateway-auth-member-seed-smoke.log`
