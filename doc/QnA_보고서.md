@@ -3972,3 +3972,23 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - demo 전용 seed 스크립트가 로컬 SQL Server 컨테이너 기준으로 PASS
   - summary 파일에 데모 계정, 검색 키, 샘플 ID가 정리되어 브라우저 시연에 바로 사용 가능
+
+## Q199. rich demo seed 기준 실제 브라우저 데모 1회 실행 (2026-03-16)
+- 요청:
+  1. 이번 변경분 커밋/푸시
+  2. 실제 브라우저 데모 1회 실행
+- 수행:
+  1. feat(demo): add rich demo seed workflow 커밋(fc0bc55) 후 기준 브랜치에 푸시
+  2. scripts/seed-demo-data.ps1로 SCM_RFT_PRODLIKE에 rich demo 데이터 주입
+  3. smoke-gateway-auth-member-e2e.ps1 -SeedData:$false로 auth/member/gateway 경로 검증
+  4. 기존 Vite dev server(http://127.0.0.1:5173)를 재사용해 frontend origin 확인
+  5. http://127.0.0.1:5173/api/auth/v1/login proxy login 확인
+  6. Edge headless screenshot으로 실제 브라우저 엔진 로드를 검증
+- 결과:
+  - 실제 브라우저 엔진 기준으로 frontend 페이지 로드와 proxy login이 PASS
+  - rich demo 데이터 기준으로 사용자 시연 가능한 로컬 브라우저 데모 1회 실행이 완료됨
+  - browser-dom.html은 비어 있었고, pass/fail은 screenshot과 proxy login 증적 기준으로 판정
+- 증적:
+  - runbooks/evidence/BROWSER-DEMO-20260316-180520/browser-demo-summary.md
+  - runbooks/evidence/BROWSER-DEMO-20260316-180520/browser-screenshot.png
+  - runbooks/evidence/BROWSER-DEMO-20260316-180520/proxy-login-response.json
