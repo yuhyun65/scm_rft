@@ -3891,3 +3891,47 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/proxy-login-response.json`
   - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/vite-direct.stdout.log`
   - `runbooks/evidence/VITE-PROXY-CHECK-20260316-170510/gateway-auth-member-seed-smoke.log`
+
+## Q193. 사용자 시연용 실행 순서서 + 브라우저 클릭 테스트 체크리스트 작성 (2026-03-16)
+- 요청:
+  1. 사용자 시연용 실행 순서서
+  2. 브라우저 클릭 테스트 체크리스트
+- 수행:
+  1. `runbooks/user-demo-runbook.md` 생성
+  2. `runbooks/browser-click-test-checklist.md` 생성
+  3. actual-topology backend 기동, demo seed, frontend proxy, browser 로그인, write-open policy 사용 조건을 문서에 반영
+- 결과:
+  - 사용자가 로컬 브라우저에서 직접 서비스를 확인할 수 있는 실행 순서와 클릭 검수 체크리스트가 준비됨
+
+## Q194. 사용자 확인용 auth/member 통합테스트 가능 여부 재확인 (2026-03-16)
+- 요청:
+  - 사용자가 서비스를 확인할 수 있도록 통합테스트 가능 여부 확인
+- 상황:
+  - `smoke-gateway-auth-member-e2e.ps1` 첫 실행 시 `auth health check failed` 발생
+- 점검:
+  1. `docker ps` 기준으로 auth/member/gateway 포함 actual-topology 컨테이너는 모두 실행 중이었음
+  2. 초기 시점에는 host health check가 실패했지만, 컨테이너 내부 health endpoint는 `{"status":"UP"}` 응답 확인
+  3. 잠시 후 동일 스크립트를 그대로 재실행하여 PASS 확인
+- 결론:
+  - 현재 시스템은 사용자 확인용 통합테스트 가능
+  - 첫 실패 원인은 기동 직후 cold start/readiness race였고, 서비스가 `UP`가 된 뒤 재실행하면 정상 통과함
+- 실행 확인:
+  - `smoke-gateway-auth-member-e2e.ps1` 재실행 PASS
+  - login / token verify / member search / member by id 모두 PASS
+
+## Q195. smoke-gateway-auth-member-e2e.ps1 자동 readiness wait 반영 및 cold start 회귀 확인 (2026-03-16)
+- 요청:
+  1. 이 변경도 커밋/푸시
+  2. readiness wait를 스크립트에 자동 반영
+- 수행:
+  1. `scripts/smoke-gateway-auth-member-e2e.ps1`에 health wait 로직 추가
+     - `HealthWaitTimeoutSec` 기본값 180초
+     - `HealthPollIntervalSec` 기본값 5초
+     - auth/member/gateway health를 즉시 1회 실패가 아니라 `UP`가 될 때까지 재시도
+  2. `runbooks/user-demo-runbook.md`에 자동 health wait 동작 반영
+  3. cold start actual-topology 재기동 직후 동일 스크립트를 실행해 회귀 확인
+- 결과:
+  - cold start 상황에서도 `smoke-gateway-auth-member-e2e.ps1`가 자동 대기 후 PASS
+  - login / token verify / member search / member by id 모두 PASS
+- 증적:
+  - `runbooks/evidence/READINESS-WAIT-20260316-172337/smoke-gateway-auth-member-e2e.log`

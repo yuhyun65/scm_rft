@@ -9,7 +9,9 @@ param(
   [string]$EnvFile = ".env",
   [string]$LoginId = "smoke-user",
   [string]$Password = "password",
-  [bool]$SeedData = $true
+  [bool]$SeedData = $true,
+  [int]$HealthWaitTimeoutSec = 180,
+  [int]$HealthPollIntervalSec = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,19 +39,34 @@ function Get-EnvValue {
 function Assert-Health {
   param(
     [Parameter(Mandatory = $true)][string]$Name,
-    [Parameter(Mandatory = $true)][string]$Uri
+    [Parameter(Mandatory = $true)][string]$Uri,
+    [Parameter(Mandatory = $true)][int]$TimeoutSec,
+    [Parameter(Mandatory = $true)][int]$PollIntervalSec
   )
 
-  try {
-    $response = Invoke-RestMethod -Method Get -Uri $Uri -TimeoutSec 10
-    if ($response.status -and "$($response.status)".ToUpperInvariant() -ne "UP") {
-      throw "health status is not UP."
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  $lastError = $null
+
+  while ((Get-Date) -lt $deadline) {
+    try {
+      $response = Invoke-RestMethod -Method Get -Uri $Uri -TimeoutSec 10
+      if ($response.status -and "$($response.status)".ToUpperInvariant() -ne "UP") {
+        throw "health status is not UP."
+      }
+      Write-Host ("[OK] {0} health check passed: {1}" -f $Name, $Uri)
+      return
     }
-    Write-Host ("[OK] {0} health check passed: {1}" -f $Name, $Uri)
+    catch {
+      $lastError = $_
+      Start-Sleep -Seconds $PollIntervalSec
+    }
   }
-  catch {
-    throw "[FAIL] $Name health check failed at $Uri. Ensure service is running."
+
+  $detail = ""
+  if ($lastError) {
+    $detail = " Last error: $($lastError.Exception.Message)"
   }
+  throw "[FAIL] $Name health check failed at $Uri within ${TimeoutSec}s.$detail Ensure service is running."
 }
 
 function Assert-ExpectedStatusCode {
@@ -227,9 +244,9 @@ WHEN NOT MATCHED THEN
 
 Push-Location $repoRoot
 try {
-  Assert-Health -Name "auth" -Uri $AuthHealthUrl
-  Assert-Health -Name "member" -Uri $MemberHealthUrl
-  Assert-Health -Name "gateway" -Uri $GatewayHealthUrl
+  Assert-Health -Name "auth" -Uri $AuthHealthUrl -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "member" -Uri $MemberHealthUrl -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "gateway" -Uri $GatewayHealthUrl -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
 
   if ($SeedData) {
     Seed-SmokeData -RepoRoot $repoRoot -ContainerName $SqlContainerName -TargetDatabase $Database -TargetEnvFile $EnvFile -PasswordHash $seedPasswordHash
