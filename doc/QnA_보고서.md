@@ -3935,3 +3935,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - login / token verify / member search / member by id 모두 PASS
 - 증적:
   - `runbooks/evidence/READINESS-WAIT-20260316-172337/smoke-gateway-auth-member-e2e.log`
+
+## Q196. 로컬 시연/통합테스트 잔류 컨테이너 정리 (2026-03-16)
+- 요청:
+  - 정리
+- 수행:
+  1. `docker compose -f docker-compose.yml -f docker-compose.actual-topology.yml down` 실행
+  2. `docker compose -f docker-compose.yml down` 실행
+  3. `.env.production`의 `GATEWAY_POLICY_PATH`가 `cutover-isolation.yaml`임을 유지 확인
+  4. 5173 포트 리스너 없음 확인
+- 결과:
+  - 로컬 actual-topology 및 infra 컨테이너 정리 완료
+  - 증적: `runbooks/evidence/CLEANUP-20260316-172852/actual-topology-down.log`
+  - 증적: `runbooks/evidence/CLEANUP-20260316-172852/infra-down.log`
