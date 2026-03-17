@@ -4278,3 +4278,17 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 사용자 화면 문자열은 정상 한국어 기준으로 복구됐다.
   - 사용자 노출 브랜드는 `Mate-SCM`으로 통일됐다.
   - 프론트 build/test가 최신 기준으로 통과했다.
+
+## Q220. 2026-03-17 작업 종료 및 런타임 정리 (2026-03-17)
+- 요청:
+  - 오늘 작업 종료를 위한 조치 수행 및 다음 진행 사항 정리
+- 수행:
+  1. `docker ps`와 포트 점검으로 데모/런타임 잔여 상태를 재확인했다.
+  2. `5173` 프론트 dev listener가 남아 있지 않은 것을 확인했다.
+  3. `.env.production`의 `GATEWAY_POLICY_PATH`를 `infra/gateway/policies/cutover-isolation.yaml`로 원복했다.
+  4. 종료 시점 기준 남은 로컬 파일은 정책상 제외된 `doc/HISCM_MSA_개발이력보고서.docx` 1건뿐임을 확인했다.
+- 결과:
+  - Docker 런타임은 모두 종료된 상태다.
+  - 프론트 dev server listener는 정리된 상태다.
+  - 데모 후 로컬 gateway 정책은 조회 기본값으로 복귀했다.
+  - 다음 작업은 실제 운영 입력값 확보 후 production cutover entry check를 다시 진행하는 것이다.
