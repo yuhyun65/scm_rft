@@ -4050,3 +4050,16 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - SCM-252 구현 변경은 Draft PR #84로 분리됨
   - SCM-253 문서 묶음은 별도 브랜치에서 독립적으로 정리 가능한 상태가 됨
+
+## Q204. PR #84 증적 코멘트와 남은 untracked 포함/제외 기준 확정 (2026-03-17)
+- 요청:
+  1. #84 기준으로 로컬 게이트 증적 코멘트 추가
+  2. feature/scm-253-frontend-redesign-docs도 PR 생성
+  3. _tmp_*와 남은 untracked의 포함/제외 기준 확정
+- 수행:
+  1. PR #84에 build/test/browser smoke PASS 증적과 evidence 경로를 코멘트로 추가
+  2. 남은 untracked를 `즉시 제외(_tmp_*)`, `포함 후보(doc/seed-data-guide.md, sql/seed_data.sql)`, `보류(doc/HISCM_MSA_개발이력보고서.docx)`로 분류하고 `runbooks/untracked-file-policy.md`에 기록
+  3. `.git/info/exclude`에 `_tmp_*`, `frontend/_tmp_*`를 추가하는 기준을 문서화
+- 결과:
+  - PR #84에는 로컬 검증 증적이 연결됨
+  - 남은 untracked는 커밋 대상과 로컬 제외 대상을 구분하는 기준이 확정됨
