@@ -4169,3 +4169,49 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 운영 freeze/signoff 문서 기준선은 현재 HEAD `850c83c`를 기준으로 재동기화됐다.
   - backend/runtime의 authoritative evidence는 2026-03-16 actual-topology validation을 유지하고, 2026-03-17 browser demo revalidation을 supplemental evidence로 추가했다.
   - 실제 production cutover entry는 여전히 `production-secret-access-confirmation.md`의 `<fill>` 미해결로 `BLOCKED` 상태다.
+
+## Q212. 실제 운영값 입력 / deploy host 렌더 / cutover entry check 재시도 (2026-03-17)
+- 요청:
+  1. production-secret-access-confirmation.md 실제 운영값 입력
+  2. deploy host 기준 .env.production 렌더
+  3. cutover entry check 실행
+- 수행:
+  1. `production-secret-access-confirmation.md`의 실제 운영값 존재 여부를 재확인했다.
+  2. secret manager 및 deploy-host 접근 가능 여부를 점검했다.
+     - `vault`, `op`, `aws`, `az`: 미설치
+     - `kubectl current-context`: 미설정
+  3. 로컬 기준 `.env.production` precheck는 다시 실행해 PASS를 확인했다.
+  4. 현재 기준선(`850c83c`)으로 cutover entry check 요약을 새 evidence로 작성했다.
+- 결과:
+  - 실제 운영값 입력은 이 세션에서 완료할 수 없었다.
+  - deploy host 기준 `.env.production` 렌더도 실제 secret source/접속 경로 부재로 실행할 수 없었다.
+  - cutover entry check는 `BLOCKED`로 확정됐다.
+    - RunId: `CUTOVER-ENTRY-CHECK-20260317-134916`
+    - 증적: `runbooks/evidence/CUTOVER-ENTRY-CHECK-20260317-134916/production-cutover-entry-check-summary.md`
+  - 현재 확인된 사실:
+    - `.env.production` local precheck PASS
+    - `.env.production` Git tracked 아님
+    - `production-secret-access-confirmation.md`의 `<fill>/OPEN` 잔여: 32건
+    - 실제 production cutover는 운영 입력값과 접속 경로가 채워지기 전까지 진행 불가
+
+
+## Q213. production-secret-access-confirmation 실제 작성용 입력표 템플릿 추가 (2026-03-17)
+- 요청:
+  - 실제 운영 입력값을 바로 받을 수 있는 입력표 템플릿 생성
+- 수행:
+  - `runbooks/production-secret-access-confirmation.md`에 operator용 작성 템플릿 섹션을 추가했다.
+  - secret manager, deploy host, owner/window, 승인 명령, entry-check ready criteria, quick submission form을 한 번에 채울 수 있게 정리했다.
+- 결과:
+  - 운영 담당자는 문서 하단 `Operator Fill Template (Copy/Paste)` 섹션에 실제 값을 먼저 수집한 뒤 sections 1~7에 반영하면 된다.
+
+## Q214. 운영 입력값 수집용 Quick Submission Form 준비 및 반영 대기 상태 기록 (2026-03-17)
+- 요청:
+  1. production-secret-access-confirmation 작성용 Quick Submission Form 전달
+  2. 운영 담당자 회신값으로 sections 1~7 실제 값 반영
+- 수행:
+  1. `runbooks/production-secret-access-confirmation.md`에 operator용 `Quick Submission Form`을 추가했다.
+  2. 현재 세션에서 실제 운영 담당자 회신값은 확보되지 않아 sections 1~7 실값 반영은 보류했다.
+- 결과:
+  - 운영 담당자에게 전달할 입력 양식은 준비 완료.
+  - sections 1~7 실제 값 반영은 회신 수신 후 즉시 진행 가능.
+  - 현재 blocker는 운영 입력값 미수신이다.

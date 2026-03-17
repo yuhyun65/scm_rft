@@ -103,3 +103,88 @@ Mark every row `DONE` before actual production cutover starts.
 | DBA | `<fill>` | `<fill>` | `<fill>` |
 | Dev Owner | `<fill>` | `<fill>` | `<fill>` |
 | Go/No-Go Approver | `<fill>` | `<fill>` | `<fill>` |
+
+
+## 8) Operator Fill Template (Copy/Paste)
+Use this block to collect the real production inputs first, then reflect them into sections 1~7 above.
+Do not paste secret values. Record only secret source path/name, host, account, owner, and approved commands.
+
+### 8.1 Secret Manager Intake
+| Field | Input Value | Example Format |
+|---|---|---|
+| Secret manager type |  | `Vault` / `AWS Secrets Manager` / `Azure Key Vault` / `Kubernetes Secret` |
+| Access client |  | `vault.exe`, `aws cli`, `az cli`, `kubectl`, runner name |
+| Secret location |  | `kv/scm/prod`, `arn:aws:secretsmanager:...`, `kv-prod/scm-rft`, `namespace/secret-name` |
+| Read approver |  | `홍길동` |
+| Render operator |  | `svc-scm-prod-deploy` |
+
+### 8.2 Deploy Host / Bastion Intake
+| Field | Input Value | Example Format |
+|---|---|---|
+| Deploy host or bastion |  | `ops-bastion-01`, `10.10.10.25` |
+| Access method |  | `WinRM`, `SSH`, `approved runner` |
+| Execution account |  | `svc-scm-prod-deploy`, `cmn-091` |
+| Working directory | `C:\Users\CMN-091\projects\SCM_RFT` | fixed |
+| Production DB name |  | `MES_HI_PROD` |
+
+### 8.3 Owner / Approval / Window Intake
+| Field | Input Value | Example Format |
+|---|---|---|
+| DBA backup owner |  | `홍길동` |
+| DBA restore owner |  | `홍길동` |
+| Ops cutover owner |  | `김운영` |
+| Go/No-Go approver |  | `박승인` |
+| Maintenance window start |  | `2026-03-20 22:00 KST` |
+| Maintenance window end |  | `2026-03-21 02:00 KST` |
+| Escalation channel |  | `Teams SCM-PROD bridge`, `war-room 070-...` |
+
+### 8.4 Approved Command Intake
+```powershell
+# Secret source access check
+<approved-secret-access-command>
+
+# Deploy host access check
+<approved-deploy-host-access-command>
+
+# Render .env.production on deploy host
+<approved-env-render-command>
+```
+
+### 8.5 Entry Check Ready Criteria
+| Check | Expected Value | Confirmed By |
+|---|---|---|
+| Secret manager type/path fixed | Yes |  |
+| Deploy host / access method fixed | Yes |  |
+| Execution account fixed | Yes |  |
+| DBA backup/restore owner fixed | Yes |  |
+| Ops cutover owner fixed | Yes |  |
+| Go/No-Go approver fixed | Yes |  |
+| Maintenance window fixed | Yes |  |
+| `.env.production` rendered on deploy host | Yes |  |
+| `check-prod-secrets.ps1 -EnvFile .env.production` PASS | Yes |  |
+
+### 8.6 Quick Submission Form
+Copy this form into chat/email/approval ticket and fill every line.
+
+```text
+[SCM_RFT Production Input Form]
+Secret manager type:
+Access client:
+Secret location:
+Read approver:
+Render operator:
+Deploy host or bastion:
+Access method:
+Execution account:
+Production DB name:
+DBA backup owner:
+DBA restore owner:
+Ops cutover owner:
+Go/No-Go approver:
+Maintenance window start:
+Maintenance window end:
+Escalation channel:
+Approved secret access command:
+Approved deploy host access command:
+Approved env render command:
+```
