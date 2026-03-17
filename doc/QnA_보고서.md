@@ -4113,3 +4113,23 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - PR #85: MERGED (`d00cb1122f627a05278f06e8c6b88df870722113`)
   - 기준 브랜치에는 frontend routed shell foundation과 redesign docs/process bundle이 모두 반영됨
   - 현재 로컬 잔여 파일은 정책상 제외한 `doc/HISCM_MSA_개발이력보고서.docx` 1건뿐임
+
+## Q210. 기준 브랜치 전체 재점검 및 프론트 개편 반영 후 브라우저 데모 재검증 (2026-03-17)
+- 요청:
+  1. 현재 기준 브랜치 기준으로 전체 개발현황 재점검
+  2. 프론트 개편 반영 후 사용자 데모 재검증
+  3. 실제 운영 전환 준비 문서와 현재 기준선 차이 재확인
+- 수행:
+  1. 기준 브랜치 `feature/to-be-dev-env-bootstrap`와 HEAD `850c83c50fc2fb908f25c45affdce50a7ca72180`를 기준으로 `progress.json`, `go-nogo-signoff.md`, `cutover-day-runbook.md`, `operational-baseline-freeze.md`, `production-secret-access-confirmation.md`, `production-cutover-gap-closure.md`를 대조했다.
+  2. 프론트 개편이 머지된 현재 기준선에서 actual-topology + rich demo seed + auth/member smoke + frontend-dev + Vite proxy login 경로를 다시 실행했다.
+  3. SQL cold start 문제는 SQL 자체 장애가 아니라 readiness polling 방식 문제로 확인했고, `docker logs`의 `Recovery is complete` 시그니처를 기준으로 재검증을 마무리했다.
+- 결과:
+  - 현재 기준 브랜치의 개발 상태는 여전히 `개발 DoD 충족`으로 유지된다.
+  - 브라우저 데모 재검증 PASS:
+    - RunId: `BASELINE-DEMO-REVALIDATE-20260317-132414`
+    - 증적: `runbooks/evidence/BASELINE-DEMO-REVALIDATE-20260317-132414/`
+    - 항목: SQL readiness PASS, demo seed PASS, gateway auth/member smoke PASS, frontend origin load PASS, proxy login PASS
+  - 운영 전환 준비 문서는 현재 HEAD와 차이가 남아 있다:
+    - `operational-baseline-freeze.md`, `cutover-day-runbook.md`, `production-secret-access-confirmation.md`, `production-cutover-gap-closure.md`는 여전히 runtime baseline `e464c20` / release tag `v2026.03.16-scm-rft-operational-go`를 기준으로 작성돼 있다.
+    - 현재 기준 브랜치 HEAD는 `850c83c`이므로, 현 기준선을 실제 운영 baseline으로 삼으려면 freeze revision / release tag / signoff supplemental update가 추가로 필요하다.
+    - `production-secret-access-confirmation.md`는 `<fill>`이 남아 있어 실제 production cutover entry는 여전히 `BLOCKED` 상태다.
