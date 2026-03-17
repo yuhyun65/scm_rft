@@ -3,7 +3,9 @@ param(
   [string]$Database = "SCM_RFT_PRODLIKE",
   [string]$SqlContainerName = "scm-sqlserver",
   [string]$EnvFile = ".env.production",
-  [bool]$ApplyMigrations = $true
+  [bool]$ApplyMigrations = $true,
+  [int]$SqlReadyTimeoutSec = 180,
+  [int]$SqlReadyPollIntervalSec = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -73,6 +75,40 @@ function Invoke-SqlBatch {
   if ($LASTEXITCODE -ne 0) {
     throw "[FAIL] sql batch failed against $DatabaseName."
   }
+}
+
+function Wait-ForSqlReady {
+  param(
+    [Parameter(Mandatory = $true)][string]$ContainerName,
+    [Parameter(Mandatory = $true)][string]$SaPassword,
+    [int]$TimeoutSec = 180,
+    [int]$PollIntervalSec = 5
+  )
+
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  while ((Get-Date) -lt $deadline) {
+    $cmd = @(
+      "exec", $ContainerName,
+      "/opt/mssql-tools18/bin/sqlcmd",
+      "-S", "localhost",
+      "-U", "sa",
+      "-P", $SaPassword,
+      "-C",
+      "-d", "master",
+      "-b",
+      "-Q", "SELECT 1;"
+    )
+
+    & docker @cmd *> $null
+    if ($LASTEXITCODE -eq 0) {
+      Write-Host "[OK] SQL readiness check passed for container '$ContainerName'."
+      return
+    }
+
+    Start-Sleep -Seconds $PollIntervalSec
+  }
+
+  throw "[FAIL] SQL container '$ContainerName' is running but SQL Server is not ready within ${TimeoutSec}s."
 }
 
 function Ensure-Database {
@@ -185,6 +221,7 @@ if ([string]::IsNullOrWhiteSpace($saPassword)) {
 }
 
 Assert-DockerReady -ContainerName $SqlContainerName
+Wait-ForSqlReady -ContainerName $SqlContainerName -SaPassword $saPassword -TimeoutSec $SqlReadyTimeoutSec -PollIntervalSec $SqlReadyPollIntervalSec
 Ensure-Database -ContainerName $SqlContainerName -DatabaseName $Database -SaPassword $saPassword
 
 if ($ApplyMigrations) {

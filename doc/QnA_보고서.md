@@ -4226,3 +4226,18 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - rehearsal/training 용도로는 mock 운영 입력 확인서를 바로 사용할 수 있다.
   - 실제 production cutover에는 사용할 수 없고, 실제 운영값이 확보되면 원본 확인서의 sections 1~7을 채워야 한다.
+
+## Q216. seed-demo-data.ps1 SQL login timeout 원인 분석 및 readiness wait 보강 (2026-03-17)
+- 요청:
+  - `seed-demo-data.ps1` 실행 시 `sqlcmd` login timeout / localhost 접속 실패 원인 확인
+- 수행:
+  1. `docker ps`와 `docker logs scm-sqlserver --tail 40`로 SQL 컨테이너 상태를 점검했다.
+  2. `seed-demo-data.ps1`는 SQL 컨테이너가 `Up`인지만 확인하고 즉시 `sqlcmd`를 실행해, SQL Server 엔진이 아직 접속 준비 전이면 timeout이 발생하는 구조임을 확인했다.
+  3. `scripts/seed-demo-data.ps1`에 `Wait-ForSqlReady`를 추가하고, `SELECT 1` 성공까지 polling 후 seed를 진행하도록 수정했다.
+  4. 같은 명령으로 `SCM_RFT_PRODLIKE` 대상 seed를 즉시 재실행해 PASS를 확인했다.
+- 결과:
+  - 원인은 seed 스크립트의 SQL readiness race였다.
+  - 보강 후에는 `scm-sqlserver` cold start 직후에도 readiness 확인 후 seed가 정상 완료된다.
+  - 재실행 PASS 증적:
+    - `runbooks/evidence/DEMO-SEED-RETRY-*`
+    - `runbooks/evidence/DEMO-SEED-20260317-140828/demo-seed-summary.md`
