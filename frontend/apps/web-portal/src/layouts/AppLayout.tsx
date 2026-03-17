@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -8,8 +8,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
 
   if (!isAuthenticated()) {
-    navigate('/login', { replace: true });
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   const handleLogout = () => {

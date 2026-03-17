@@ -4241,3 +4241,26 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 재실행 PASS 증적:
     - `runbooks/evidence/DEMO-SEED-RETRY-*`
     - `runbooks/evidence/DEMO-SEED-20260317-140828/demo-seed-summary.md`
+
+## Q217. frontend-dev.ps1 실행 시 5173 포트 충돌 원인 확인 (2026-03-17)
+- 요청:
+  - `frontend-dev.ps1` 실행 시 `Port 5173 is already in use` 오류 원인 확인
+- 수행:
+  1. `Get-NetTCPConnection -LocalPort 5173 -State Listen`로 포트 점유 상태를 확인했다.
+  2. 해당 포트를 점유한 프로세스를 조회한 결과 `node.exe`(PID 1656)로 확인했다.
+  3. `http://127.0.0.1:5173`에 직접 요청해 `HTTP 200`을 확인했다.
+- 결과:
+  - 원인은 프론트 dev server가 이미 실행 중인 상태에서 같은 포트로 다시 기동을 시도한 것이었다.
+  - 현재는 기존 Vite dev server를 그대로 사용하면 되고, 브라우저에서 `http://localhost:5173`으로 접속해 데모를 진행하면 된다.
+  - 새로 재기동하려면 기존 `node.exe`(PID 1656)를 종료한 뒤 `frontend-dev.ps1`를 다시 실행하면 된다.
+
+## Q218. 프론트 빈 화면 원인인 인증 가드 렌더링 방식 수정 (2026-03-17)
+- 요청:
+  - `http://localhost:5173/` 접속 시 빈 화면이 표시되는 문제 패치
+- 수행:
+  1. `AppLayout.tsx`에서 인증되지 않은 상태일 때 렌더 중 `navigate('/login')`를 호출하고 `null`을 반환하던 구조를 확인했다.
+  2. 같은 위치를 `<Navigate to="/login" replace />` 반환 방식으로 변경했다.
+  3. 프론트 빌드를 다시 실행해 패치 후 기준선이 유지되는지 검증했다.
+- 결과:
+  - 초기 비인증 진입 시 빈 화면 대신 `/login`으로 정상 리다이렉트되도록 수정했다.
+  - 사용자는 `http://localhost:5173/` 또는 `http://localhost:5173/login` 둘 다 이용할 수 있다.
