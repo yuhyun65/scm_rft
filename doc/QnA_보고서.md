@@ -4264,3 +4264,17 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - 초기 비인증 진입 시 빈 화면 대신 `/login`으로 정상 리다이렉트되도록 수정했다.
   - 사용자는 `http://localhost:5173/` 또는 `http://localhost:5173/login` 둘 다 이용할 수 있다.
+
+## Q219. 프론트 깨진 한글 문자열 복구 및 HISCM -> Mate-SCM 화면 브랜딩 변경 (2026-03-17)
+- 요청:
+  - 프론트 깨진 한글 문자열 복구
+  - 모든 유저 화면의 `HISCM`을 `Mate-SCM`으로 변경
+- 수행:
+  1. `frontend/apps/web-portal/src/components`와 `pages`의 사용자 노출 문자열을 전수 점검했다.
+  2. 깨진 한글 문구가 포함된 공통 컴포넌트(`Header`, `Sidebar`, `Pagination`, `StatusBadge`)와 주요 페이지(`Login`, `Dashboard`, `OrderList`, `OrderDetail`, `Inventory`, `Member`, `QualityDoc`, `Board`, `Report`)를 정상 한국어 문구로 교체했다.
+  3. 모든 사용자 노출 브랜드 명칭을 `Mate-SCM`으로 통일하고, `formatPortalTitle` 테스트 기대값도 함께 갱신했다.
+  4. `rg`로 `HISCM` 잔여 문자열 및 대표적인 깨진 문자열 패턴이 남아 있지 않은지 재검색하고, 프론트 build/test를 재실행했다.
+- 결과:
+  - 사용자 화면 문자열은 정상 한국어 기준으로 복구됐다.
+  - 사용자 노출 브랜드는 `Mate-SCM`으로 통일됐다.
+  - 프론트 build/test가 최신 기준으로 통과했다.

@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+﻿import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 
 interface NavItem {
@@ -10,39 +10,31 @@ interface NavItem {
 
 const NAV: { section: string; items: NavItem[] }[] = [
   {
-    section: '홈',
-    items: [{ icon: '🏠', label: '대시보드', path: '/dashboard' }],
+    section: '메인',
+    items: [{ icon: '홈', label: '대시보드', path: '/dashboard' }],
   },
   {
     section: '주문/생산',
-    items: [
-      { icon: '📦', label: '주문 관리', path: '/orders' },
-    ],
+    items: [{ icon: '주문', label: '주문 관리', path: '/orders' }],
   },
   {
     section: '재고/물류',
-    items: [
-      { icon: '🗃️', label: '재고 현황', path: '/inventory' },
-    ],
+    items: [{ icon: '재고', label: '재고 현황', path: '/inventory' }],
   },
   {
     section: '거래처/인원',
-    items: [
-      { icon: '🏢', label: '거래처 관리', path: '/members' },
-    ],
+    items: [{ icon: '거래처', label: '거래처 관리', path: '/members' }],
   },
   {
     section: '품질/문서',
     items: [
-      { icon: '✅', label: '품질 문서', path: '/quality-docs', badge: 3 },
-      { icon: '📋', label: '게시판', path: '/board' },
+      { icon: '품질', label: '품질 문서', path: '/quality-docs', badge: 3 },
+      { icon: '게시', label: '게시판', path: '/board' },
     ],
   },
   {
     section: '보고서',
-    items: [
-      { icon: '📊', label: '보고서 생성', path: '/reports' },
-    ],
+    items: [{ icon: '보고', label: '보고서 생성', path: '/reports' }],
   },
 ];
 
@@ -54,14 +46,14 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <div>
-          <div className="logo-text">HISCM</div>
-          <div className="logo-sub">공급망 관리 시스템</div>
+          <div className="logo-text">Mate-SCM</div>
+          <div className="logo-sub">공급망 운영 포털</div>
         </div>
       </div>
       {NAV.map(({ section, items }) => (
         <div key={section}>
           <div className="sidebar-section">{section}</div>
-          {items.map(item => (
+          {items.map((item) => (
             <div
               key={item.path}
               className={clsx('sidebar-item', { active: pathname.startsWith(item.path) })}
@@ -69,9 +61,7 @@ export default function Sidebar() {
             >
               <span className="sidebar-icon">{item.icon}</span>
               {item.label}
-              {item.badge !== undefined && (
-                <span className="sidebar-badge">{item.badge}</span>
-              )}
+              {item.badge !== undefined && <span className="sidebar-badge">{item.badge}</span>}
             </div>
           ))}
         </div>

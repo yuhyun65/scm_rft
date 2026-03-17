@@ -14,7 +14,7 @@ import ReportPage from './pages/ReportPage';
 
 /** @deprecated kept for test compatibility */
 export function formatPortalTitle(scope: string): string {
-  return `SCM Web Portal (${scope})`;
+  return `Mate-SCM Portal (${scope})`;
 }
 
 const apiBaseUrl = (import.meta as { env?: Record<string, string> }).env?.VITE_API_BASE_URL ?? '';
@@ -53,3 +53,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+

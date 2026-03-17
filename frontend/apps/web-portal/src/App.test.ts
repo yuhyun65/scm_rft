@@ -4,7 +4,7 @@ import { formatApiError, ApiError } from "@scm-rft/api-client";
 
 describe("formatPortalTitle", () => {
   it("appends scope text", () => {
-    expect(formatPortalTitle("scm-rft")).toBe("SCM Web Portal (scm-rft)");
+    expect(formatPortalTitle("scm-rft")).toBe("Mate-SCM Portal (scm-rft)");
   });
 });
 
