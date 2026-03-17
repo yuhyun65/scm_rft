@@ -4102,3 +4102,14 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 문서명이 HISCM 범위를 가리키며 SCM_RFT 구현/운영 기준선 문서가 아님
   - 장기 유지보수 대상은 SCM_RFT 코드 저장소가 아니라 상위 HISCM 문서 라인에 가깝다
   - 현재 SCM_RFT에는 제외 정책만 유지하고 물리 이동/삭제는 수행하지 않음
+
+## Q209. PR #85 머지 및 기준 브랜치 동기화 완료 (2026-03-17)
+- 수행:
+  1. PR #85 체크 완료 확인 후 merge 진행
+  2. 기준 브랜치 `feature/to-be-dev-env-bootstrap`로 복귀
+  3. `git pull --ff-only`로 기준 브랜치 최신 상태 동기화
+- 결과:
+  - PR #84: MERGED (`ece4e610a12c644912b206c15ef9d7100d0f6c97`)
+  - PR #85: MERGED (`d00cb1122f627a05278f06e8c6b88df870722113`)
+  - 기준 브랜치에는 frontend routed shell foundation과 redesign docs/process bundle이 모두 반영됨
+  - 현재 로컬 잔여 파일은 정책상 제외한 `doc/HISCM_MSA_개발이력보고서.docx` 1건뿐임
