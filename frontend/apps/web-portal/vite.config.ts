@@ -5,6 +5,9 @@ const proxyTarget = process.env.VITE_GATEWAY_PROXY_TARGET ?? "http://localhost:1
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    environment: "node"
+  },
   server: {
     host: "0.0.0.0",
     port: 5173,

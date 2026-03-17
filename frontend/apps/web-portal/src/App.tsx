@@ -1,98 +1,55 @@
-import { useEffect, useState } from "react";
-import { describePortalScope } from "@scm-rft/ui";
-import { readContractCatalog } from "@scm-rft/api-client";
-import { AuthMemberPanel } from "./features/auth-member-panel";
-import { BoardQualityDocPanel } from "./features/board-qualitydoc-panel";
-import { CutoverRunnerPanel } from "./features/cutover-runner-panel";
-import { InventoryFileReportPanel } from "./features/inventory-file-report-panel";
-import { OrderLotPanel } from "./features/order-lot-panel";
+﻿import { useMemo } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AppLayout from './layouts/AppLayout';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import OrderListPage from './pages/OrderListPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import InventoryPage from './pages/InventoryPage';
+import MemberPage from './pages/MemberPage';
+import QualityDocPage from './pages/QualityDocPage';
+import BoardPage from './pages/BoardPage';
+import ReportPage from './pages/ReportPage';
 
-const TOKEN_STORAGE_KEY = "scm-rft.access-token";
-
-export function formatPortalTitle(scope: string) {
+/** @deprecated kept for test compatibility */
+export function formatPortalTitle(scope: string): string {
   return `SCM Web Portal (${scope})`;
 }
 
-function readStoredToken() {
-  return window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+const apiBaseUrl = (import.meta as { env?: Record<string, string> }).env?.VITE_API_BASE_URL ?? '';
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
+});
+
+export function createAppRouter(resolvedApiBaseUrl: string) {
+  return createBrowserRouter([
+    { path: '/login', element: <LoginPage apiBaseUrl={resolvedApiBaseUrl} /> },
+    {
+      element: <AppLayout />,
+      children: [
+        { path: '/', element: <Navigate to="/dashboard" replace /> },
+        { path: '/dashboard', element: <DashboardPage /> },
+        { path: '/orders', element: <OrderListPage /> },
+        { path: '/orders/:orderId', element: <OrderDetailPage /> },
+        { path: '/inventory', element: <InventoryPage /> },
+        { path: '/members', element: <MemberPage /> },
+        { path: '/quality-docs', element: <QualityDocPage /> },
+        { path: '/board', element: <BoardPage /> },
+        { path: '/reports', element: <ReportPage /> },
+      ],
+    },
+    { path: '*', element: <Navigate to="/dashboard" replace /> },
+  ]);
 }
 
 export default function App() {
-  const catalog = readContractCatalog();
-  const [accessToken, setAccessToken] = useState(() => readStoredToken());
-  const [currentMemberId, setCurrentMemberId] = useState("");
-  const title = formatPortalTitle(describePortalScope("scm-rft"));
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
-  const boardApiBaseUrl = import.meta.env.VITE_BOARD_API_BASE_URL ?? apiBaseUrl;
-  const qualityDocApiBaseUrl = import.meta.env.VITE_QUALITY_DOC_API_BASE_URL ?? apiBaseUrl;
-  const inventoryApiBaseUrl = import.meta.env.VITE_INVENTORY_API_BASE_URL ?? apiBaseUrl;
-  const fileApiBaseUrl = import.meta.env.VITE_FILE_API_BASE_URL ?? apiBaseUrl;
-  const reportApiBaseUrl = import.meta.env.VITE_REPORT_API_BASE_URL ?? apiBaseUrl;
-  const orderLotApiBaseUrl = import.meta.env.VITE_ORDER_LOT_API_BASE_URL ?? apiBaseUrl;
-
-  useEffect(() => {
-    if (accessToken) {
-      window.localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
-      return;
-    }
-    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-  }, [accessToken]);
+  const router = useMemo(() => createAppRouter(apiBaseUrl), []);
 
   return (
-    <main className="shell">
-      <header className="hero">
-        <p className="eyebrow">Frontend Modernization</p>
-        <h1>{title}</h1>
-        <p className="heroText">
-          The portal now covers Auth, Member, Board, Quality-Doc, Inventory, File, Report, and
-          Order-Lot MVP paths, plus an integrated P0 runner so the main gateway workflow can be
-          exercised from one surface.
-        </p>
-        <div className="heroMeta">
-          <span>Contracts: {catalog.contracts.length}</span>
-          <span>Auth/Member base: {apiBaseUrl || "(same origin)"}</span>
-          <span>Board base: {boardApiBaseUrl || "(same origin)"}</span>
-          <span>Quality-Doc base: {qualityDocApiBaseUrl || "(same origin)"}</span>
-          <span>Inventory base: {inventoryApiBaseUrl || "(same origin)"}</span>
-          <span>File base: {fileApiBaseUrl || "(same origin)"}</span>
-          <span>Report base: {reportApiBaseUrl || "(same origin)"}</span>
-          <span>Order-Lot base: {orderLotApiBaseUrl || "(same origin)"}</span>
-        </div>
-      </header>
-
-      <AuthMemberPanel
-        apiBaseUrl={apiBaseUrl}
-        accessToken={accessToken}
-        onAccessTokenChange={setAccessToken}
-        onLoginSuccess={setCurrentMemberId}
-      />
-
-      <BoardQualityDocPanel
-        boardApiBaseUrl={boardApiBaseUrl}
-        qualityDocApiBaseUrl={qualityDocApiBaseUrl}
-        accessToken={accessToken}
-        memberIdHint={currentMemberId}
-      />
-
-      <InventoryFileReportPanel
-        inventoryApiBaseUrl={inventoryApiBaseUrl}
-        fileApiBaseUrl={fileApiBaseUrl}
-        reportApiBaseUrl={reportApiBaseUrl}
-        accessToken={accessToken}
-        memberIdHint={currentMemberId}
-      />
-
-      <OrderLotPanel
-        apiBaseUrl={orderLotApiBaseUrl}
-        accessToken={accessToken}
-        changedByHint={currentMemberId}
-      />
-
-      <CutoverRunnerPanel
-        apiBaseUrl={apiBaseUrl}
-        accessToken={accessToken}
-        memberIdHint={currentMemberId}
-      />
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }
