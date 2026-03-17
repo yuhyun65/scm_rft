@@ -4084,3 +4084,12 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - PR #84는 review-ready
   - PR #85는 문서 범위/정책 기준이 코멘트로 고정됨
   - seed 관련 수동 문서/SQL 경로는 canonical demo seed 경로와 중복되므로 이번 라인에서는 포함하지 않음
+
+## Q207. canonical demo seed 경로 보강 (2026-03-17)
+- 수행:
+  1. runbooks/demo-data-runbook.md에 canonical seed path를 명시
+  2. runbooks/user-demo-runbook.md에 manual SQL 경로 배제와 canonical seed guide를 명시
+  3. cold-start actual-topology 기준으로 auth/member smoke 검증 명령에 `-HealthWaitTimeoutSec 300`을 반영
+- 결과:
+  - SCM_RFT demo seed 기준 문서는 `seed-demo-data.ps1 + demo-data-runbook.md`로 명확히 고정됨
+  - 사용자 데모 runbook도 동일 기준을 따르도록 정리됨
