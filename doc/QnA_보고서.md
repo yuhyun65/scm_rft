@@ -4093,3 +4093,12 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - SCM_RFT demo seed 기준 문서는 `seed-demo-data.ps1 + demo-data-runbook.md`로 명확히 고정됨
   - 사용자 데모 runbook도 동일 기준을 따르도록 정리됨
+
+## Q208. HISCM_MSA_개발이력보고서.docx 기준 위치 결정 (2026-03-17)
+- 결정:
+  - `doc/HISCM_MSA_개발이력보고서.docx`는 SCM_RFT에 두지 않음
+  - canonical home은 `C:\Users\CMN-091\projects\HISCM\docs`로 본다
+- 근거:
+  - 문서명이 HISCM 범위를 가리키며 SCM_RFT 구현/운영 기준선 문서가 아님
+  - 장기 유지보수 대상은 SCM_RFT 코드 저장소가 아니라 상위 HISCM 문서 라인에 가깝다
+  - 현재 SCM_RFT에는 제외 정책만 유지하고 물리 이동/삭제는 수행하지 않음

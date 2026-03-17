@@ -25,7 +25,7 @@ Reason:
   - canonical path: `scripts/seed-demo-data.ps1`
   - canonical operator doc: `runbooks/demo-data-runbook.md`
 - the manual SQL path hardcodes database/schema assumptions and is not part of the validated gate/demo baseline
-- `doc/HISCM_MSA_개발이력보고서.docx` is a format-specific handoff artifact whose canonical home is not fixed to SCM_RFT
+- `doc/HISCM_MSA_개발이력보고서.docx` is a format-specific HISCM handoff artifact whose canonical home is `C:\Users\CMN-091\projects\HISCM\docs`, not SCM_RFT
 
 ## Working Rule
 1. commit runtime/source changes only when they are referenced by code or runbooks
@@ -40,3 +40,4 @@ Add these patterns to `.git/info/exclude`:
 - `doc/seed-data-guide.md`
 - `sql/seed_data.sql`
 - `doc/HISCM_MSA_개발이력보고서.docx`
+
