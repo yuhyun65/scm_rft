@@ -23,6 +23,11 @@ Use full feature demo if you want to show:
 - Quality-Doc ACK
 - Report job create
 
+## Demo Seed Rule
+- Use only `scripts/seed-demo-data.ps1` for SCM_RFT demo data.
+- Do not use `doc/seed-data-guide.md` or `sql/seed_data.sql` for the current SCM_RFT baseline.
+- Canonical seed guide: `runbooks/demo-data-runbook.md`
+
 ## Terminal 1. Backend Start
 ```powershell
 Set-Location C:\Users\CMN-091\projects\SCM_RFT
@@ -59,7 +64,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-gateway-auth-member-e2e
   -Database "SCM_RFT_PRODLIKE" `
   -SqlContainerName "scm-sqlserver" `
   -EnvFile ".env.production" `
-  -SeedData:$false
+  -SeedData:$false `
+  -HealthWaitTimeoutSec 300
 ```
 
 Expected result:

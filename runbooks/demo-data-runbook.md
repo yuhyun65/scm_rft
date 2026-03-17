@@ -5,6 +5,12 @@
 - Keep smoke/P0 seed accounts compatible while adding more search results and status variety.
 - Produce a summary file with the exact demo accounts and sample IDs.
 
+## Canonical Seed Path
+- SCM_RFT canonical demo-seed path is `scripts/seed-demo-data.ps1`.
+- SCM_RFT canonical operator guide is this document: `runbooks/demo-data-runbook.md`.
+- Do not use `doc/seed-data-guide.md` or `sql/seed_data.sql` for the current SCM_RFT baseline.
+- If a manual SQL seed path is ever adopted, it must replace the current script path explicitly in a separate issue/PR.
+
 ## Preconditions
 - Repository: `C:\Users\CMN-091\projects\SCM_RFT`
 - Docker Desktop running
@@ -65,10 +71,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\smoke-gateway-auth-member-e2e
   -Database "SCM_RFT_PRODLIKE" `
   -SqlContainerName "scm-sqlserver" `
   -EnvFile ".env.production" `
-  -SeedData:$false
+  -SeedData:$false `
+  -HealthWaitTimeoutSec 300
 ```
 
 ## Notes
 - The script is idempotent. Re-running updates the same deterministic IDs.
 - It does not delete data outside the fixed demo catalog.
 - Use `post-cutover-write-open.yaml` if you want to demonstrate write actions in the browser.
+- For actual-topology cold starts, use the longer health wait shown above.
