@@ -4073,3 +4073,14 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - PR #84: 로컬 게이트 증적 연결 완료
   - PR #85: `docs(scm-253): add frontend redesign process bundle` 생성 완료
   - 남은 untracked는 `seed-data-guide.md`, `seed_data.sql`, `HISCM_MSA_개발이력보고서.docx`만 정책 판단 대상으로 유지
+
+## Q206. PR #84 리뷰 준비 완료 및 seed 문서/SQL 제외 결정 (2026-03-17)
+- 수행:
+  1. PR #84의 GitHub 체크 PASS 확인 후 Draft를 해제해 review-ready 상태로 전환
+  2. PR #85에 문서 범위(in/out)와 포함 정책 코멘트 추가
+  3. `doc/seed-data-guide.md`, `sql/seed_data.sql`, `doc/HISCM_MSA_개발이력보고서.docx`를 현재 SCM_RFT 기준선에서는 제외 대상으로 확정
+  4. `runbooks/untracked-file-policy.md`와 `.git/info/exclude`에 제외 기준을 반영
+- 결과:
+  - PR #84는 review-ready
+  - PR #85는 문서 범위/정책 기준이 코멘트로 고정됨
+  - seed 관련 수동 문서/SQL 경로는 canonical demo seed 경로와 중복되므로 이번 라인에서는 포함하지 않음

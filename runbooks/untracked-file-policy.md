@@ -14,27 +14,29 @@ Reason:
 - no long-term ownership
 - not referenced by runbooks or product documentation
 
-## Version-Control Candidates
-These files can be committed only after explicit ownership and purpose are confirmed.
+## Exclude From SCM_RFT For Now
+These files are not included in SCM_RFT at the current baseline.
 - `doc/seed-data-guide.md`
-  - include if it becomes the canonical demo/seed operator guide for SCM_RFT
 - `sql/seed_data.sql`
-  - include if it is the maintained source-of-truth SQL for reusable demo/seed data provisioning
-
-## Hold / Out Of Scope For SCM_RFT
-These files should stay out of the repo unless the user explicitly decides SCM_RFT is the canonical home.
 - `doc/HISCM_MSA_개발이력보고서.docx`
 
 Reason:
-- format-specific handoff/report artifact
-- ownership and long-term maintenance target are not yet defined
+- `doc/seed-data-guide.md` and `sql/seed_data.sql` duplicate the current canonical demo-seed flow
+  - canonical path: `scripts/seed-demo-data.ps1`
+  - canonical operator doc: `runbooks/demo-data-runbook.md`
+- the manual SQL path hardcodes database/schema assumptions and is not part of the validated gate/demo baseline
+- `doc/HISCM_MSA_개발이력보고서.docx` is a format-specific handoff artifact whose canonical home is not fixed to SCM_RFT
 
 ## Working Rule
 1. commit runtime/source changes only when they are referenced by code or runbooks
 2. commit docs only when they have a clear owner and update path
 3. keep scratch outputs in local exclude, not in Git history
+4. keep one canonical seed path in SCM_RFT; do not version duplicate manual seed paths without an explicit replacement decision
 
 ## Local Exclude Rules
 Add these patterns to `.git/info/exclude`:
 - `_tmp_*`
 - `frontend/_tmp_*`
+- `doc/seed-data-guide.md`
+- `sql/seed_data.sql`
+- `doc/HISCM_MSA_개발이력보고서.docx`
