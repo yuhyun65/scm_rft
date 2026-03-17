@@ -4005,3 +4005,48 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - 오늘 로컬 데모/통합테스트용 세션 정리 완료
   - 다음 턴은 clean한 로컬 런타임 상태에서 재시작 가능
+
+## Q201. 프론트 WIP 라우터 초기화와 테스트 환경 정렬 (2026-03-17)
+- 요청:
+  - App.tsx의 라우터 초기화와 테스트 환경을 맞춰 현재 프론트 WIP의 build/test를 통과시키기.
+- 수행:
+  1. frontend/apps/web-portal/src/App.tsx에서 createBrowserRouter(...)를 모듈 로드 시점에서 제거하고, createAppRouter(...) 함수로 분리한 뒤 App 내부 useMemo에서 초기화하도록 변경
+  2. frontend/apps/web-portal/vite.config.ts에 test.environment = "node"를 명시해 현재 단위 테스트 성격과 런타임 조건을 일치시킴
+  3. scripts/use-toolchain.ps1 적용 후 corepack pnpm -C .\frontend --filter @scm-rft/web-portal build 실행
+  4. scripts/use-toolchain.ps1 적용 후 corepack pnpm -C .\frontend --filter @scm-rft/web-portal test 실행
+- 결과:
+  - build PASS
+  - unit test PASS (5 files, 16 tests)
+  - 기존 실패 원인인 document is not defined 문제가 해소되어 현재 프론트 WIP는 최소 build/test 기준을 충족함
+- 참고:
+  - package.json, pnpm-lock.yaml, App.tsx, styles.css의 기존 사용자 변경은 그대로 유지했고 이번 턴은 App.tsx와 vite.config.ts만 최소 수정
+
+## Q202. 프론트 WIP 전용 브랜치 분리, 브라우저 smoke, PR 분할 정리 (2026-03-17)
+- 요청:
+  1. 현재 프론트 WIP를 전용 브랜치로 분리
+  2. frontend-dev 기준 브라우저 smoke 1회 실행
+  3. 그 다음 PR 단위로 정리
+- 수행:
+  1. dirty worktree를 유지한 채 `feature/scm-252-frontend-redesign-foundation` 브랜치를 생성해 기준 브랜치와 분리
+  2. App.tsx 라우터 초기화와 vite.config.ts 테스트 환경 정렬 후 `frontend build`, `frontend test`를 PASS로 맞춤
+  3. actual-topology backend를 기동하고 `smoke-gateway-auth-member-e2e.ps1 -HealthWaitTimeoutSec 300`으로 auth/member/gateway smoke를 통과시킨 뒤 `frontend-dev.ps1`와 proxy login 기준 브라우저 smoke를 PASS로 확보
+  4. 현재 WIP를 merge 가능한 묶음으로 나누기 위해 `runbooks/frontend-redesign-pr-split.md`를 생성하고 구현 PR(`SCM-252`)과 문서 PR(`SCM-253`)로 분할 기준을 정리
+- 결과:
+  - 현재 프론트 WIP는 전용 브랜치에서 관리되며 build/test/browser smoke 기준을 충족함
+  - `SCM-252` 구현 PR과 `SCM-253` 문서 PR로 나누는 방식이 가장 안전한 정리안으로 확정됨
+- 증적:
+  - `runbooks/evidence/SCM-252-BROWSER-SMOKE-20260317-113505/`
+  - `runbooks/frontend-redesign-pr-split.md`
+
+## Q203. SCM-252 구현 커밋/드래프트 PR 및 SCM-253 문서 브랜치 분리 (2026-03-17)
+- 요청:
+  1. SCM-252 범위만 선별 커밋
+  2. Draft PR 생성
+  3. SCM-253 문서 묶음은 별도 브랜치로 분리
+- 수행:
+  1. frontend routed shell 관련 코드/설정 파일만 선별해 `feat(frontend): add routed shell foundation` 커밋(84f27f3)
+  2. `feature/scm-252-frontend-redesign-foundation`를 원격에 push하고 Draft PR #84 생성
+  3. 문서 묶음을 `feature/scm-253-frontend-redesign-docs` 브랜치로 분리하고, QnA/분할 계획/디자인·프로세스 문서를 별도 커밋 대상으로 정리
+- 결과:
+  - SCM-252 구현 변경은 Draft PR #84로 분리됨
+  - SCM-253 문서 묶음은 별도 브랜치에서 독립적으로 정리 가능한 상태가 됨
