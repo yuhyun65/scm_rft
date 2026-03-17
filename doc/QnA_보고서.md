@@ -4215,3 +4215,14 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 운영 담당자에게 전달할 입력 양식은 준비 완료.
   - sections 1~7 실제 값 반영은 회신 수신 후 즉시 진행 가능.
   - 현재 blocker는 운영 입력값 미수신이다.
+
+## Q215. production 운영 입력 확인서의 rehearsal-only mock 버전 생성 (2026-03-17)
+- 요청:
+  - 운영 담당자 회신값을 가상의 값으로 만들 수 있는지 검토 후 진행
+- 수행:
+  1. 실제 production 확인서(`runbooks/production-secret-access-confirmation.md`)는 유지하고, 별도 rehearsal-only 문서로 `runbooks/production-secret-access-confirmation.mock.md`를 생성했다.
+  2. 모든 값은 `MOCK-` 또는 `EXAMPLE-` 접두사로 채워 실제 운영 승인 근거로 사용할 수 없도록 분리했다.
+  3. secret manager, bastion, execution account, DB name, owner, maintenance window, approved command 예시를 포함해 절차 연습용으로 정리했다.
+- 결과:
+  - rehearsal/training 용도로는 mock 운영 입력 확인서를 바로 사용할 수 있다.
+  - 실제 production cutover에는 사용할 수 없고, 실제 운영값이 확보되면 원본 확인서의 sections 1~7을 채워야 한다.
