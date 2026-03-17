@@ -2,8 +2,8 @@
 
 ## Scope
 - Baseline branch: `feature/to-be-dev-env-bootstrap`
-- Runtime baseline: `e464c2084eded932aeb07cb51300a67c19ecf62d`
-- Release tag: `v2026.03.16-scm-rft-operational-go`
+- Runtime baseline: `850c83c50fc2fb908f25c45affdce50a7ca72180`
+- Release tag: `v2026.03.17-scm-rft-operational-go`
 - Objective: close the remaining operational execution gaps before actual production cutover.
 
 ## Current State

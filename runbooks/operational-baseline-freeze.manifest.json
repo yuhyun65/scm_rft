@@ -1,49 +1,49 @@
-﻿{
-    "freeze_id":  "OPS-FREEZE-20260316-R2",
-    "effective_at":  "2026-03-16 15:10:00 +09:00",
-    "baseline_branch":  "feature/to-be-dev-env-bootstrap",
-    "baseline_commit":  "e464c20",
-    "release_tag":  "v2026.03.16-scm-rft-operational-go",
-    "files":  [
-                  {
-                      "path":  "runbooks/release-note.md",
-                      "sha256":  "b2b7e4c74399e53e847311cdcf18e6d9a8ed93f208f09ccc7bba4b96efc74413"
-                  },
-                  {
-                      "path":  "runbooks/go-nogo-signoff.md",
-                      "sha256":  "aac2826d806087d12882439e2c3adc99fba078231e600ced0eaaaa24f0036322"
-                  },
-                  {
-                      "path":  "runbooks/prod-deploy-orchestration-runbook.md",
-                      "sha256":  "d241c550e0cf3387e51fb1f4db72e526024f5615d4c8c0a075f612294e54f7dc"
-                  },
-                  {
-                      "path":  "runbooks/cutover-day-runbook.md",
-                      "sha256":  "2052133f1f2f956260819d24ec55783b763f92b4266c4dc616a21bf5090c6675"
-                  },
-                  {
-                      "path":  "runbooks/production-cutover-execution-checklist.md",
-                      "sha256":  "68e8200134dc6538c86a07848bfded5464ac0415dc9be4a137836363765e3827"
-                  },
-                  {
-                      "path":  "runbooks/actual-cutover-topology-rehearsal-runbook.md",
-                      "sha256":  "ea1f95e36ef6a120a37b7344c4a6df654ed663e4ee823f12845a95f7fb3d6c13"
-                  },
-                  {
-                      "path":  "docker-compose.actual-topology.yml",
-                      "sha256":  "7a1a47fc4ab8b2206fe0aca89b4f0ff735cd4bbe209cdf20aa68db3f41bb96ff"
-                  },
-                  {
-                      "path":  "infra/gateway/policies/cutover-isolation.yaml",
-                      "sha256":  "119f63f9d8aa666206d26626114683b42192a02f0cfd33c9c1764d24f9cde5cd"
-                  },
-                  {
-                      "path":  "infra/gateway/policies/post-cutover-write-open.yaml",
-                      "sha256":  "814de4582969e40616068652f30ed05dd91325016642fce277f47c1e7bf573aa"
-                  },
-                  {
-                      "path":  "doc/roadmap/progress.json",
-                      "sha256":  "1ada44d1596c20c1123718ba7065a5d873ce391744d31bb7988d0b4cf448d4df"
-                  }
-              ]
+{
+  "freeze_id": "OPS-FREEZE-20260317-R3",
+  "effective_at": "2026-03-17 13:46:18 +09:00",
+  "baseline_branch": "feature/to-be-dev-env-bootstrap",
+  "baseline_commit": "850c83c",
+  "release_tag": "v2026.03.17-scm-rft-operational-go",
+  "files": [
+    {
+      "path": "runbooks/release-note.md",
+      "sha256": "bce6d9a466973bdc53ca4fb70903dbf4cbccf7ff165bb5bcbafc6fcf1c43d8ed"
+    },
+    {
+      "path": "runbooks/go-nogo-signoff.md",
+      "sha256": "8a32c8a95f07a428ed12d699b3736a994cfa8b08813b66f75e955403c4098aa8"
+    },
+    {
+      "path": "runbooks/prod-deploy-orchestration-runbook.md",
+      "sha256": "d241c550e0cf3387e51fb1f4db72e526024f5615d4c8c0a075f612294e54f7dc"
+    },
+    {
+      "path": "runbooks/cutover-day-runbook.md",
+      "sha256": "bc8b8d5ee8f495d0715d7b7403bf271e8c3df82396464303d2cc953c2cfa011c"
+    },
+    {
+      "path": "runbooks/production-cutover-execution-checklist.md",
+      "sha256": "a84951df7654aaf5272b46c7aff6f00952f1d7995ff41d8d4b7858023ae8b10d"
+    },
+    {
+      "path": "runbooks/actual-cutover-topology-rehearsal-runbook.md",
+      "sha256": "ea1f95e36ef6a120a37b7344c4a6df654ed663e4ee823f12845a95f7fb3d6c13"
+    },
+    {
+      "path": "docker-compose.actual-topology.yml",
+      "sha256": "7a1a47fc4ab8b2206fe0aca89b4f0ff735cd4bbe209cdf20aa68db3f41bb96ff"
+    },
+    {
+      "path": "infra/gateway/policies/cutover-isolation.yaml",
+      "sha256": "119f63f9d8aa666206d26626114683b42192a02f0cfd33c9c1764d24f9cde5cd"
+    },
+    {
+      "path": "infra/gateway/policies/post-cutover-write-open.yaml",
+      "sha256": "814de4582969e40616068652f30ed05dd91325016642fce277f47c1e7bf573aa"
+    },
+    {
+      "path": "doc/roadmap/progress.json",
+      "sha256": "1ada44d1596c20c1123718ba7065a5d873ce391744d31bb7988d0b4cf448d4df"
+    }
+  ]
 }

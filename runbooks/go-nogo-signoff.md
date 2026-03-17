@@ -161,3 +161,28 @@ Note: health probe result in each summary depends on service runtime state at me
 - The remaining open gap from section 9 is closed.
 - `cutover-isolation.yaml` + actual container-network topology validation is complete.
 - Final current state: `GO (actual production-topology validation completed)`
+
+
+## 11) Superseding Current-Base Sync (2026-03-17)
+
+### Sync Inputs
+- Superseding Base SHA: `850c83c50fc2fb908f25c45affdce50a7ca72180`
+- Previous operational freeze base SHA: `e464c2084eded932aeb07cb51300a67c19ecf62d`
+- Backend/runtime evidence root retained: `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/`
+- Browser demo revalidation evidence root: `runbooks/evidence/BASELINE-DEMO-REVALIDATE-20260317-132414/`
+- Diff scope since previous freeze: frontend routed shell foundation, redesign docs/process bundle, demo seed/operator guidance, readiness-safe auth/member demo smoke
+
+### Sync Result
+- Backend/runtime authoritative result remains `GO` from section 10.
+- Current-base browser demo revalidation: PASS
+- Confirmed on the merged base branch:
+  - SQL readiness by container log signature: PASS
+  - rich demo seed: PASS
+  - gateway auth/member smoke: PASS
+  - frontend origin load: PASS
+  - Vite proxy login: PASS
+
+### Sync Decision
+- The operational baseline is superseded from `e464c20` to `850c83c`.
+- Superseding release tag: `v2026.03.17-scm-rft-operational-go`
+- Current final state: `GO (current-base freeze/signoff synchronized)`

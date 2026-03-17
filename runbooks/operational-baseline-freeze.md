@@ -1,15 +1,16 @@
 # Operational Baseline Freeze
 
 ## Freeze Metadata
-- Freeze ID: `OPS-FREEZE-20260316-R2`
-- Effective At: `2026-03-16 15:10:00 +09:00`
+- Freeze ID: `OPS-FREEZE-20260317-R3`
+- Effective At: `2026-03-17 13:46:18 +09:00`
 - Baseline Branch: `feature/to-be-dev-env-bootstrap`
-- Baseline Commit: `e464c20`
-- Release Tag: `v2026.03.16-scm-rft-operational-go`
+- Baseline Commit: `850c83c`
+- Release Tag: `v2026.03.17-scm-rft-operational-go`
 
 ## Purpose
-- Freeze the final operational baseline after actual production-topology validation.
-- Use this baseline for production secret rendering, cutover execution, and hypercare.
+- Supersede the 2026-03-16 operational freeze after merging the frontend redesign foundation and documentation/process bundle.
+- Keep the 2026-03-16 actual production-topology validation as the authoritative backend/runtime proof.
+- Add 2026-03-17 browser demo revalidation so the current baseline branch is synchronized for operator/demo usage.
 - Any runtime or gateway policy change after this point requires a new Issue -> Branch -> PR -> tag.
 
 ## Frozen Files (SHA256)
@@ -31,17 +32,19 @@ Reference: `runbooks/operational-baseline-freeze.manifest.json`
 ## Decision Rules
 1. Runtime changes after this freeze require a new release tag and freeze revision.
 2. Documentation-only updates are allowed only if they do not change runtime behavior and are logged in `doc/QnA_보고서.md`.
-3. Production execution must use baseline commit `e464c20` or a superseding approved freeze.
+3. Production execution must use baseline commit `850c83c` or a superseding approved freeze.
 
 ## Validation Baseline
-- Actual topology evidence root: `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/`
-- `migration-dry-run`: PASS
-- `smoke-test`: PASS
-- `smoke-gateway-p0-e2e.ps1`: PASS
+- Backend/runtime authoritative evidence: `runbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/`
+- Current-base browser/demo evidence: `runbooks/evidence/BASELINE-DEMO-REVALIDATE-20260317-132414/`
+- Runtime delta from previous freeze:
+  - No backend service runtime changes under `services/auth`, `services/member`, `services/gateway`, `services/board`, `services/quality-doc`, `services/order-lot`, `services/inventory`, `services/file`, `services/report`
+  - No migration delta under `migration/flyway/`
+  - No gateway policy runtime delta under `infra/gateway/policies/`
 - Current DoD blockers: `0`
 
 ## Immediate Next Actions
-1. Render `.env.production` from the approved secret manager values on the target runtime.
-2. Execute final production cutover by `runbooks/cutover-day-runbook.md`.
-3. Start hypercare monitoring by `runbooks/hypercare-rollback-monitoring-checklist.md`.
-﻿
+1. Fill `runbooks/production-secret-access-confirmation.md` with the real production secret/access inputs.
+2. Render `.env.production` from the approved secret manager values on the target runtime.
+3. Execute final production cutover by `runbooks/cutover-day-runbook.md`.
+4. Start hypercare monitoring by `runbooks/hypercare-rollback-monitoring-checklist.md`.

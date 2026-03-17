@@ -1096,9 +1096,12 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - eature/scm-211-board-qualitydoc-mvp
     - eature/scm-212-gateway-policy-runtime
   - 필수 게이트 실행(각 이슈 워크트리): build, unit-integration-test, contract-test, smoke-test, migration-dry-run
-    - SCM-210 evidence: unbooks/evidence/SCM-210-20260226-124328/
-    - SCM-211 evidence: unbooks/evidence/SCM-211-20260226-124514/
-    - SCM-212 evidence: unbooks/evidence/SCM-212-20260226-124717/
+    - SCM-210 evidence: 
+unbooks/evidence/SCM-210-20260226-124328/
+    - SCM-211 evidence: 
+unbooks/evidence/SCM-211-20260226-124514/
+    - SCM-212 evidence: 
+unbooks/evidence/SCM-212-20260226-124717/
   - PR 생성:
     - PR #16: https://github.com/yuhyun65/scm_rft/pull/16
     - PR #17: https://github.com/yuhyun65/scm_rft/pull/17
@@ -3680,11 +3683,15 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
      - 태그명: 2026.03.16-scm-rft-operational-go
      - 기준 commit: e464c20
   3. 배포 문서 고정
-     - unbooks/release-note.md 갱신
-     - unbooks/operational-baseline-freeze.md / .manifest.json 갱신
+     - 
+unbooks/release-note.md 갱신
+     - 
+unbooks/operational-baseline-freeze.md / .manifest.json 갱신
   4. 기준 증적 연결
-     - unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/decision-summary.md
-     - unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/smoke-gateway-p0-e2e.log
+     - 
+unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/decision-summary.md
+     - 
+unbooks/evidence/SCM-ACTUAL-TOPOLOGY-20260316-145704/smoke-gateway-p0-e2e.log
 - 결과:
   - actual-topology PASS 기준의 최종 운영 전환 baseline 문서화 완료
   - release tag와 operational freeze manifest가 같은 baseline commit(e464c20)를 참조하도록 정리
@@ -3719,7 +3726,8 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
      - Docker daemon 정상
      - 서버 기준 Running: 9
   2. 로컬 통합테스트 런북/스크립트 존재
-     - unbooks/integration-test-runbook.md
+     - 
+unbooks/integration-test-runbook.md
      - scripts/ci-run-gate.ps1
      - scripts/smoke-gateway-p0-e2e.ps1
      - scripts/prod-up.ps1
@@ -3757,14 +3765,17 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
      - 핵심 결과:
        - P0-F01~F07 gateway E2E smoke passed.
   2. 기준 문서 최신화
-     - 파일: unbooks/cutover-day-runbook.md
+     - 파일: 
+unbooks/cutover-day-runbook.md
      - 반영:
        - runtime baseline e464c20로 갱신
        - release tag 2026.03.16-scm-rft-operational-go 추가
        - full traffic open 단계에 post-cutover-write-open.yaml 전환 명시
 - 증적:
-  - unbooks/evidence/LOCAL-IT-20260316-153544/local-integration-summary.md
-  - unbooks/evidence/LOCAL-IT-20260316-153544/smoke-gateway-p0-e2e.log
+  - 
+unbooks/evidence/LOCAL-IT-20260316-153544/local-integration-summary.md
+  - 
+unbooks/evidence/LOCAL-IT-20260316-153544/smoke-gateway-p0-e2e.log
 - 결과:
   - 현재 PC + Docker 환경에서 actual-topology 기준 로컬 통합테스트 1회 PASS
   - cutover-day runbook 기준선이 최종 운영 baseline과 일치하도록 보정 완료
@@ -3774,12 +3785,15 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   - 실제 운영 secret manager / 운영 접속 경로 확정 후 cutover 실행 준비
 - 수행:
   1. 최신 baseline 반영
-     - unbooks/prod-env-secrets-inventory.md의 runtime baseline을 e464c20 + release tag 2026.03.16-scm-rft-operational-go로 갱신
+     - 
+unbooks/prod-env-secrets-inventory.md의 runtime baseline을 e464c20 + release tag 2026.03.16-scm-rft-operational-go로 갱신
   2. cutover 체크리스트 보강
-     - unbooks/production-cutover-execution-checklist.md
+     - 
+unbooks/production-cutover-execution-checklist.md
      - section  ) Secret Manager / Operational Access Confirmation 추가
   3. 별도 확인 문서 추가
-     - unbooks/production-secret-access-confirmation.md
+     - 
+unbooks/production-secret-access-confirmation.md
      - 항목:
        - secret manager 종류
        - secret location
@@ -3797,11 +3811,13 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   2. deploy host에서 실제 secret manager 값으로 .env.production 렌더링
   3. production-cutover-execution-checklist.md 기준으로 실제 cutover 실행
 - 확인 결과:
-  1. unbooks/production-secret-access-confirmation.md의 운영 항목이 모두 TBD 상태였다.
+  1. 
+unbooks/production-secret-access-confirmation.md의 운영 항목이 모두 TBD 상태였다.
   2. 실제 secret manager CLI/접속 경로가 세션에 없었다.
      - ault, op, ws, z 미설치
      - kubectl는 있으나 current-context is not set
-  3. unbooks/production-cutover-execution-checklist.md의 0단계(Secret Manager / Operational Access Confirmation)를 충족하지 못했다.
+  3. 
+unbooks/production-cutover-execution-checklist.md의 0단계(Secret Manager / Operational Access Confirmation)를 충족하지 못했다.
   4. 로컬 .env.production은 존재하고 scripts/check-prod-secrets.ps1 -EnvFile .env.production는 PASS였으나, 이는 실제 secret manager 재렌더링 증적이 아니다.
 - 판단:
   - 현재 세션에서는 실제 운영 secret source와 deploy host/bastion 정보가 없어 1~3단계를 안전하게 실행할 수 없다.
@@ -3814,7 +3830,8 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 요청:
   - 현재 DoD 충족 이후 실제 운영 실행 갭을 실행 순서, 입력값, 담당자 기준으로 정리
 - 수행:
-  1. unbooks/production-cutover-gap-closure.md 생성
+  1. 
+unbooks/production-cutover-gap-closure.md 생성
   2. 남은 운영 실행 갭을 7단계로 분해
      - secret source 확정
      - deploy host/bastion 확정
@@ -3848,14 +3865,17 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
   1. 현재 문서와 저장소를 다시 확인하여 실제 운영값 자동 발견 가능 여부 점검
   2. .env.production에서 확인 가능한 값은 local rehearsal DB명 SCM_RFT_PRODLIKE뿐이었고, secret manager/운영 host/owner 정보는 저장소에서 발견되지 않음
   3. git ls-files .env.production와 scripts/check-prod-secrets.ps1 -EnvFile .env.production를 실행
-  4. unbooks/production-secret-access-confirmation.md의 <fill> 잔여 개수를 스캔하여 cutover entry readiness를 판정
+  4. 
+unbooks/production-secret-access-confirmation.md의 <fill> 잔여 개수를 스캔하여 cutover entry readiness를 판정
 - 결과:
   - .env.production Git 추적 없음
   - check-prod-secrets.ps1 PASS
   - 그러나 production-secret-access-confirmation.md에 실제 운영 입력값이 남아 있지 않아 entry check 최종 판정은 BLOCKED
 - 증적:
-  - unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/env-precheck.log
-  - unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-check-summary.md
+  - 
+unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/env-precheck.log
+  - 
+unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-check-summary.md
 - 남은 필수 입력:
   1. secret manager 종류/경로
   2. deploy host 또는 bastion 접속 정보
@@ -4133,3 +4153,19 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
     - `operational-baseline-freeze.md`, `cutover-day-runbook.md`, `production-secret-access-confirmation.md`, `production-cutover-gap-closure.md`는 여전히 runtime baseline `e464c20` / release tag `v2026.03.16-scm-rft-operational-go`를 기준으로 작성돼 있다.
     - 현재 기준 브랜치 HEAD는 `850c83c`이므로, 현 기준선을 실제 운영 baseline으로 삼으려면 freeze revision / release tag / signoff supplemental update가 추가로 필요하다.
     - `production-secret-access-confirmation.md`는 `<fill>`이 남아 있어 실제 production cutover entry는 여전히 `BLOCKED` 상태다.
+
+
+## Q211. 현재 HEAD 850c83c 기준 운영 freeze/signoff 문서 재동기화 (2026-03-17)
+- 요청:
+  1. QnA_보고서.md 변경분 커밋/푸시
+  2. 현재 HEAD `850c83c` 기준으로 운영 freeze/signoff 문서 재동기화
+- 수행:
+  1. Q210 반영분을 `docs(qna): log baseline recheck and demo revalidation` 커밋(21bcb24)으로 push했다.
+  2. 기존 운영 freeze 기준(`e464c20` / `v2026.03.16-scm-rft-operational-go`)과 현재 HEAD `850c83c`의 차이를 검토했다.
+  3. `go-nogo-signoff.md`에 2026-03-17 current-base sync supplemental 섹션을 추가했다.
+  4. `release-note.md`, `operational-baseline-freeze.md`, `operational-baseline-freeze.manifest.json`, `cutover-day-runbook.md`, `prod-env-secrets-inventory.md`, `production-secret-access-confirmation.md`, `production-cutover-gap-closure.md`의 baseline/tag를 현재 기준으로 갱신했다.
+  5. 현재 기준선용 superseding release tag로 `v2026.03.17-scm-rft-operational-go`를 `850c83c`에 생성했다.
+- 결과:
+  - 운영 freeze/signoff 문서 기준선은 현재 HEAD `850c83c`를 기준으로 재동기화됐다.
+  - backend/runtime의 authoritative evidence는 2026-03-16 actual-topology validation을 유지하고, 2026-03-17 browser demo revalidation을 supplemental evidence로 추가했다.
+  - 실제 production cutover entry는 여전히 `production-secret-access-confirmation.md`의 `<fill>` 미해결로 `BLOCKED` 상태다.
