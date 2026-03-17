@@ -4063,3 +4063,13 @@ Java 21로 업그레이드(현재 17) 및 버전 고정 정책 적용
 - 결과:
   - PR #84에는 로컬 검증 증적이 연결됨
   - 남은 untracked는 커밋 대상과 로컬 제외 대상을 구분하는 기준이 확정됨
+
+## Q205. PR #84 증적 코멘트 등록 및 PR #85 생성 완료 (2026-03-17)
+- 수행:
+  1. PR #84에 로컬 build/test/browser smoke 증적 코멘트 추가
+  2. SCM-253 문서 브랜치를 push한 뒤 Draft PR #85 생성
+  3. `.git/info/exclude`에 `_tmp_*`, `frontend/_tmp_*`를 추가해 일회성 임시 파일을 로컬 제외 대상으로 고정
+- 결과:
+  - PR #84: 로컬 게이트 증적 연결 완료
+  - PR #85: `docs(scm-253): add frontend redesign process bundle` 생성 완료
+  - 남은 untracked는 `seed-data-guide.md`, `seed_data.sql`, `HISCM_MSA_개발이력보고서.docx`만 정책 판단 대상으로 유지
