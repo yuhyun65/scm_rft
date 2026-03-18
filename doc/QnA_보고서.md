@@ -4476,3 +4476,15 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
     - `runbooks/evidence/ROUTED-DETAIL-DEMO-REVALIDATE-20260318-1800/proxy-login-response.json`
   - 실제 production cutover entry는 여전히 BLOCKED다.
   - blocker는 코드가 아니라 real secret manager / bastion / execution account / owner / maintenance window 미확정이다.
+
+## Q233. routed 화면 공통 `Illegal invocation` fetch 오류 수정 (2026-03-18)
+- 요청:
+  - 주문관리, 재고현황, 거래처관리, 품질문서, 게시판, 보고서 화면에 공통으로 발생한 `TypeError: Failed to execute 'fetch' on 'Window': Illegal invocation` 수정
+- 수행:
+  1. routed 화면들이 모두 `useScmApiClient()`를 통해 같은 API client를 사용하고, 로그인 화면만 직접 `fetch(...)`를 호출한다는 점을 확인했다.
+  2. `frontend/packages/api-client/src/index.ts`에서 `fetch`를 bare function reference로 저장한 뒤 `this.fetcher(...)`로 호출하고 있어, 브라우저에서 `window.fetch` 바인딩이 깨지는 구조임을 확인했다.
+  3. API client constructor를 수정해 `options.fetcher ?? globalThis.fetch`를 `globalThis`에 바인딩해서 저장하도록 바꿨다.
+  4. `pnpm -C frontend --filter @scm-rft/web-portal build`와 `test`를 다시 실행해 회귀를 확인했다.
+- 결과:
+  - routed Mate-SCM 화면의 공통 API 호출 경로에서 발생하던 `Illegal invocation` 원인을 제거했다.
+  - 프론트 검증 결과는 build PASS, test PASS(5 files, 16 tests)다.

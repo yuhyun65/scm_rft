@@ -333,7 +333,8 @@ export class ScmApiClient {
   constructor(options: ApiClientOptions = {}) {
     this.baseUrl = normalizeBaseUrl(options.baseUrl ?? "");
     this.accessToken = options.accessToken;
-    this.fetcher = options.fetcher ?? fetch;
+    const rawFetcher = options.fetcher ?? globalThis.fetch;
+    this.fetcher = rawFetcher.bind(globalThis);
   }
 
   setAccessToken(token?: string) {
