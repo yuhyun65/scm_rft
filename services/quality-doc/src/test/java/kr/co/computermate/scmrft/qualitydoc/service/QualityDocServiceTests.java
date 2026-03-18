@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentAckRequest;
 import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentAckResponse;
+import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentDetailResponse;
+import kr.co.computermate.scmrft.qualitydoc.api.RegisterQualityDocumentRequest;
 import kr.co.computermate.scmrft.qualitydoc.repository.QualityDocumentAckEntity;
 import kr.co.computermate.scmrft.qualitydoc.repository.QualityDocumentAckRepository;
 import kr.co.computermate.scmrft.qualitydoc.repository.QualityDocumentEntity;
@@ -66,5 +68,18 @@ class QualityDocServiceTests {
         .hasMessageContaining("different ackType");
 
     verify(qualityDocumentAckRepository, never()).insert(eq(documentId), eq("user01"), eq("CONFIRMED"), any());
+  }
+
+  @Test
+  void registerDocumentReturnsDetailResponse() {
+    QualityDocService service = new QualityDocService(qualityDocumentRepository, qualityDocumentAckRepository);
+
+    QualityDocumentDetailResponse response = service.registerDocument(
+        new RegisterQualityDocumentRequest("Incoming inspection", "NOTICE", "quality-user")
+    );
+
+    assertThat(response.title()).isEqualTo("Incoming inspection");
+    assertThat(response.status()).isEqualTo("ACTIVE");
+    verify(qualityDocumentRepository).insert(any(), eq("Incoming inspection"), eq("NOTICE"), any(), eq("quality-user"), eq("ISSUED"), any());
   }
 }

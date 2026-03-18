@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import kr.co.computermate.scmrft.member.api.CreateMemberRequest;
 import kr.co.computermate.scmrft.member.api.MemberResponse;
 import kr.co.computermate.scmrft.member.repository.MemberEntity;
 import kr.co.computermate.scmrft.member.repository.MemberRepository;
@@ -38,6 +39,20 @@ class MemberServiceTests {
     assertThatThrownBy(() -> memberService.searchMembers(null, null, 0, 0))
         .isInstanceOf(MemberApiException.class)
         .hasMessageContaining("size");
+  }
+
+  @Test
+  void createMemberReturnsCreatedMember() {
+    MemberService memberService = new MemberService(memberRepository);
+    when(memberRepository.findById("SUP-NEW")).thenReturn(Optional.empty());
+
+    MemberResponse response = memberService.createMember(
+        new CreateMemberRequest("SUP-NEW", "New Supplier", "ACTIVE")
+    );
+
+    assertThat(response.memberId()).isEqualTo("SUP-NEW");
+    assertThat(response.memberName()).isEqualTo("New Supplier");
+    assertThat(response.status()).isEqualTo("ACTIVE");
   }
 }
 

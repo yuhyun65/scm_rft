@@ -70,6 +70,35 @@ public class QualityDocumentRepository {
     return rows.stream().findFirst();
   }
 
+  public void insert(
+      UUID documentId,
+      String title,
+      String documentType,
+      Instant issuedAt,
+      String publisherMemberId,
+      String status,
+      Instant recordedAt
+  ) {
+    Timestamp issuedTimestamp = Timestamp.from(issuedAt);
+    Timestamp recordedTimestamp = Timestamp.from(recordedAt);
+    jdbcClient.sql("""
+            INSERT INTO dbo.quality_documents (
+                document_id, title, document_type, issued_at, publisher_member_id, status, created_at, updated_at
+            ) VALUES (
+                :documentId, :title, :documentType, :issuedAt, :publisherMemberId, :status, :createdAt, :updatedAt
+            )
+        """)
+        .param("documentId", documentId)
+        .param("title", title)
+        .param("documentType", documentType)
+        .param("issuedAt", issuedTimestamp)
+        .param("publisherMemberId", publisherMemberId)
+        .param("status", status)
+        .param("createdAt", recordedTimestamp)
+        .param("updatedAt", recordedTimestamp)
+        .update();
+  }
+
   private Instant toInstant(Timestamp value) {
     return value == null ? null : value.toInstant();
   }

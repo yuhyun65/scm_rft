@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import type { LotDetail, OrderDetail, OrderStatusChangeResponse } from "@scm-rft/api-client";
 import { useNavigate, useParams } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
-import { formatCount, formatDateTime, formatErrorText, useAuthIdentity, useScmApiClient } from "../lib/scmApi";
+import {
+  formatCount,
+  formatDateTime,
+  formatErrorText,
+  useAuthIdentity,
+  useScmApiClient,
+} from "../lib/scmApi";
 
 export default function OrderDetailPage() {
   const navigate = useNavigate();
@@ -12,6 +18,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorText, setErrorText] = useState("");
+  const [successText, setSuccessText] = useState("");
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [statusResult, setStatusResult] = useState<OrderStatusChangeResponse | null>(null);
   const [targetStatus, setTargetStatus] = useState("CONFIRMED");
@@ -19,6 +26,15 @@ export default function OrderDetailPage() {
   const [lotId, setLotId] = useState("");
   const [lotLoading, setLotLoading] = useState(false);
   const [lotResult, setLotResult] = useState<LotDetail | null>(null);
+
+  const [editSupplierId, setEditSupplierId] = useState("");
+  const [editOrderDate, setEditOrderDate] = useState("");
+  const [savingOrder, setSavingOrder] = useState(false);
+
+  const [newLotId, setNewLotId] = useState("");
+  const [newLotQuantity, setNewLotQuantity] = useState("1");
+  const [newLotStatus, setNewLotStatus] = useState("READY");
+  const [creatingLot, setCreatingLot] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,6 +51,8 @@ export default function OrderDetailPage() {
         if (!cancelled) {
           setOrder(result);
           setTargetStatus(result.status === "PENDING" ? "CONFIRMED" : result.status);
+          setEditSupplierId(result.supplierId || "");
+          setEditOrderDate((result.orderedAt || "").slice(0, 10));
         }
       } catch (error) {
         if (!cancelled) {
@@ -64,6 +82,8 @@ export default function OrderDetailPage() {
     try {
       const result = await client.getOrder(orderId);
       setOrder(result);
+      setEditSupplierId(result.supplierId || "");
+      setEditOrderDate((result.orderedAt || "").slice(0, 10));
     } catch (error) {
       setErrorText(formatErrorText(error));
     } finally {
@@ -78,6 +98,7 @@ export default function OrderDetailPage() {
 
     setSubmitting(true);
     setErrorText("");
+    setSuccessText("");
     try {
       const result = await client.changeOrderStatus(orderId, {
         targetStatus,
@@ -87,10 +108,33 @@ export default function OrderDetailPage() {
       setStatusResult(result);
       const refreshed = await client.getOrder(orderId);
       setOrder(refreshed);
+      setSuccessText(`주문 상태를 ${result.afterStatus}로 변경했습니다.`);
     } catch (error) {
       setErrorText(formatErrorText(error));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleSaveOrder() {
+    if (!orderId) {
+      return;
+    }
+
+    setSavingOrder(true);
+    setErrorText("");
+    setSuccessText("");
+    try {
+      const result = await client.updateOrder(orderId, {
+        supplierId: editSupplierId.trim(),
+        orderDate: editOrderDate,
+      });
+      setOrder(result);
+      setSuccessText("주문 기본 정보를 저장했습니다.");
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setSavingOrder(false);
     }
   }
 
@@ -113,6 +157,41 @@ export default function OrderDetailPage() {
     }
   }
 
+  async function handleCreateLot() {
+    if (!orderId) {
+      return;
+    }
+
+    const quantity = Number(newLotQuantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setErrorText("LOT 수량은 0보다 커야 합니다.");
+      return;
+    }
+
+    setCreatingLot(true);
+    setErrorText("");
+    setSuccessText("");
+    try {
+      const result = await client.addLot(orderId, {
+        lotId: newLotId.trim(),
+        quantity,
+        status: newLotStatus,
+      });
+      setLotResult(result);
+      setLotId(result.lotId);
+      const refreshed = await client.getOrder(orderId);
+      setOrder(refreshed);
+      setSuccessText(`LOT ${result.lotId}를 추가했습니다.`);
+      setNewLotId("");
+      setNewLotQuantity("1");
+      setNewLotStatus("READY");
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setCreatingLot(false);
+    }
+  }
+
   return (
     <div className="page-body">
       <div className="flex-between mb-16">
@@ -130,7 +209,7 @@ export default function OrderDetailPage() {
             {loading ? "새로고침 중..." : "새로고침"}
           </button>
           <button className="btn btn-success" onClick={handleChangeStatus} disabled={submitting || !order}>
-            {submitting ? "상태 반영 중..." : "상태 변경"}
+            {submitting ? "상태 변경 중..." : "상태 변경"}
           </button>
           <button className="btn btn-gray" onClick={() => navigate("/reports")}>
             보고서 이동
@@ -139,6 +218,7 @@ export default function OrderDetailPage() {
       </div>
 
       {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+      {successText ? <div className="alert-banner success mb-12">{successText}</div> : null}
 
       <div className="grid-2 mb-16">
         <div className="card">
@@ -172,6 +252,27 @@ export default function OrderDetailPage() {
 
         <div className="card">
           <div className="card-header">
+            <span className="card-title">주문 기본 정보 수정</span>
+          </div>
+          <div className="card-body">
+            <div className="form-group mb-12">
+              <label>거래처 ID</label>
+              <input value={editSupplierId} onChange={(event) => setEditSupplierId(event.target.value)} />
+            </div>
+            <div className="form-group mb-12">
+              <label>주문일</label>
+              <input type="date" value={editOrderDate} onChange={(event) => setEditOrderDate(event.target.value)} />
+            </div>
+            <button className="btn btn-primary" onClick={handleSaveOrder} disabled={savingOrder || !order}>
+              {savingOrder ? "저장 중..." : "주문 정보 저장"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-2 mb-16">
+        <div className="card">
+          <div className="card-header">
             <span className="card-title">상태 변경</span>
           </div>
           <div className="card-body">
@@ -189,7 +290,7 @@ export default function OrderDetailPage() {
               <textarea rows={4} value={reason} onChange={(event) => setReason(event.target.value)} />
             </div>
             <div className="text-muted fs-12 mb-12">
-              변경자는 현재 로그인 계정인 {memberName || memberId || "Mate-SCM 사용자"}로 자동 기록됩니다.
+              변경자는 현재 로그인 계정인 {memberName || memberId || "Mate-SCM 사용자"}로 기록됩니다.
             </div>
             {statusResult ? (
               <div className="alert-banner success">
@@ -198,6 +299,41 @@ export default function OrderDetailPage() {
             ) : (
               <div className="text-muted fs-12">최근 상태 변경 결과가 없습니다.</div>
             )}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">LOT 추가</span>
+          </div>
+          <div className="card-body">
+            <div className="form-row">
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>LOT ID</label>
+                <input value={newLotId} onChange={(event) => setNewLotId(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>수량</label>
+                <input
+                  type="number"
+                  step="0.001"
+                  value={newLotQuantity}
+                  onChange={(event) => setNewLotQuantity(event.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>상태</label>
+                <select value={newLotStatus} onChange={(event) => setNewLotStatus(event.target.value)}>
+                  <option value="READY">READY</option>
+                  <option value="IN_PROGRESS">IN_PROGRESS</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="CANCELED">CANCELED</option>
+                </select>
+              </div>
+            </div>
+            <button className="btn btn-primary" onClick={handleCreateLot} disabled={creatingLot || !order}>
+              {creatingLot ? "LOT 생성 중..." : "LOT 추가"}
+            </button>
           </div>
         </div>
       </div>
@@ -224,9 +360,6 @@ export default function OrderDetailPage() {
                 </button>
               </div>
             </div>
-            <div className="text-muted fs-12 mb-12">
-              현재 routed page에서는 order detail payload에 LOT 목록이 포함되지 않아, LOT ID 기준 상세 조회만 연결했습니다.
-            </div>
             {lotResult ? (
               <>
                 {[
@@ -249,20 +382,20 @@ export default function OrderDetailPage() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">미연결 액션 안내</span>
+            <span className="card-title">연결 상태</span>
           </div>
           <div className="card-body">
             <div className="detail-row">
               <div className="detail-label">주문 수정</div>
-              <div className="detail-value">백엔드 수정 API가 현재 노출되지 않아 routed page에서 보류합니다.</div>
+              <div className="detail-value">거래처 ID, 주문일 수정 API가 연결되어 있습니다.</div>
             </div>
             <div className="detail-row">
               <div className="detail-label">LOT 추가</div>
-              <div className="detail-value">LOT 생성 API가 현재 노출되지 않아 상세 조회만 우선 연결했습니다.</div>
+              <div className="detail-value">주문 상세 화면에서 바로 LOT를 추가하고 재조회할 수 있습니다.</div>
             </div>
             <div className="detail-row">
               <div className="detail-label">보고서</div>
-              <div className="detail-value">보고서 생성은 보고서 관리 화면에서 실제 API로 연결됩니다.</div>
+              <div className="detail-value">보고서 생성은 보고서 관리 화면에서 실제 API로 처리합니다.</div>
             </div>
           </div>
         </div>

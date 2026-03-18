@@ -1,5 +1,7 @@
 package kr.co.computermate.scmrft.orderlot.repository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -40,5 +42,18 @@ public class LotRepository {
         .query(Integer.class)
         .single();
     return count == null ? 0 : count;
+  }
+
+  public void insert(String lotId, String orderId, java.math.BigDecimal quantity, String status, Instant createdAt) {
+    jdbcClient.sql("""
+            INSERT INTO dbo.order_lots (lot_no, order_no, quantity, status, created_at)
+            VALUES (:lotId, :orderId, :quantity, :status, :createdAt)
+        """)
+        .param("lotId", lotId)
+        .param("orderId", orderId)
+        .param("quantity", quantity)
+        .param("status", status)
+        .param("createdAt", Timestamp.from(createdAt))
+        .update();
   }
 }

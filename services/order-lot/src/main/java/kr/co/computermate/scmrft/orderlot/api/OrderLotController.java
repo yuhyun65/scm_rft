@@ -3,10 +3,12 @@ package kr.co.computermate.scmrft.orderlot.api;
 import jakarta.validation.Valid;
 import kr.co.computermate.scmrft.orderlot.service.OrderLotCommandService;
 import kr.co.computermate.scmrft.orderlot.service.OrderLotQueryService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +47,27 @@ public class OrderLotController {
   @GetMapping("/lots/{lotId}")
   public LotDetailResponse getLotById(@PathVariable("lotId") String lotId) {
     return queryService.getLotById(lotId);
+  }
+
+  @PostMapping("/orders")
+  public ResponseEntity<OrderDetailResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(commandService.createOrder(request));
+  }
+
+  @PutMapping("/orders/{orderId}")
+  public ResponseEntity<OrderDetailResponse> updateOrder(
+      @PathVariable("orderId") String orderId,
+      @Valid @RequestBody UpdateOrderRequest request
+  ) {
+    return ResponseEntity.ok(commandService.updateOrder(orderId, request));
+  }
+
+  @PostMapping("/orders/{orderId}/lots")
+  public ResponseEntity<LotDetailResponse> addLot(
+      @PathVariable("orderId") String orderId,
+      @Valid @RequestBody AddLotRequest request
+  ) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(commandService.addLot(orderId, request));
   }
 
   @PostMapping("/orders/{orderId}/status")

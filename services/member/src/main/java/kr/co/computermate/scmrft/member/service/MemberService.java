@@ -2,11 +2,13 @@ package kr.co.computermate.scmrft.member.service;
 
 import java.util.List;
 import java.util.Locale;
+import kr.co.computermate.scmrft.member.api.CreateMemberRequest;
 import kr.co.computermate.scmrft.member.api.MemberResponse;
 import kr.co.computermate.scmrft.member.api.SearchMembersResponse;
 import kr.co.computermate.scmrft.member.repository.MemberEntity;
 import kr.co.computermate.scmrft.member.repository.MemberRepository;
 import kr.co.computermate.scmrft.member.repository.MemberSearchResult;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,6 +55,30 @@ public class MemberService {
         .toList();
 
     return new SearchMembersResponse(items, result.total(), page, size);
+  }
+
+  public MemberResponse createMember(CreateMemberRequest request) {
+    String memberId = normalize(request.memberId());
+    String memberName = normalize(request.memberName());
+    String status = normalizeStatus(request.status());
+
+    if (memberId.isEmpty()) {
+      throw MemberApiException.badRequest("memberId is required.");
+    }
+    if (memberName.isEmpty()) {
+      throw MemberApiException.badRequest("memberName is required.");
+    }
+    if (memberRepository.findById(memberId).isPresent()) {
+      throw MemberApiException.conflict("Member already exists.");
+    }
+
+    MemberEntity entity = new MemberEntity(memberId, memberName, status == null ? "ACTIVE" : status);
+    try {
+      memberRepository.insert(entity);
+    } catch (DataIntegrityViolationException ex) {
+      throw MemberApiException.conflict("Member already exists.");
+    }
+    return toResponse(entity);
   }
 
   private MemberResponse toResponse(MemberEntity entity) {

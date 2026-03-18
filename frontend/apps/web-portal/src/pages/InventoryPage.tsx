@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import type { InventoryBalanceSearchResponse } from "@scm-rft/api-client";
+import type {
+  InventoryAdjustmentResponse,
+  InventoryBalanceSearchResponse,
+} from "@scm-rft/api-client";
 import { useNavigate } from "react-router-dom";
 import KpiCard from "../components/KpiCard";
 import Pagination from "../components/Pagination";
@@ -19,6 +22,14 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<InventoryBalanceSearchResponse | null>(null);
+
+  const [showAdjustForm, setShowAdjustForm] = useState(false);
+  const [adjustItemCode, setAdjustItemCode] = useState("");
+  const [adjustWarehouseCode, setAdjustWarehouseCode] = useState("");
+  const [adjustQuantityDelta, setAdjustQuantityDelta] = useState("0");
+  const [adjustReferenceNo, setAdjustReferenceNo] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
+  const [adjustmentResult, setAdjustmentResult] = useState<InventoryAdjustmentResponse | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +73,37 @@ export default function InventoryPage() {
     setReloadKey((current) => current + 1);
   }
 
+  async function handleAdjustInventory() {
+    const quantityDelta = Number(adjustQuantityDelta);
+    if (!Number.isFinite(quantityDelta) || quantityDelta === 0) {
+      setErrorText("조정 수량은 0이 아닌 숫자여야 합니다.");
+      return;
+    }
+
+    setAdjusting(true);
+    setErrorText("");
+    try {
+      const result = await client.adjustInventory({
+        itemCode: adjustItemCode.trim(),
+        warehouseCode: adjustWarehouseCode.trim(),
+        quantityDelta,
+        referenceNo: adjustReferenceNo.trim() || undefined,
+      });
+      setAdjustmentResult(result);
+      setShowAdjustForm(false);
+      setItemCode(result.itemCode);
+      setWarehouseCode(result.warehouseCode);
+      setAppliedItemCode(result.itemCode);
+      setAppliedWarehouseCode(result.warehouseCode);
+      setPage(0);
+      setReloadKey((current) => current + 1);
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setAdjusting(false);
+    }
+  }
+
   const items = searchResult?.items ?? [];
   const total = searchResult?.total ?? 0;
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
@@ -97,10 +139,10 @@ export default function InventoryPage() {
               />
             </div>
             <div className="form-group">
-              <label>품목코드</label>
+              <label>품목 코드</label>
               <input
                 type="text"
-                placeholder="코드 입력"
+                placeholder="품목 코드"
                 style={{ width: 140 }}
                 value={itemCode}
                 onChange={(event) => setItemCode(event.target.value)}
@@ -123,24 +165,99 @@ export default function InventoryPage() {
                 <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 아직 없습니다.">
                   엑셀 다운로드 예정
                 </button>
-                <button className="btn btn-outline" disabled title="재고 조정 API는 현재 노출되지 않았습니다.">
-                  재고 조정 예정
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setShowAdjustForm((current) => !current);
+                    setAdjustItemCode(itemCode.trim() || items[0]?.itemCode || "");
+                    setAdjustWarehouseCode(warehouseCode.trim() || items[0]?.warehouseCode || "");
+                  }}
+                >
+                  재고 조정
                 </button>
               </div>
             </div>
           </div>
           <div className="text-muted fs-12 mt-8">
-            재고 화면은 실제 inventory balance API로 전환했습니다. 상세는 `품목코드 + 창고코드` 기준 route에서 movement 조회까지 이어집니다.
+            조회는 balance API, 상세는 movement API, 재고 조정은 adjustment API에 연결되어 있습니다.
           </div>
         </div>
       </div>
 
+      {showAdjustForm ? (
+        <div className="card mb-12">
+          <div className="card-header">
+            <span className="card-title">재고 조정</span>
+          </div>
+          <div className="card-body">
+            <div className="form-row">
+              <div className="form-group">
+                <label>품목 코드</label>
+                <input value={adjustItemCode} onChange={(event) => setAdjustItemCode(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>창고 코드</label>
+                <input
+                  value={adjustWarehouseCode}
+                  onChange={(event) => setAdjustWarehouseCode(event.target.value)}
+                />
+              </div>
+              <div className="form-group">
+                <label>조정 수량</label>
+                <input
+                  type="number"
+                  step="0.001"
+                  value={adjustQuantityDelta}
+                  onChange={(event) => setAdjustQuantityDelta(event.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ minWidth: 180 }}>
+                <label>참조 번호</label>
+                <input
+                  value={adjustReferenceNo}
+                  onChange={(event) => setAdjustReferenceNo(event.target.value)}
+                  placeholder="예: ADJ-20260318-01"
+                />
+              </div>
+            </div>
+            <div className="flex gap-8">
+              <button className="btn btn-primary" onClick={handleAdjustInventory} disabled={adjusting}>
+                {adjusting ? "조정 중..." : "조정 실행"}
+              </button>
+              <button className="btn btn-gray" onClick={() => setShowAdjustForm(false)} disabled={adjusting}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+      {adjustmentResult ? (
+        <div className="alert-banner success mb-12">
+          {adjustmentResult.itemCode} / {adjustmentResult.warehouseCode} 조정 완료
+          ({adjustmentResult.quantityDelta.toLocaleString("ko-KR")} → 현재 {adjustmentResult.resultingQuantity.toLocaleString("ko-KR")})
+        </div>
+      ) : null}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
-        <KpiCard label="총 조회 건수" value={total.toLocaleString("ko-KR")} sub="inventory balance API 기준" variant="success" />
-        <KpiCard label="현재 페이지 수량 합계" value={pageQuantity.toLocaleString("ko-KR")} sub="현재 표시 중인 balance row 합계" />
-        <KpiCard label="최근 동기화 시각" value={latestUpdatedAt ? formatDateTime(latestUpdatedAt) : "-"} sub={appliedWarehouseCode || "전체 창고 기준"} variant="warn" />
+        <KpiCard
+          label="총 조회 건수"
+          value={total.toLocaleString("ko-KR")}
+          sub="inventory balance API 기준"
+          variant="success"
+        />
+        <KpiCard
+          label="현재 페이지 수량 합계"
+          value={pageQuantity.toLocaleString("ko-KR")}
+          sub="현재 화면 합계"
+        />
+        <KpiCard
+          label="최종 반영 시각"
+          value={latestUpdatedAt ? formatDateTime(latestUpdatedAt) : "-"}
+          sub={appliedWarehouseCode || "전체 창고 기준"}
+          variant="warn"
+        />
       </div>
 
       <div className="card">
@@ -153,10 +270,10 @@ export default function InventoryPage() {
           <table>
             <thead>
               <tr>
-                <th>품목코드</th>
-                <th>창고코드</th>
+                <th>품목 코드</th>
+                <th>창고 코드</th>
                 <th>현재고</th>
-                <th>최종 반영시각</th>
+                <th>최종 반영 시각</th>
                 <th>액션</th>
               </tr>
             </thead>

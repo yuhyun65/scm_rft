@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { MemberSearchResponse } from "@scm-rft/api-client";
+import type { Member, MemberSearchResponse } from "@scm-rft/api-client";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import StatusBadge from "../components/StatusBadge";
@@ -19,6 +19,13 @@ export default function MemberPage() {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<MemberSearchResponse | null>(null);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createMemberId, setCreateMemberId] = useState("");
+  const [createMemberName, setCreateMemberName] = useState("");
+  const [createStatus, setCreateStatus] = useState("ACTIVE");
+  const [creating, setCreating] = useState(false);
+  const [createdMember, setCreatedMember] = useState<Member | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,12 +69,36 @@ export default function MemberPage() {
     setReloadKey((current) => current + 1);
   }
 
+  async function handleCreateMember() {
+    setCreating(true);
+    setErrorText("");
+    try {
+      const result = await client.createMember({
+        memberId: createMemberId.trim(),
+        memberName: createMemberName.trim(),
+        status: createStatus,
+      });
+      setCreatedMember(result);
+      setShowCreateForm(false);
+      setAppliedKeyword(result.memberId);
+      setKeyword(result.memberId);
+      setPage(0);
+      setReloadKey((current) => current + 1);
+      navigate(`/members/${encodeURIComponent(result.memberId)}`);
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setCreating(false);
+    }
+  }
+
   const items = searchResult?.items ?? [];
   const totalPages = Math.max(Math.ceil((searchResult?.total ?? 0) / PAGE_SIZE), 1);
 
   return (
     <div className="page-body">
       <div className="page-title">거래처 관리</div>
+
       <div className="card mb-12">
         <div className="card-body" style={{ padding: "14px 16px" }}>
           <div className="form-row">
@@ -84,7 +115,7 @@ export default function MemberPage() {
               <input
                 type="text"
                 placeholder="거래처명 / 거래처 ID"
-                style={{ width: 200 }}
+                style={{ width: 220 }}
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
                 onKeyDown={(event) => {
@@ -102,18 +133,58 @@ export default function MemberPage() {
             </div>
             <div className="form-group" style={{ marginLeft: "auto" }}>
               <label style={{ visibility: "hidden" }}>등록</label>
-              <button className="btn btn-success" disabled title="거래처 등록 API는 아직 routed page에 연결하지 않았습니다.">
-                + 거래처 등록 예정
+              <button className="btn btn-success" onClick={() => setShowCreateForm((current) => !current)}>
+                + 거래처 등록
               </button>
             </div>
           </div>
           <div className="text-muted fs-12 mt-8">
-            거래처 화면은 실제 member 조회/상세만 연결했습니다. 사업자번호, 대표자, 연락처 같은 부가 정보는 현재 member API payload에 없습니다.
+            거래처 목록/상세뿐 아니라 거래처 등록도 member API에 연결되어 있습니다.
           </div>
         </div>
       </div>
 
+      {showCreateForm ? (
+        <div className="card mb-12">
+          <div className="card-header">
+            <span className="card-title">거래처 등록</span>
+          </div>
+          <div className="card-body">
+            <div className="form-row">
+              <div className="form-group">
+                <label>거래처 ID</label>
+                <input value={createMemberId} onChange={(event) => setCreateMemberId(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>거래처명</label>
+                <input value={createMemberName} onChange={(event) => setCreateMemberName(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>상태</label>
+                <select value={createStatus} onChange={(event) => setCreateStatus(event.target.value)}>
+                  <option value="ACTIVE">활성</option>
+                  <option value="INACTIVE">비활성</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-8">
+              <button className="btn btn-primary" onClick={handleCreateMember} disabled={creating}>
+                {creating ? "등록 중..." : "등록"}
+              </button>
+              <button className="btn btn-gray" onClick={() => setShowCreateForm(false)} disabled={creating}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+      {createdMember ? (
+        <div className="alert-banner success mb-12">
+          거래처 {createdMember.memberId} / {createdMember.memberName || "-"} 등록이 완료되었습니다.
+        </div>
+      ) : null}
 
       <div className="card">
         <div className="card-header">

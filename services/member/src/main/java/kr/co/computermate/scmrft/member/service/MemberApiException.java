@@ -27,5 +27,9 @@ public class MemberApiException extends RuntimeException {
   public static MemberApiException notFound(String message) {
     return new MemberApiException(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", message);
   }
+
+  public static MemberApiException conflict(String message) {
+    return new MemberApiException(HttpStatus.CONFLICT, "MEMBER_CONFLICT", message);
+  }
 }
 

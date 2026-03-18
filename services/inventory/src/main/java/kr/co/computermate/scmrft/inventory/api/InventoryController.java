@@ -1,7 +1,12 @@
 package kr.co.computermate.scmrft.inventory.api;
 
+import jakarta.validation.Valid;
 import kr.co.computermate.scmrft.inventory.service.InventoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +39,12 @@ public class InventoryController {
       @RequestParam(value = "size", defaultValue = "50") int size
   ) {
     return inventoryService.searchMovements(itemCode, warehouseCode, movementType, page, size);
+  }
+
+  @PostMapping("/adjustments")
+  public ResponseEntity<InventoryAdjustmentResponse> adjustInventory(
+      @Valid @RequestBody InventoryAdjustmentRequest request
+  ) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.adjustInventory(request));
   }
 }

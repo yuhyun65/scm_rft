@@ -2,12 +2,17 @@ package kr.co.computermate.scmrft.inventory.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import kr.co.computermate.scmrft.inventory.api.InventoryAdjustmentRequest;
+import kr.co.computermate.scmrft.inventory.api.InventoryAdjustmentResponse;
 import kr.co.computermate.scmrft.inventory.api.SearchInventoryBalancesResponse;
 import kr.co.computermate.scmrft.inventory.api.SearchInventoryMovementsResponse;
 import kr.co.computermate.scmrft.inventory.repository.InventoryBalanceEntity;
@@ -71,5 +76,20 @@ class InventoryServiceTests {
     assertThat(response.total()).isEqualTo(1L);
     assertThat(response.items()).hasSize(1);
     assertThat(response.items().get(0).movementType()).isEqualTo("IN");
+  }
+
+  @Test
+  void adjustInventoryCreatesMovementAndUpdatesBalance() {
+    InventoryService service = new InventoryService(inventoryRepository);
+    when(inventoryRepository.findBalance("ITEM-1", "WH-1"))
+        .thenReturn(java.util.Optional.of(new InventoryBalanceEntity("ITEM-1", "WH-1", new BigDecimal("10.000"), Instant.now())));
+
+    InventoryAdjustmentResponse response = service.adjustInventory(
+        new InventoryAdjustmentRequest("ITEM-1", "WH-1", new BigDecimal("2.500"), "ADJ-001")
+    );
+
+    assertThat(response.resultingQuantity()).isEqualByComparingTo(new BigDecimal("12.500"));
+    verify(inventoryRepository).insertMovement(any(), eq("ITEM-1"), eq("WH-1"), eq("ADJUST"), eq(new BigDecimal("2.500")), eq("ADJ-001"), any());
+    verify(inventoryRepository).updateBalance(eq("ITEM-1"), eq("WH-1"), eq(new BigDecimal("12.500")), any());
   }
 }

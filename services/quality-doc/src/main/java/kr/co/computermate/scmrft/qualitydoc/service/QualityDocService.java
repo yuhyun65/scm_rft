@@ -9,6 +9,7 @@ import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentAckRequest;
 import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentAckResponse;
 import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentDetailResponse;
 import kr.co.computermate.scmrft.qualitydoc.api.QualityDocumentSummaryResponse;
+import kr.co.computermate.scmrft.qualitydoc.api.RegisterQualityDocumentRequest;
 import kr.co.computermate.scmrft.qualitydoc.api.SearchQualityDocumentsResponse;
 import kr.co.computermate.scmrft.qualitydoc.repository.QualityDocumentAckEntity;
 import kr.co.computermate.scmrft.qualitydoc.repository.QualityDocumentAckRepository;
@@ -102,6 +103,39 @@ public class QualityDocService {
       }
       return toAckResponse(concurrent, true);
     }
+  }
+
+  @Transactional(timeout = 3, isolation = Isolation.READ_COMMITTED)
+  public QualityDocumentDetailResponse registerDocument(RegisterQualityDocumentRequest request) {
+    String title = requireValue(request.title(), "title is required.");
+    String documentType = requireValue(request.documentType(), "documentType is required.");
+    String publisherMemberId = normalizeToNull(request.publisherMemberId());
+
+    Instant issuedAt = Instant.now();
+    UUID documentId = UUID.randomUUID();
+    try {
+      qualityDocumentRepository.insert(
+          documentId,
+          title,
+          documentType.toUpperCase(Locale.ROOT),
+          issuedAt,
+          publisherMemberId,
+          "ISSUED",
+          issuedAt
+      );
+    } catch (DataIntegrityViolationException ex) {
+      throw QualityDocApiException.conflict("Unable to register quality document.");
+    }
+
+    return new QualityDocumentDetailResponse(
+        documentId.toString(),
+        title,
+        "ACTIVE",
+        issuedAt,
+        null,
+        null,
+        true
+    );
   }
 
   private QualityDocumentAckResponse toAckResponse(QualityDocumentAckEntity entity, boolean duplicate) {

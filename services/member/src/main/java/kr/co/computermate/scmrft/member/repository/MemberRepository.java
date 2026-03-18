@@ -38,6 +38,17 @@ public class MemberRepository {
     return searchWithKeyword(keyword.trim() + "%", status, offset, size);
   }
 
+  public void insert(MemberEntity entity) {
+    jdbcClient.sql("""
+            INSERT INTO dbo.members (member_id, member_name, status, created_at, updated_at)
+            VALUES (:memberId, :memberName, :status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """)
+        .param("memberId", entity.memberId())
+        .param("memberName", entity.memberName())
+        .param("status", entity.status())
+        .update();
+  }
+
   private MemberSearchResult searchWithoutKeyword(String status, int offset, int size) {
     Long total = jdbcClient.sql("""
             SELECT COUNT(*) AS total

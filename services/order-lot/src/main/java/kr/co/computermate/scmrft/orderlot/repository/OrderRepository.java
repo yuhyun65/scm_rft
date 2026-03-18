@@ -3,6 +3,7 @@ package kr.co.computermate.scmrft.orderlot.repository;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -93,12 +94,38 @@ public class OrderRepository {
         .update();
   }
 
+  public void insert(String orderId, String supplierId, LocalDate orderDate, String status, Instant createdAt) {
+    jdbcClient.sql("""
+            INSERT INTO dbo.orders(order_no, member_id, order_date, status, created_at)
+            VALUES (:orderId, :supplierId, :orderDate, :status, :createdAt)
+        """)
+        .param("orderId", orderId)
+        .param("supplierId", supplierId)
+        .param("orderDate", orderDate)
+        .param("status", status)
+        .param("createdAt", Timestamp.from(createdAt))
+        .update();
+  }
+
+  public int updateOrder(String orderId, String supplierId, LocalDate orderDate) {
+    return jdbcClient.sql("""
+            UPDATE dbo.orders
+            SET member_id = :supplierId,
+                order_date = :orderDate
+            WHERE order_no = :orderId
+        """)
+        .param("orderId", orderId)
+        .param("supplierId", supplierId)
+        .param("orderDate", orderDate)
+        .update();
+  }
+
   private Instant toOrderedAt(Timestamp createdAt, Date orderDate) {
-    if (createdAt != null) {
-      return createdAt.toInstant();
-    }
     if (orderDate != null) {
       return orderDate.toLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC);
+    }
+    if (createdAt != null) {
+      return createdAt.toInstant();
     }
     return null;
   }

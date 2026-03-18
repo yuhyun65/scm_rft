@@ -52,6 +52,12 @@ export type MemberSearchResponse = {
   size: number;
 };
 
+export type CreateMemberRequest = {
+  memberId: string;
+  memberName: string;
+  status?: string;
+};
+
 export type PageMeta = {
   page: number;
   size: number;
@@ -161,6 +167,23 @@ export type InventoryMovementSearchResponse = {
   size: number;
 };
 
+export type InventoryAdjustmentRequest = {
+  itemCode: string;
+  warehouseCode: string;
+  quantityDelta: number;
+  referenceNo?: string;
+};
+
+export type InventoryAdjustmentResponse = {
+  movementId: string;
+  itemCode: string;
+  warehouseCode: string;
+  quantityDelta: number;
+  resultingQuantity: number;
+  referenceNo?: string;
+  adjustedAt: string;
+};
+
 export type FileRegisterRequest = {
   domainKey: string;
   originalName: string;
@@ -172,6 +195,12 @@ export type FileMetadata = {
   domainKey: string;
   originalName: string;
   storagePath: string;
+};
+
+export type RegisterQualityDocumentRequest = {
+  title: string;
+  documentType: string;
+  publisherMemberId?: string;
 };
 
 export type ReportJobCreateRequest = {
@@ -229,6 +258,24 @@ export type OrderStatusChangeResponse = {
   beforeStatus: string;
   afterStatus: string;
   changedAt: string;
+};
+
+export type CreateOrderRequest = {
+  orderId: string;
+  supplierId: string;
+  orderDate: string;
+  status?: string;
+};
+
+export type UpdateOrderRequest = {
+  supplierId: string;
+  orderDate: string;
+};
+
+export type AddLotRequest = {
+  lotId: string;
+  quantity: number;
+  status?: string;
 };
 
 function normalizeBaseUrl(baseUrl: string): string {
@@ -346,6 +393,10 @@ export class ScmApiClient {
     return this.request<MemberSearchResponse>("GET", `/api/member/v1/members${query}`);
   }
 
+  createMember(request: CreateMemberRequest): Promise<Member> {
+    return this.request<Member>("POST", "/api/member/v1/members", request);
+  }
+
   searchOrders(params: {
     supplierId?: string;
     status?: string;
@@ -367,8 +418,24 @@ export class ScmApiClient {
     return this.request<OrderDetail>("GET", `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}`);
   }
 
+  createOrder(request: CreateOrderRequest): Promise<OrderDetail> {
+    return this.request<OrderDetail>("POST", "/api/order-lot/v1/orders", request);
+  }
+
+  updateOrder(orderId: string, request: UpdateOrderRequest): Promise<OrderDetail> {
+    return this.request<OrderDetail>("PUT", `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}`, request);
+  }
+
   getLot(lotId: string): Promise<LotDetail> {
     return this.request<LotDetail>("GET", `/api/order-lot/v1/lots/${encodeURIComponent(lotId)}`);
+  }
+
+  addLot(orderId: string, request: AddLotRequest): Promise<LotDetail> {
+    return this.request<LotDetail>(
+      "POST",
+      `/api/order-lot/v1/orders/${encodeURIComponent(orderId)}/lots`,
+      request
+    );
   }
 
   changeOrderStatus(
@@ -420,6 +487,10 @@ export class ScmApiClient {
     return this.request<QualityDocumentSearchResponse>("GET", `/api/quality-doc/v1/documents${query}`);
   }
 
+  registerQualityDocument(request: RegisterQualityDocumentRequest): Promise<QualityDocumentDetail> {
+    return this.request<QualityDocumentDetail>("POST", "/api/quality-doc/v1/documents", request);
+  }
+
   getQualityDocument(documentId: string): Promise<QualityDocumentDetail> {
     return this.request<QualityDocumentDetail>(
       "GET",
@@ -468,6 +539,10 @@ export class ScmApiClient {
       size: params.size
     });
     return this.request<InventoryMovementSearchResponse>("GET", `/api/inventory/v1/movements${query}`);
+  }
+
+  adjustInventory(request: InventoryAdjustmentRequest): Promise<InventoryAdjustmentResponse> {
+    return this.request<InventoryAdjustmentResponse>("POST", "/api/inventory/v1/adjustments", request);
   }
 
   registerFile(request: FileRegisterRequest): Promise<FileMetadata> {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { OrderSearchResponse } from "@scm-rft/api-client";
+import type { OrderDetail, OrderSearchResponse } from "@scm-rft/api-client";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import StatusBadge from "../components/StatusBadge";
@@ -19,6 +19,14 @@ export default function OrderListPage() {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<OrderSearchResponse | null>(null);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createOrderId, setCreateOrderId] = useState("");
+  const [createSupplierId, setCreateSupplierId] = useState("");
+  const [createOrderDate, setCreateOrderDate] = useState(new Date().toISOString().slice(0, 10));
+  const [createOrderStatus, setCreateOrderStatus] = useState("PENDING");
+  const [creating, setCreating] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<OrderDetail | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +70,30 @@ export default function OrderListPage() {
     setReloadKey((current) => current + 1);
   }
 
+  async function handleCreateOrder() {
+    setCreating(true);
+    setErrorText("");
+    try {
+      const result = await client.createOrder({
+        orderId: createOrderId.trim(),
+        supplierId: createSupplierId.trim(),
+        orderDate: createOrderDate,
+        status: createOrderStatus,
+      });
+      setCreatedOrder(result);
+      setShowCreateForm(false);
+      setKeyword(result.orderId);
+      setAppliedKeyword(result.orderId);
+      setPage(0);
+      setReloadKey((current) => current + 1);
+      navigate(`/orders/${encodeURIComponent(result.orderId)}`);
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setCreating(false);
+    }
+  }
+
   const items = searchResult?.items ?? [];
   const totalPages = Math.max(searchResult?.page.totalPages ?? 1, 1);
   const totalElements = searchResult?.page.totalElements ?? items.length;
@@ -93,7 +125,7 @@ export default function OrderListPage() {
               <input
                 type="text"
                 placeholder="주문번호 / 거래처 ID"
-                style={{ width: 180 }}
+                style={{ width: 200 }}
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
                 onKeyDown={(event) => {
@@ -112,23 +144,69 @@ export default function OrderListPage() {
             <div className="form-group" style={{ marginLeft: "auto" }}>
               <label style={{ visibility: "hidden" }}>등록</label>
               <div className="flex gap-8">
-                <button className="btn btn-success" disabled title="주문 등록 API는 아직 routed page에 연결하지 않았습니다.">
-                  + 주문 등록 예정
+                <button className="btn btn-success" onClick={() => setShowCreateForm((current) => !current)}>
+                  + 주문 등록
                 </button>
-                <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 현재 제공되지 않습니다.">
+                <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 아직 없습니다.">
                   엑셀 다운로드 예정
                 </button>
               </div>
             </div>
           </div>
           <div className="text-muted fs-12 mt-8">
-            실제 API 기준으로 주문 목록/상세/상태 변경까지 연결했습니다. 주문 등록과 엑셀 다운로드는 백엔드
-            지원 범위가 정리되기 전까지 노출만 보류합니다.
+            주문 목록/상세/상태 변경뿐 아니라 주문 등록도 routed 페이지에서 실제 API로 처리합니다.
           </div>
         </div>
       </div>
 
+      {showCreateForm ? (
+        <div className="card mb-12">
+          <div className="card-header">
+            <span className="card-title">주문 등록</span>
+          </div>
+          <div className="card-body">
+            <div className="form-row">
+              <div className="form-group">
+                <label>주문번호</label>
+                <input value={createOrderId} onChange={(event) => setCreateOrderId(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>거래처 ID</label>
+                <input value={createSupplierId} onChange={(event) => setCreateSupplierId(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>주문일</label>
+                <input type="date" value={createOrderDate} onChange={(event) => setCreateOrderDate(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>초기 상태</label>
+                <select value={createOrderStatus} onChange={(event) => setCreateOrderStatus(event.target.value)}>
+                  <option value="PENDING">대기</option>
+                  <option value="CONFIRMED">확정</option>
+                  <option value="IN_PROGRESS">진행 중</option>
+                  <option value="COMPLETED">완료</option>
+                  <option value="CANCELED">취소</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-8">
+              <button className="btn btn-primary" onClick={handleCreateOrder} disabled={creating}>
+                {creating ? "등록 중..." : "등록"}
+              </button>
+              <button className="btn btn-gray" onClick={() => setShowCreateForm(false)} disabled={creating}>
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+      {createdOrder ? (
+        <div className="alert-banner success mb-12">
+          주문 {createdOrder.orderId} 등록 완료 ({formatDateTime(createdOrder.orderedAt)})
+        </div>
+      ) : null}
 
       <div className="card">
         <div className="card-header">
@@ -158,10 +236,7 @@ export default function OrderListPage() {
                 items.map((order) => (
                   <tr key={order.orderId}>
                     <td>
-                      <span
-                        className="text-primary fw-600 cursor-pointer"
-                        onClick={() => navigate(`/orders/${order.orderId}`)}
-                      >
+                      <span className="text-primary fw-600 cursor-pointer" onClick={() => navigate(`/orders/${order.orderId}`)}>
                         {order.orderId}
                       </span>
                     </td>
