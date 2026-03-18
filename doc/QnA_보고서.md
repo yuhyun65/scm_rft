@@ -4314,3 +4314,16 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - `5173` listener가 없어 사용자 데모 재실행 시 포트 충돌이 없다.
   - 실제 production cutover entry를 막는 남은 항목은 `production-secret-access-confirmation.md`의 `<fill>` 33건이다.
   - 실제 운영값만 확보되면 deploy host 기준 `.env.production` 렌더와 cutover entry check를 바로 재개할 수 있다.
+
+## Q222. 실제 운영체계도 문서화 (2026-03-18)
+- 요청:
+  - 시스템을 실제 운영하기 위한 운영체계도 문서화
+- 수행:
+  1. 기존 runbook 체계를 검토해 운영 기준선, 역할, 시크릿/접속, 컷오버, 모니터링, 롤백 구조를 하나의 운영 모델 문서로 정리했다.
+  2. 실제 운영 기준선(`feature/to-be-dev-env-bootstrap`, `850c83c`, `v2026.03.17-scm-rft-operational-go`)을 문서 상단에 고정했다.
+  3. 운영 흐름을 release baseline -> secret/access -> deploy host render -> pre-deploy gate -> go/no-go -> phase A isolation -> phase B write-open -> hypercare -> rollback 분기로 도식화했다.
+  4. 역할/RACI, secret/render 원칙, cutover 2단계 정책, 모니터링/롤백 기준, 현재 실제 운영 blocker를 문서에 반영했다.
+- 결과:
+  - [production-operating-model.md](C:\Users\CMN-091\projects\SCM_RFT\runbooks\production-operating-model.md) 문서가 추가됐다.
+  - 실제 운영 전환을 위한 통제체계와 수행 흐름을 한 문서에서 참조할 수 있게 됐다.
+  - 남은 실제 production blocker는 운영값/접속 승인 정보 미입력 항목으로 명시됐다.
