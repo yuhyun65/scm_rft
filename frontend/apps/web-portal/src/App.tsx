@@ -7,10 +7,15 @@ import DashboardPage from './pages/DashboardPage';
 import OrderListPage from './pages/OrderListPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import InventoryPage from './pages/InventoryPage';
+import InventoryDetailPage from './pages/InventoryDetailPage';
 import MemberPage from './pages/MemberPage';
+import MemberDetailPage from './pages/MemberDetailPage';
 import QualityDocPage from './pages/QualityDocPage';
+import QualityDocDetailPage from './pages/QualityDocDetailPage';
 import BoardPage from './pages/BoardPage';
+import BoardDetailPage from './pages/BoardDetailPage';
 import ReportPage from './pages/ReportPage';
+import ReportDetailPage from './pages/ReportDetailPage';
 
 /** @deprecated kept for test compatibility */
 export function formatPortalTitle(scope: string): string {
@@ -34,10 +39,15 @@ export function createAppRouter(resolvedApiBaseUrl: string) {
         { path: '/orders', element: <OrderListPage /> },
         { path: '/orders/:orderId', element: <OrderDetailPage /> },
         { path: '/inventory', element: <InventoryPage /> },
+        { path: '/inventory/:itemCode/:warehouseCode', element: <InventoryDetailPage /> },
         { path: '/members', element: <MemberPage /> },
+        { path: '/members/:memberId', element: <MemberDetailPage /> },
         { path: '/quality-docs', element: <QualityDocPage /> },
+        { path: '/quality-docs/:documentId', element: <QualityDocDetailPage /> },
         { path: '/board', element: <BoardPage /> },
+        { path: '/board/:postId', element: <BoardDetailPage /> },
         { path: '/reports', element: <ReportPage /> },
+        { path: '/reports/:jobId', element: <ReportDetailPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/dashboard" replace /> },

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Member, MemberSearchResponse } from "@scm-rft/api-client";
+import type { MemberSearchResponse } from "@scm-rft/api-client";
+import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import StatusBadge from "../components/StatusBadge";
 import { formatErrorText, useScmApiClient } from "../lib/scmApi";
@@ -7,6 +8,7 @@ import { formatErrorText, useScmApiClient } from "../lib/scmApi";
 const PAGE_SIZE = 10;
 
 export default function MemberPage() {
+  const navigate = useNavigate();
   const client = useScmApiClient();
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState("");
@@ -15,10 +17,8 @@ export default function MemberPage() {
   const [appliedKeyword, setAppliedKeyword] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<MemberSearchResponse | null>(null);
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,20 +54,6 @@ export default function MemberPage() {
       cancelled = true;
     };
   }, [appliedKeyword, appliedStatus, client, page, reloadKey]);
-
-  async function handleLoadMember(memberId: string) {
-    setDetailLoading(true);
-    setErrorText("");
-    try {
-      const result = await client.getMember(memberId);
-      setSelectedMember(result);
-    } catch (error) {
-      setErrorText(formatErrorText(error));
-      setSelectedMember(null);
-    } finally {
-      setDetailLoading(false);
-    }
-  }
 
   function handleSearch() {
     setAppliedStatus(statusFilter);
@@ -129,78 +115,47 @@ export default function MemberPage() {
 
       {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
 
-      <div className="grid-2">
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">
-              거래처 목록 <span className="text-muted fw-600 fs-12">총 {(searchResult?.total ?? 0).toLocaleString("ko-KR")}건</span>
-            </span>
-          </div>
-          <div className="tbl-wrap">
-            <table>
-              <thead>
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">
+            거래처 목록 <span className="text-muted fw-600 fs-12">총 {(searchResult?.total ?? 0).toLocaleString("ko-KR")}건</span>
+          </span>
+        </div>
+        <div className="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>거래처 ID</th>
+                <th>거래처명</th>
+                <th>상태</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 ? (
                 <tr>
-                  <th>거래처 ID</th>
-                  <th>거래처명</th>
-                  <th>상태</th>
-                  <th>액션</th>
+                  <td colSpan={4} className="text-center text-muted" style={{ padding: 24 }}>
+                    조회 결과가 없습니다.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {items.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center text-muted" style={{ padding: 24 }}>
-                      조회 결과가 없습니다.
+              ) : (
+                items.map((member) => (
+                  <tr key={member.memberId}>
+                    <td>{member.memberId}</td>
+                    <td className="fw-600">{member.memberName || "-"}</td>
+                    <td>{member.status ? <StatusBadge status={member.status} /> : "-"}</td>
+                    <td>
+                      <button className="btn btn-sm btn-outline" onClick={() => navigate(`/members/${encodeURIComponent(member.memberId)}`)}>
+                        상세
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  items.map((member) => (
-                    <tr key={member.memberId}>
-                      <td>{member.memberId}</td>
-                      <td className="fw-600">{member.memberName || "-"}</td>
-                      <td>{member.status ? <StatusBadge status={member.status} /> : "-"}</td>
-                      <td>
-                        <button className="btn btn-sm btn-outline" onClick={() => void handleLoadMember(member.memberId)}>
-                          상세
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">거래처 상세</span>
-          </div>
-          <div className="card-body">
-            {detailLoading ? (
-              <div className="text-muted">거래처 상세를 불러오는 중입니다.</div>
-            ) : selectedMember ? (
-              <>
-                {[
-                  ["거래처 ID", selectedMember.memberId],
-                  ["거래처명", selectedMember.memberName || "-"],
-                  [
-                    "상태",
-                    selectedMember.status ? <StatusBadge key="member-status" status={selectedMember.status} /> : "-",
-                  ],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="detail-row">
-                    <div className="detail-label">{label}</div>
-                    <div className="detail-value">{value}</div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <div className="text-muted fs-12">목록에서 거래처를 선택하면 실제 member 상세 응답이 표시됩니다.</div>
-            )}
-          </div>
-        </div>
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
       </div>
     </div>
   );

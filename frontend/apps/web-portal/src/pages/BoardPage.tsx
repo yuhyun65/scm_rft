@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import type {
   BoardPostCreateResponse,
-  BoardPostDetail,
   BoardPostSearchResponse,
 } from "@scm-rft/api-client";
+import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import StatusBadge from "../components/StatusBadge";
 import { formatDateTime, formatErrorText, useAuthIdentity, useScmApiClient } from "../lib/scmApi";
@@ -11,6 +11,7 @@ import { formatDateTime, formatErrorText, useAuthIdentity, useScmApiClient } fro
 const PAGE_SIZE = 10;
 
 export default function BoardPage() {
+  const navigate = useNavigate();
   const client = useScmApiClient();
   const { memberId, memberName } = useAuthIdentity();
   const [page, setPage] = useState(0);
@@ -20,11 +21,9 @@ export default function BoardPage() {
   const [appliedKeyword, setAppliedKeyword] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [errorText, setErrorText] = useState("");
   const [searchResult, setSearchResult] = useState<BoardPostSearchResponse | null>(null);
-  const [selectedPost, setSelectedPost] = useState<BoardPostDetail | null>(null);
   const [createResult, setCreateResult] = useState<BoardPostCreateResponse | null>(null);
   const [createBoardType, setCreateBoardType] = useState("GENERAL");
   const [createTitle, setCreateTitle] = useState("");
@@ -72,20 +71,6 @@ export default function BoardPage() {
     setReloadKey((current) => current + 1);
   }
 
-  async function handleLoadPost(postId: string) {
-    setDetailLoading(true);
-    setErrorText("");
-    try {
-      const result = await client.getBoardPost(postId);
-      setSelectedPost(result);
-    } catch (error) {
-      setErrorText(formatErrorText(error));
-      setSelectedPost(null);
-    } finally {
-      setDetailLoading(false);
-    }
-  }
-
   async function handleCreatePost() {
     setCreateSubmitting(true);
     setErrorText("");
@@ -99,8 +84,8 @@ export default function BoardPage() {
       setCreateResult(result);
       setCreateTitle("");
       setCreateContent("");
-      await handleLoadPost(result.postId);
       setReloadKey((current) => current + 1);
+      navigate(`/board/${encodeURIComponent(result.postId)}`);
     } catch (error) {
       setErrorText(formatErrorText(error));
     } finally {
@@ -184,7 +169,7 @@ export default function BoardPage() {
                       <td>
                         <StatusBadge status={post.boardType} />
                       </td>
-                      <td className="text-primary fw-600 cursor-pointer" onClick={() => void handleLoadPost(post.postId)}>
+                      <td className="text-primary fw-600 cursor-pointer" onClick={() => navigate(`/board/${encodeURIComponent(post.postId)}`)}>
                         {post.title}
                       </td>
                       <td>{post.status ? <StatusBadge status={post.status} /> : "-"}</td>
@@ -201,38 +186,9 @@ export default function BoardPage() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">게시글 상세 / 작성</span>
+            <span className="card-title">새 게시글 작성</span>
           </div>
           <div className="card-body">
-            {detailLoading ? (
-              <div className="text-muted mb-16">게시글 상세를 불러오는 중입니다.</div>
-            ) : selectedPost ? (
-              <div className="mb-16">
-                {[
-                  ["게시글 ID", selectedPost.postId],
-                  ["유형", <StatusBadge key="post-type" status={selectedPost.boardType} />],
-                  ["제목", selectedPost.title],
-                  ["상태", selectedPost.status ? <StatusBadge key="post-status" status={selectedPost.status} /> : "-"],
-                  ["작성자", selectedPost.createdBy],
-                  ["작성일", formatDateTime(selectedPost.createdAt)],
-                  ["본문", selectedPost.content || "-"],
-                  [
-                    "첨부 파일",
-                    selectedPost.attachments?.length
-                      ? selectedPost.attachments.map((attachment) => attachment.fileId).join(", ")
-                      : "-",
-                  ],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="detail-row">
-                    <div className="detail-label">{label}</div>
-                    <div className="detail-value">{value}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-muted fs-12 mb-16">게시글을 선택하면 실제 board 상세 응답이 표시됩니다.</div>
-            )}
-
             <div className="form-group mb-12">
               <label>새 글 유형</label>
               <select value={createBoardType} onChange={(event) => setCreateBoardType(event.target.value)} style={{ width: "100%" }}>

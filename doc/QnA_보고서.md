@@ -4397,3 +4397,21 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 좌측 메뉴만 되던 routed Mate-SCM 화면 중 주문/거래처/품질문서/게시판/보고서가 실제 API 기반으로 동작하게 정리됐다.
   - 프론트 검증 결과는 build PASS, test PASS(5 files, 16 tests)다.
   - 이번 요청 범위 밖인 재고 화면은 아직 기존 정적 routed UI 상태다.
+
+## Q228. inventory API 연결 및 상세 라우트 분리, browser demo 재검증 (2026-03-18)
+- 요청:
+  - 재고 화면도 실제 API로 연결
+  - 각 화면 상세를 라우트 기반으로 분리
+  - 브라우저 데모 재검증
+- 수행:
+  1. 재고 화면을 mock 데이터에서 `searchInventoryBalances` 기반으로 전환하고, `itemCode + warehouseCode` 기준의 detail route에서 `searchInventoryMovements`까지 조회하도록 바꿨다.
+  2. `InventoryDetailPage`, `MemberDetailPage`, `QualityDocDetailPage`, `BoardDetailPage`, `ReportDetailPage`를 추가하고, `App.tsx`에 각 도메인별 detail route를 등록했다.
+  3. 목록 화면의 상세/ACK/이력/다시조회 버튼을 inline panel 대신 dedicated route로 이동시키도록 정리했다.
+  4. `pnpm -C frontend --filter @scm-rft/web-portal build`와 `test`를 다시 실행해 회귀를 확인했다.
+  5. `run-local-prodlike-demo.ps1 -Mode FullFeature -LaunchFrontend`를 다시 실행해 actual-topology, seed, gateway smoke, full P0 smoke, 프론트 dev server 기동까지 모두 PASS를 확인했다.
+  6. 브라우저 데모 증적으로 frontend origin 응답, proxy login 응답, headless Edge 로그인 페이지 스크린샷을 `runbooks/evidence/ROUTED-DETAIL-DEMO-REVALIDATE-20260318-114729/`에 남겼다.
+  7. 검증 후 `stop-local-prodlike-demo.ps1`로 컨테이너와 프론트 listener를 정리하고 정책을 `cutover-isolation.yaml`로 원복했다.
+- 결과:
+  - 재고 화면도 실제 inventory API 기반으로 동작하게 정리됐다.
+  - 주문 외에도 거래처/품질문서/게시판/보고서/재고 상세가 라우트 기반으로 분리됐다.
+  - local production-like 기준 browser demo 재검증이 PASS했고, cleanup까지 완료됐다.

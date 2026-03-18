@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ReportJob } from "@scm-rft/api-client";
+import { useNavigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
 import { formatDateTime, formatErrorText, useAuthIdentity, useScmApiClient } from "../lib/scmApi";
 
@@ -11,15 +12,14 @@ const REPORT_OPTIONS = [
 ];
 
 export default function ReportPage() {
+  const navigate = useNavigate();
   const client = useScmApiClient();
   const { memberId, memberName } = useAuthIdentity();
   const [reportType, setReportType] = useState("P0_DAILY");
   const [requestedByMemberId, setRequestedByMemberId] = useState(memberId);
   const [jobId, setJobId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
-  const [latestJob, setLatestJob] = useState<ReportJob | null>(null);
   const [jobHistory, setJobHistory] = useState<ReportJob[]>([]);
 
   async function handleCreateJob() {
@@ -30,32 +30,12 @@ export default function ReportPage() {
         reportType,
         requestedByMemberId: requestedByMemberId || undefined,
       });
-      setLatestJob(result);
       setJobId(result.jobId);
       setJobHistory((current) => [result, ...current.filter((job) => job.jobId !== result.jobId)].slice(0, 5));
     } catch (error) {
       setErrorText(formatErrorText(error));
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleLoadJob(targetJobId = jobId) {
-    if (!targetJobId.trim()) {
-      return;
-    }
-
-    setDetailLoading(true);
-    setErrorText("");
-    try {
-      const result = await client.getReportJob(targetJobId.trim());
-      setLatestJob(result);
-      setJobId(result.jobId);
-      setJobHistory((current) => [result, ...current.filter((job) => job.jobId !== result.jobId)].slice(0, 5));
-    } catch (error) {
-      setErrorText(formatErrorText(error));
-    } finally {
-      setDetailLoading(false);
     }
   }
 
@@ -102,7 +82,7 @@ export default function ReportPage() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">보고서 Job 상세 조회</span>
+            <span className="card-title">보고서 Job 상세 이동</span>
           </div>
           <div className="card-body">
             <div className="form-row mb-12">
@@ -112,33 +92,14 @@ export default function ReportPage() {
               </div>
               <div className="form-group">
                 <label style={{ visibility: "hidden" }}>조회</label>
-                <button className="btn btn-outline" onClick={() => void handleLoadJob()} disabled={detailLoading || !jobId.trim()}>
-                  {detailLoading ? "조회 중..." : "상세 조회"}
+                <button className="btn btn-outline" onClick={() => navigate(`/reports/${encodeURIComponent(jobId.trim())}`)} disabled={!jobId.trim()}>
+                  상세 페이지 이동
                 </button>
               </div>
             </div>
-
-            {latestJob ? (
-              <>
-                {[
-                  ["Job ID", latestJob.jobId],
-                  ["유형", latestJob.reportType],
-                  ["상태", <StatusBadge key="report-status" status={latestJob.status} />],
-                  ["요청자", latestJob.requestedByMemberId || "-"],
-                  ["요청일시", formatDateTime(latestJob.requestedAt)],
-                  ["완료일시", formatDateTime(latestJob.completedAt)],
-                  ["출력 파일 ID", latestJob.outputFileId || "-"],
-                  ["오류 메시지", latestJob.errorMessage || "-"],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="detail-row">
-                    <div className="detail-label">{label}</div>
-                    <div className="detail-value">{value}</div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <div className="text-muted fs-12">보고서 job을 생성하거나 기존 job ID를 입력해 상세를 조회하면 결과가 표시됩니다.</div>
-            )}
+            <div className="text-muted fs-12">
+              생성된 job이나 기존 job ID를 입력하면 dedicated route에서 실제 job 상세를 확인할 수 있습니다.
+            </div>
           </div>
         </div>
       </div>
@@ -177,7 +138,7 @@ export default function ReportPage() {
                     <td className="fs-11">{formatDateTime(job.requestedAt)}</td>
                     <td className="fs-11">{job.outputFileId || "-"}</td>
                     <td>
-                      <button className="btn btn-sm btn-outline" onClick={() => void handleLoadJob(job.jobId)}>
+                      <button className="btn btn-sm btn-outline" onClick={() => navigate(`/reports/${encodeURIComponent(job.jobId)}`)}>
                         다시 조회
                       </button>
                     </td>
