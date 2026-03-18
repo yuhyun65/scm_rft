@@ -389,7 +389,25 @@ try {
   }
   Write-Host "[OK] P0-F01 member search/detail passed."
 
-  $orderList = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/order-lot/v1/orders?keyword=P0-ORDER&page=0&size=10" -Headers $authHeaders
+  $orderList = $null
+  for ($attempt = 1; $attempt -le 3; $attempt++) {
+    try {
+      $orderList = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/order-lot/v1/orders?keyword=P0-ORDER&page=0&size=10" -Headers $authHeaders
+      break
+    }
+    catch {
+      $statusCode = "unknown"
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+        $statusCode = [int]$_.Exception.Response.StatusCode
+      }
+      if ($statusCode -eq 504 -and $attempt -lt 3) {
+        Write-Host "[WARN] order list via gateway returned 504. retrying..."
+        Start-Sleep -Seconds 2
+        continue
+      }
+      throw
+    }
+  }
   if (@($orderList.items).Count -lt 1) {
     throw "[FAIL] P0-F02 order list returned empty."
   }

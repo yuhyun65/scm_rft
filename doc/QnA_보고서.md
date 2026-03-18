@@ -4431,3 +4431,48 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 현재 backend가 실제 제공하는 지원 endpoint는 routed UI에 모두 연결됐다.
   - 남은 미지원 액션은 backend 자체 미지원 범위(주문 등록/수정, LOT 추가, 재고 조정, 거래처 등록, 품질문서 등록, 실제 파일 다운로드)로 좁혀졌다.
   - 이 변경 라인은 기존 기준 브랜치 연장선이라 별도 PR 분리보다 커밋 단위 정리가 적절하다고 판단했다.
+
+## Q230. routed Mate-SCM 남은 write 액션 서버 구현 및 프론트 연결 (2026-03-18)
+- 요청:
+  - 남아 있던 backend 미지원 액션 중 실제 구현 가능한 항목을 서버까지 추가
+- 수행:
+  1. member 서비스에 거래처 등록 endpoint(`POST /api/member/v1/members`)와 요청 DTO, repository insert 경로를 추가했다.
+  2. quality-doc 서비스에 문서 등록 endpoint(`POST /api/quality-doc/v1/documents`)를 추가했다.
+  3. order-lot 서비스에 주문 생성/수정/LOT 추가 endpoint(`POST /orders`, `PUT /orders/{orderId}`, `POST /orders/{orderId}/lots`)를 추가했다.
+  4. inventory 서비스에 재고 조정 endpoint(`POST /api/inventory/v1/adjustments`)를 추가했다.
+  5. 각 서비스 테스트를 보강하고 `gradle test`로 회귀를 확인했다.
+  6. 프론트 routed page와 `frontend/packages/api-client`를 새 endpoint에 맞춰 갱신해 거래처 등록, 주문 생성/수정/LOT 추가, 품질문서 등록, 재고 조정이 실제 gateway API를 호출하도록 연결했다.
+- 결과:
+  - 이전에 dead button이던 routed Mate-SCM 주요 write 액션이 실제 서버까지 구현됐다.
+  - 남은 미지원 항목은 실제 파일 다운로드처럼 저장소/바이너리 전달 구조가 없는 범위로 줄었다.
+  - 프론트 검증은 build PASS, test PASS(5 files, 16 tests)였다.
+
+## Q231. local runtime 재배포 후 routed detail action smoke 및 demo 보강 (2026-03-18)
+- 요청:
+  - 새 backend 액션이 실제 local actual-topology 런타임에서도 동작하도록 재배포하고 routed detail 기준으로 다시 검증
+- 수행:
+  1. `docker-compose.actual-topology.yml`이 `services/*/build/libs/*.jar`를 bind mount하는 구조임을 확인하고, 변경된 `member`, `quality-doc`, `order-lot`, `inventory` bootJar를 다시 빌드했다.
+  2. 처음에는 jar 재빌드만 하고 컨테이너를 강제 재생성하지 않아 old process가 그대로 남아 `405 Method Not Allowed`가 발생하는 것을 확인했다.
+  3. 해당 서비스와 gateway를 `--force-recreate`로 다시 올린 뒤, gateway 기준으로 거래처 등록/상세, 품질문서 등록/ACK, 주문 생성/수정/LOT 추가/상태변경, 재고 조정, 게시글 생성/상세, 파일 상세, 보고서 생성/상세를 다시 검증했다.
+  4. routed detail action smoke 결과를 `runbooks/evidence/ROUTED-DETAIL-DEMO-REVALIDATE-20260318-1800/routed-detail-actions.json`에 남겼다.
+  5. `browser-click-test-checklist.md`, `user-demo-runbook.md`를 새 create/update 흐름까지 포함하도록 보강했다.
+- 결과:
+  - routed Mate-SCM의 주요 detail/write 시나리오가 gateway 기준으로 실제 동작함을 재확인했다.
+  - 브라우저 데모 기준 문서도 현재 구현 범위와 일치하도록 갱신됐다.
+
+## Q232. local production-like demo launcher 안정화와 production entry blocker 재확인 (2026-03-18)
+- 요청:
+  - routed detail 기준 수동 브라우저 시연을 다시 가능한 상태로 정리하고, 실제 운영 cutover entry 조건도 다시 확인
+- 수행:
+  1. `run-local-prodlike-demo.ps1`의 gateway health wait 기본값을 `300s`로 상향했다.
+  2. `smoke-gateway-p0-e2e.ps1`에서 cold start 직후 `order-lot` 첫 read가 간헐적으로 `504`를 내던 문제를 완화하기 위해 order list 호출에 재시도를 추가했다.
+  3. standalone `smoke-gateway-p0-e2e.ps1`를 다시 실행해 `P0-F01~F07` 전체 PASS를 확인했다.
+  4. frontend dev server를 다시 띄우고 `http://127.0.0.1:5173/login` origin 응답과 `/api/auth/v1/login` proxy login 응답을 증적으로 남겼다.
+  5. `production-secret-access-confirmation.md`의 placeholder와 실제 secret-manager/deploy-host 부재를 다시 확인했다.
+- 결과:
+  - local prod-like 기준 manual browser demo 준비 상태를 다시 확보했다.
+  - 증적:
+    - `runbooks/evidence/ROUTED-DETAIL-DEMO-REVALIDATE-20260318-1800/routed-detail-browser-demo-summary.md`
+    - `runbooks/evidence/ROUTED-DETAIL-DEMO-REVALIDATE-20260318-1800/proxy-login-response.json`
+  - 실제 production cutover entry는 여전히 BLOCKED다.
+  - blocker는 코드가 아니라 real secret manager / bastion / execution account / owner / maintenance window 미확정이다.

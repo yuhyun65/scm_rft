@@ -22,6 +22,10 @@
 - [ ] In search, keyword=`demo`, status=`ACTIVE`
 - [ ] Click `조회`
 - [ ] Table shows multiple `demo-*` members
+- [ ] Open `거래처 등록` or create form section
+- [ ] Enter a new `memberId`, `memberName`, `status`
+- [ ] Click `등록`
+- [ ] Success banner appears
 - [ ] Click one `상세`
 - [ ] Route changes to `/members/:memberId`
 - [ ] Detail page shows `memberId`, `memberName`, `status`
@@ -34,7 +38,10 @@
 - [ ] Click one order `상세`
 - [ ] Route changes to `/orders/:orderId`
 - [ ] Order detail shows order status, expected delivery, total lot count
+- [ ] Open order create form and create one new order
+- [ ] Open order update form and submit changed supplier/date
 - [ ] Enter `DEMO-LOT-1002-A` and click `LOT 조회`
+- [ ] Open lot add form and add one lot
 - [ ] For full feature demo only: change status and submit
 - [ ] Status change response returns `beforeStatus` and `afterStatus`
 
@@ -53,6 +60,7 @@
 - [ ] Quality-doc list returns seeded documents
 - [ ] Click `상세 / ACK`
 - [ ] Route changes to `/quality-docs/:documentId`
+- [ ] Open quality-doc register form and create one document
 - [ ] For full feature demo only: ACK action succeeds
 
 ## 4. Inventory + File + Report Routes
@@ -62,6 +70,9 @@
 - [ ] Click `이력 조회`
 - [ ] Route changes to `/inventory/:itemCode/:warehouseCode`
 - [ ] Inventory detail page shows balance and movement rows
+- [ ] Open inventory adjustment form
+- [ ] Submit one quantity adjustment
+- [ ] Success response shows `resultingQuantity`
 - [ ] Open `보고서 생성`
 - [ ] Create a report job
 - [ ] Click `상세 페이지 이동` or a `다시 조회` row button

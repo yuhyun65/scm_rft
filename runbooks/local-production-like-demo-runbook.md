@@ -32,7 +32,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-local-prodlike-demo.ps1 -
 5. starts actual-topology application containers
 6. seeds rich demo data
 7. validates auth/member/gateway path
-8. if `FullFeature`, switches to `post-cutover-write-open.yaml`, recreates gateway, waits for health, and runs full P0 smoke
+8. if `FullFeature`, switches to `post-cutover-write-open.yaml`, recreates gateway, waits for health up to `300s`, and runs full P0 smoke
 9. optionally launches `frontend-dev.ps1` in a separate PowerShell window
 10. writes a summary file under `runbooks/evidence/LOCAL-PRODLIKE-DEMO-<timestamp>/demo-launch-summary.md`
 
