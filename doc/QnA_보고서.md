@@ -4415,3 +4415,19 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 재고 화면도 실제 inventory API 기반으로 동작하게 정리됐다.
   - 주문 외에도 거래처/품질문서/게시판/보고서/재고 상세가 라우트 기반으로 분리됐다.
   - local production-like 기준 browser demo 재검증이 PASS했고, cleanup까지 완료됐다.
+
+## Q229. file detail route 연결 및 routed click checklist 보강 (2026-03-18)
+- 요청:
+  - 미지원 액션 중 백엔드가 있는 항목부터 추가 연결
+  - route-based detail 화면 기준 사용자 클릭 시나리오 체크리스트 보강
+  - 필요 시 변경 라인 기준 정리
+- 수행:
+  1. backend controller와 api-client를 다시 대조해 현재 routed UI에 아직 직접 드러나지 않은 지원 endpoint가 `file` 메타데이터 조회라는 점을 확인했다.
+  2. `FileDetailPage`와 `/files/:fileId` route를 추가했다.
+  3. 게시글 상세에서는 attachment `fileId`를 file detail route로 이동시키고, 보고서 상세에서는 `outputFileId`가 있을 때 file detail route로 이동할 수 있게 연결했다.
+  4. `browser-click-test-checklist.md`를 routed Mate-SCM 화면 기준으로 다시 작성해 login/member, order, board, quality-doc, inventory, report, file detail route 확인 절차를 명시했다.
+  5. `user-demo-runbook.md`도 routed detail 흐름 기준으로 보강했다.
+- 결과:
+  - 현재 backend가 실제 제공하는 지원 endpoint는 routed UI에 모두 연결됐다.
+  - 남은 미지원 액션은 backend 자체 미지원 범위(주문 등록/수정, LOT 추가, 재고 조정, 거래처 등록, 품질문서 등록, 실제 파일 다운로드)로 좁혀졌다.
+  - 이 변경 라인은 기존 기준 브랜치 연장선이라 별도 PR 분리보다 커밋 단위 정리가 적절하다고 판단했다.

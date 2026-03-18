@@ -69,7 +69,17 @@ export default function ReportDetailPage() {
                 ["요청자", job.requestedByMemberId || "-"],
                 ["요청일시", formatDateTime(job.requestedAt)],
                 ["완료일시", formatDateTime(job.completedAt)],
-                ["출력 파일 ID", job.outputFileId || "-"],
+                [
+                  "출력 파일 ID",
+                  job.outputFileId ? (
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => navigate(`/files/${encodeURIComponent(job.outputFileId ?? "")}`)}
+                    >
+                      {job.outputFileId}
+                    </button>
+                  ) : "-",
+                ],
                 ["오류 메시지", job.errorMessage || "-"],
               ].map(([label, value]) => (
                 <div key={String(label)} className="detail-row">

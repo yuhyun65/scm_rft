@@ -16,6 +16,7 @@ import BoardPage from './pages/BoardPage';
 import BoardDetailPage from './pages/BoardDetailPage';
 import ReportPage from './pages/ReportPage';
 import ReportDetailPage from './pages/ReportDetailPage';
+import FileDetailPage from './pages/FileDetailPage';
 
 /** @deprecated kept for test compatibility */
 export function formatPortalTitle(scope: string): string {
@@ -48,6 +49,7 @@ export function createAppRouter(resolvedApiBaseUrl: string) {
         { path: '/board/:postId', element: <BoardDetailPage /> },
         { path: '/reports', element: <ReportPage /> },
         { path: '/reports/:jobId', element: <ReportDetailPage /> },
+        { path: '/files/:fileId', element: <FileDetailPage /> },
       ],
     },
     { path: '*', element: <Navigate to="/dashboard" replace /> },

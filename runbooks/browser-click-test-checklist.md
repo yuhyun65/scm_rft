@@ -13,53 +13,63 @@
 - Quality demo: `demo-quality-001 / password`
 - Admin demo: `smoke-admin / password`
 
-## 1. Auth + Member
-- [ ] Login card visible
-- [ ] Login ID defaults to `smoke-user`
-- [ ] Password defaults to `password`
-- [ ] Click `Login`
-- [ ] `Login Response` shows `accessToken`, `memberId`, `roles`
-- [ ] Click `Verify Token`
-- [ ] `Verify Response` shows `active=true`
-- [ ] Enter `demo-buyer-001` in `Member ID`
-- [ ] Click `Get Member`
-- [ ] `Member Response` shows `memberId=demo-buyer-001`
-- [ ] In `Member Search`, keyword=`demo`, status=`ACTIVE`
-- [ ] Click `Search Members`
-- [ ] `Search Response` shows multiple `demo-*` members
+## 1. Login + Member Route
+- [ ] Login page visible at `/login`
+- [ ] Enter `smoke-user / password`
+- [ ] Click `로그인`
+- [ ] Redirect to `/dashboard`
+- [ ] Open left menu `거래처 관리`
+- [ ] In search, keyword=`demo`, status=`ACTIVE`
+- [ ] Click `조회`
+- [ ] Table shows multiple `demo-*` members
+- [ ] Click one `상세`
+- [ ] Route changes to `/members/:memberId`
+- [ ] Detail page shows `memberId`, `memberName`, `status`
 
-## 2. Order-Lot
-- [ ] `Order-Lot P0 UI MVP` section visible
-- [ ] In `Keyword`, enter `DEMO-ORDER`
-- [ ] Click order search action
+## 2. Order Route
+- [ ] Open left menu `주문 관리`
+- [ ] In search, keyword=`DEMO-ORDER`
+- [ ] Click `조회`
 - [ ] Order list returns multiple records
-- [ ] Set `Order ID=DEMO-ORDER-1002` and open detail
-- [ ] Set `Lot ID=DEMO-LOT-1002-A` and open detail
-- [ ] For full feature demo only: change `DEMO-ORDER-1002` status and submit
+- [ ] Click one order `상세`
+- [ ] Route changes to `/orders/:orderId`
+- [ ] Order detail shows order status, expected delivery, total lot count
+- [ ] Enter `DEMO-LOT-1002-A` and click `LOT 조회`
+- [ ] For full feature demo only: change status and submit
 - [ ] Status change response returns `beforeStatus` and `afterStatus`
 
-## 3. Board + Quality-Doc
-- [ ] `Board + Quality-Doc UI MVP` section visible
-- [ ] Board keyword=`Demo`, click search
-- [ ] Board list returns multiple seeded posts
-- [ ] Use `55555555-5555-5555-5555-000000000002` for detail lookup
+## 3. Board + Quality-Doc Routes
+- [ ] Open `게시판`
+- [ ] Board keyword=`Demo`, click `조회`
+- [ ] Board list returns seeded posts
+- [ ] Click one post title
+- [ ] Route changes to `/board/:postId`
 - [ ] Board detail returns content
-- [ ] For full feature demo only: create board post succeeds
-- [ ] Leave quality-doc status blank, keyword=`Demo`, click search
+- [ ] If attachment button exists, click it and confirm route changes to `/files/:fileId`
+- [ ] Go back and create a board post
+- [ ] New post creation succeeds and route moves to its detail page
+- [ ] Open `품질 문서`
+- [ ] Leave status blank, keyword=`Demo`, click `조회`
 - [ ] Quality-doc list returns seeded documents
-- [ ] Use `66666666-6666-6666-6666-000000000002` for detail lookup
+- [ ] Click `상세 / ACK`
+- [ ] Route changes to `/quality-docs/:documentId`
 - [ ] For full feature demo only: ACK action succeeds
 
-## 4. Inventory + File + Report
-- [ ] `Inventory + File + Report UI MVP` section visible
-- [ ] Inventory balance search with `ITEM-001` and `WH-01` returns rows
-- [ ] Inventory movement search for the same item returns rows
-- [ ] For full feature demo only: file register succeeds
-- [ ] Use `44444444-4444-4444-4444-000000000003` for file detail read
-- [ ] File detail read succeeds
-- [ ] For full feature demo only: report job create succeeds
-- [ ] Use `77777777-7777-7777-7777-000000000001` for report job detail
-- [ ] Report job detail returns current status
+## 4. Inventory + File + Report Routes
+- [ ] Open `재고 현황`
+- [ ] Search with `ITEM-001`, `WH-01`
+- [ ] Inventory balance list returns rows
+- [ ] Click `이력 조회`
+- [ ] Route changes to `/inventory/:itemCode/:warehouseCode`
+- [ ] Inventory detail page shows balance and movement rows
+- [ ] Open `보고서 생성`
+- [ ] Create a report job
+- [ ] Click `상세 페이지 이동` or a `다시 조회` row button
+- [ ] Route changes to `/reports/:jobId`
+- [ ] Report detail returns current status
+- [ ] If `outputFileId` exists, click it
+- [ ] Route changes to `/files/:fileId`
+- [ ] File detail page returns metadata
 
 ## 5. Cutover Runner
 - [ ] `Cutover Runner` section visible
@@ -75,10 +85,10 @@ Mark the demo as failed immediately if any of the following appears:
 - [ ] Order-Lot write action fails while write-open policy is enabled
 
 ## Evidence To Capture
-- [ ] Browser screenshot: Auth + Member success
-- [ ] Browser screenshot: Order-Lot success
-- [ ] Browser screenshot: Board + Quality-Doc success
-- [ ] Browser screenshot: Inventory + File + Report success
+- [ ] Browser screenshot: Login + Member route success
+- [ ] Browser screenshot: Order route success
+- [ ] Browser screenshot: Board + Quality-Doc route success
+- [ ] Browser screenshot: Inventory + File + Report route success
 - [ ] Browser screenshot: Cutover Runner success
 - [ ] Demo seed summary file path captured from `scripts/seed-demo-data.ps1`
 - [ ] Optional: devtools network screenshot for proxied `/api/*` call

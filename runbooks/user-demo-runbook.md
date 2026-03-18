@@ -103,18 +103,20 @@ Expected result:
 - Report job detail ID: `77777777-7777-7777-7777-000000000001`
 
 ## Demo Flow Order
-1. Auth + Member
-2. Order-Lot
-3. Board + Quality-Doc
-4. Inventory + File + Report
+1. Login -> 거래처 관리 -> 거래처 상세 route
+2. 주문 관리 -> 주문 상세 route
+3. 게시판 -> 게시글 상세 route -> 파일 상세 route(첨부가 있을 때)
+4. 품질 문서 -> 문서 상세/ACK route
+5. 재고 현황 -> 재고 상세 route
+6. 보고서 생성 -> 보고서 상세 route -> 파일 상세 route(output file이 있을 때)
 5. Cutover Runner
 
 ## Demo Pass Criteria
-- Login succeeds and access token is shown
-- Member search and detail return data
+- Login succeeds and dashboard로 이동한다
+- Member search and detail route return data
 - Order and lot data return data
-- Board and quality-doc lists return data
-- Inventory, file, and report actions return data
+- Board and quality-doc routes return data
+- Inventory, report, and file detail routes return data
 - No visible gateway/CORS error in browser
 
 ## Demo End / Cleanup

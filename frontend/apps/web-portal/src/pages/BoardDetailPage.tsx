@@ -77,13 +77,25 @@ export default function BoardDetailPage() {
                 ["상태", post.status ? <StatusBadge key="post-status" status={post.status} /> : "-"],
                 ["작성자", post.createdBy],
                 ["작성일", formatDateTime(post.createdAt)],
-                ["본문", post.content || "-"],
-                [
-                  "첨부 파일",
-                  post.attachments?.length ? post.attachments.map((attachment) => attachment.fileId).join(", ") : "-",
-                ],
-              ].map(([label, value]) => (
-                <div key={String(label)} className="detail-row">
+                  ["본문", post.content || "-"],
+                  [
+                    "첨부 파일",
+                    post.attachments?.length ? (
+                      <div className="flex" style={{ flexWrap: "wrap", gap: 8 }}>
+                        {post.attachments.map((attachment) => (
+                          <button
+                            key={attachment.fileId}
+                            className="btn btn-sm btn-outline"
+                            onClick={() => navigate(`/files/${encodeURIComponent(attachment.fileId)}`)}
+                          >
+                            {attachment.fileName || attachment.fileId}
+                          </button>
+                        ))}
+                      </div>
+                    ) : "-",
+                  ],
+                ].map(([label, value]) => (
+                  <div key={String(label)} className="detail-row">
                   <div className="detail-label">{label}</div>
                   <div className="detail-value">{value}</div>
                 </div>
