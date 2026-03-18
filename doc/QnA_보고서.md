@@ -4488,3 +4488,15 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - routed Mate-SCM 화면의 공통 API 호출 경로에서 발생하던 `Illegal invocation` 원인을 제거했다.
   - 프론트 검증 결과는 build PASS, test PASS(5 files, 16 tests)다.
+
+## Q234. 2026-03-18 세션 종료 정리 (2026-03-18)
+- 요청:
+  - 오늘 작업 종료를 위해 모든 런타임과 환경을 정리
+- 수행:
+  1. `scripts/stop-local-prodlike-demo.ps1`를 실행해 frontend listener와 local actual-topology/infra stack을 중지했다.
+  2. `docker ps`로 실행 중 컨테이너가 없는 것을 확인했다.
+  3. 서비스 포트(`5173`, `18080`, `8081~8088`) listener가 남지 않도록 정리했다.
+  4. `.env.production`의 `GATEWAY_POLICY_PATH`가 `infra/gateway/policies/cutover-isolation.yaml`로 복구된 것을 확인했다.
+- 결과:
+  - 세션 종료 시점 기준 local SCM_RFT runtime은 정리 완료 상태다.
+  - 다음 작업은 실제 운영값 확보 후 cutover entry check 재시작 또는 routed Mate-SCM 수동 브라우저 시연 재개로 이어가면 된다.
