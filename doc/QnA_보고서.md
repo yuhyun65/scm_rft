@@ -4368,3 +4368,15 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - DB 생성 직후 ONLINE 전환 지연으로 인한 `Cannot open database ... requested by the login` 오류가 재발하지 않도록 보강됐다.
   - 검증용 DB 기준으로 `seed-demo-data.ps1`가 PASS했다.
   - 증적: `runbooks/evidence/DEMO-SEED-20260318-103935/demo-seed-summary.md`
+
+## Q226. demo seed DB usable 연결 기준으로 보강 (2026-03-18)
+- 요청:
+  - `run-local-prodlike-demo.ps1` 재실행 시 `SCM_RFT_PRODLIKE`가 `ONLINE`인데도 로그인 실패하는 현상 해결
+- 수행:
+  1. SQL Server 로그를 확인해 `SCM_RFT_PRODLIKE`가 `state_desc=ONLINE`으로 보이더라도 recovery 완료 전에 첫 로그인 시도가 들어오면 `Failed to open the explicitly specified database`가 발생하는 것을 확인했다.
+  2. `seed-demo-data.ps1`의 `Wait-ForDatabaseOnline` 기준을 제거하고, 대상 DB에 대해 직접 `SELECT 1`이 성공할 때까지 재시도하는 `Wait-ForDatabaseUsable`로 교체했다.
+  3. 새 검증용 DB `SCM_RFT_PRODLIKE_VERIFY_20260318B`를 대상으로 실제 생성/접속/시드 흐름을 실행해 수정 효과를 확인했다.
+- 결과:
+  - 단순 `ONLINE` 상태가 아니라 실제 클라이언트 연결 가능 시점까지 기다리도록 보강됐다.
+  - 검증용 DB 기준으로 `seed-demo-data.ps1`가 PASS했다.
+  - 증적: `runbooks/evidence/DEMO-SEED-20260318-104413/demo-seed-summary.md`
