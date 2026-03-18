@@ -4356,3 +4356,15 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 운영유사 데모 런처가 실제 1회 PASS했다.
   - 주요 증적은 `runbooks/evidence/LOCAL-PRODLIKE-DEMO-*` 및 `runbooks/evidence/DEMO-SEED-*`에 남았다.
   - 이제 시작/종료 모두 단일 진입 스크립트로 수행할 수 있다.
+
+## Q225. demo seed 시 DB ONLINE 전환 대기 보강 (2026-03-18)
+- 요청:
+  - `run-local-prodlike-demo.ps1` 실행 중 `SCM_RFT_PRODLIKE` 접속 실패 원인 확인 및 재발 방지
+- 수행:
+  1. `seed-demo-data.ps1`를 점검해 대상 DB 생성 직후 바로 해당 DB로 접속을 시도하는 경로를 확인했다.
+  2. `Ensure-Database` 직후 `Wait-ForDatabaseOnline` 단계를 추가해 대상 DB가 `ONLINE` 상태가 될 때까지 `master`에서 폴링하도록 보강했다.
+  3. 새 검증용 DB `SCM_RFT_PRODLIKE_VERIFY_20260318`를 대상으로 실제 생성/시드 흐름을 실행해 수정 효과를 확인했다.
+- 결과:
+  - DB 생성 직후 ONLINE 전환 지연으로 인한 `Cannot open database ... requested by the login` 오류가 재발하지 않도록 보강됐다.
+  - 검증용 DB 기준으로 `seed-demo-data.ps1`가 PASS했다.
+  - 증적: `runbooks/evidence/DEMO-SEED-20260318-103935/demo-seed-summary.md`

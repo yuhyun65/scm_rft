@@ -130,6 +130,59 @@ function Ensure-Database {
   Invoke-SqlBatch -ContainerName $ContainerName -DatabaseName "master" -SaPassword $SaPassword -Sql $createDbSql
 }
 
+function Wait-ForDatabaseOnline {
+  param(
+    [Parameter(Mandatory = $true)][string]$ContainerName,
+    [Parameter(Mandatory = $true)][string]$DatabaseName,
+    [Parameter(Mandatory = $true)][string]$SaPassword,
+    [int]$TimeoutSec = 120,
+    [int]$PollIntervalSec = 3
+  )
+
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  while ((Get-Date) -lt $deadline) {
+    $checkSql = @"
+SET NOCOUNT ON;
+IF EXISTS (
+  SELECT 1
+  FROM sys.databases
+  WHERE name = N'$DatabaseName'
+    AND state_desc = 'ONLINE'
+)
+  SELECT 1;
+ELSE
+  SELECT 0;
+"@
+
+    $cmd = @(
+      "exec", $ContainerName,
+      "/opt/mssql-tools18/bin/sqlcmd",
+      "-S", "localhost",
+      "-U", "sa",
+      "-P", $SaPassword,
+      "-C",
+      "-d", "master",
+      "-W",
+      "-h", "-1",
+      "-Q", $checkSql
+    )
+
+    try {
+      $output = (& docker @cmd 2>$null | Out-String).Trim()
+      if ($LASTEXITCODE -eq 0 -and $output -match '(^|\\s)1(\\s|$)') {
+        Write-Host "[OK] database '$DatabaseName' is ONLINE."
+        return
+      }
+    }
+    catch {
+    }
+
+    Start-Sleep -Seconds $PollIntervalSec
+  }
+
+  throw "[FAIL] database '$DatabaseName' did not become ONLINE within ${TimeoutSec}s."
+}
+
 function Apply-MigrationFiles {
   param(
     [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -231,6 +284,7 @@ if ([string]::IsNullOrWhiteSpace($saPassword)) {
 Assert-DockerReady -ContainerName $SqlContainerName
 Wait-ForSqlReady -ContainerName $SqlContainerName -SaPassword $saPassword -TimeoutSec $SqlReadyTimeoutSec -PollIntervalSec $SqlReadyPollIntervalSec
 Ensure-Database -ContainerName $SqlContainerName -DatabaseName $Database -SaPassword $saPassword
+Wait-ForDatabaseOnline -ContainerName $SqlContainerName -DatabaseName $Database -SaPassword $saPassword
 
 if ($ApplyMigrations) {
   Apply-MigrationFiles -RepoRoot $repoRoot -ContainerName $SqlContainerName -DatabaseName $Database -SaPassword $saPassword
