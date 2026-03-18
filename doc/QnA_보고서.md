@@ -4327,3 +4327,14 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - [production-operating-model.md](C:\Users\CMN-091\projects\SCM_RFT\runbooks\production-operating-model.md) 문서가 추가됐다.
   - 실제 운영 전환을 위한 통제체계와 수행 흐름을 한 문서에서 참조할 수 있게 됐다.
   - 남은 실제 production blocker는 운영값/접속 승인 정보 미입력 항목으로 명시됐다.
+
+## Q223. 로컬 운영유사 데모 단일 진입 스크립트 추가 (2026-03-18)
+- 요청:
+  - 내 로컬 PC 환경에서 실제 운영과 유사한 수준으로 데모할 수 있도록 한 번에 실행하는 방식으로 정리
+- 수행:
+  1. `actual-topology`와 2단계 gateway 정책 전환 흐름을 하나의 스크립트로 묶는 `scripts/run-local-prodlike-demo.ps1`를 추가했다.
+  2. 스크립트가 toolchain 적용, `.env.production` precheck, infra/application 기동, rich demo seed, auth/member smoke, write-open 전환, P0 smoke, 선택적 프론트 실행까지 순차 수행하도록 구성했다.
+  3. 단일 진입 명령과 cleanup 방법을 설명하는 [local-production-like-demo-runbook.md](C:\Users\CMN-091\projects\SCM_RFT\runbooks\local-production-like-demo-runbook.md)를 추가했다.
+- 결과:
+  - 로컬 PC에서도 운영과 유사한 container-network + policy-switch 기반 데모를 한 번에 띄울 수 있는 진입점이 생겼다.
+  - `FullFeature` 모드에서는 read 검증 후 write-open 정책 전환과 full P0 smoke까지 포함한다.
