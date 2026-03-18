@@ -99,8 +99,16 @@ function Wait-ForSqlReady {
       "-Q", "SELECT 1;"
     )
 
-    & docker @cmd *> $null
-    if ($LASTEXITCODE -eq 0) {
+    $sqlReadyExitCode = 1
+    try {
+      & docker @cmd *> $null
+      $sqlReadyExitCode = $LASTEXITCODE
+    }
+    catch {
+      $sqlReadyExitCode = 1
+    }
+
+    if ($sqlReadyExitCode -eq 0) {
       Write-Host "[OK] SQL readiness check passed for container '$ContainerName'."
       return
     }

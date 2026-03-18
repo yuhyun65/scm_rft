@@ -4338,3 +4338,21 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - 로컬 PC에서도 운영과 유사한 container-network + policy-switch 기반 데모를 한 번에 띄울 수 있는 진입점이 생겼다.
   - `FullFeature` 모드에서는 read 검증 후 write-open 정책 전환과 full P0 smoke까지 포함한다.
+
+## Q224. 로컬 운영유사 데모 실제 실행 및 종료 launcher 추가 (2026-03-18)
+- 요청:
+  - `run-local-prodlike-demo.ps1`로 실제 데모 1회 실행
+  - 필요 시 종료용 cleanup launcher 추가
+- 수행:
+  1. `run-local-prodlike-demo.ps1 -Mode FullFeature -LaunchFrontend`를 실제 실행했다.
+  2. 첫 실행에서 드러난 launcher 결함을 보강했다.
+     - `seed-demo-data.ps1`의 SQL readiness 루프가 native stderr 예외로 중단되던 문제를 재시도 구조로 보완했다.
+     - `run-local-prodlike-demo.ps1`의 `SeedData` 인자 전달 오류를 제거했다.
+     - `stop-local-prodlike-demo.ps1`의 문자열 보간/예약 변수 충돌을 수정했다.
+  3. 보강 후 SQL readiness, rich demo seed, auth/member/gateway smoke, write-open 정책 전환, full P0 smoke, 프론트 dev server 기동까지 순차 완료를 확인했다.
+  4. 브라우저 origin `http://127.0.0.1:5173`가 `HTTP 200`으로 응답하는지 확인했다.
+  5. 반복 사용을 위해 `scripts/stop-local-prodlike-demo.ps1`를 추가하고, runbook에 cleanup 단일 명령을 반영했다.
+- 결과:
+  - 운영유사 데모 런처가 실제 1회 PASS했다.
+  - 주요 증적은 `runbooks/evidence/LOCAL-PRODLIKE-DEMO-*` 및 `runbooks/evidence/DEMO-SEED-*`에 남았다.
+  - 이제 시작/종료 모두 단일 진입 스크립트로 수행할 수 있다.

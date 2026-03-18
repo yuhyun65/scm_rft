@@ -77,10 +77,19 @@ function Wait-ForGatewayHealth {
 function Invoke-PowerShellScript {
   param(
     [Parameter(Mandatory = $true)][string]$FilePath,
-    [string[]]$Arguments = @()
+    [object[]]$Arguments = @()
   )
 
-  $cmd = @('-NoProfile','-ExecutionPolicy','Bypass','-File', $FilePath) + $Arguments
+  $normalizedArgs = foreach ($arg in $Arguments) {
+    if ($arg -is [bool]) {
+      if ($arg) { '$true' } else { '$false' }
+    }
+    else {
+      [string]$arg
+    }
+  }
+
+  $cmd = @('-NoProfile','-ExecutionPolicy','Bypass','-File', $FilePath) + $normalizedArgs
   & powershell.exe @cmd
   if ($LASTEXITCODE -ne 0) {
     throw "[FAIL] script failed: $FilePath"
@@ -148,18 +157,17 @@ Invoke-Step -Name 'Seed rich demo data' -Action {
 }
 
 Invoke-Step -Name 'Validate auth/member/gateway path' -Action {
-  Invoke-PowerShellScript -FilePath $authMemberSmokeScript -Arguments @(
-    '-GatewayBaseUrl', 'http://localhost:18080',
-    '-AuthHealthUrl', 'http://localhost:8081/actuator/health',
-    '-MemberHealthUrl', 'http://localhost:8082/actuator/health',
-    '-GatewayHealthUrl', 'http://localhost:18080/actuator/health',
-    '-Database', $Database,
-    '-SqlContainerName', $SqlContainerName,
-    '-EnvFile', $EnvFile,
-    '-SeedData:$false',
-    '-HealthWaitTimeoutSec', [string]$HealthWaitTimeoutSec
-  )
-}
+    Invoke-PowerShellScript -FilePath $authMemberSmokeScript -Arguments @(
+      '-GatewayBaseUrl', 'http://localhost:18080',
+      '-AuthHealthUrl', 'http://localhost:8081/actuator/health',
+      '-MemberHealthUrl', 'http://localhost:8082/actuator/health',
+      '-GatewayHealthUrl', 'http://localhost:18080/actuator/health',
+      '-Database', $Database,
+      '-SqlContainerName', $SqlContainerName,
+      '-EnvFile', $EnvFile,
+      '-HealthWaitTimeoutSec', [string]$HealthWaitTimeoutSec
+    )
+  }
 
 if ($Mode -eq 'FullFeature') {
   Invoke-Step -Name 'Switch gateway policy to write-open mode' -Action {

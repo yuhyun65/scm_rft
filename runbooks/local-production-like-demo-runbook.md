@@ -58,6 +58,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-local-prodlike-demo.ps1 -
 - Report job detail ID: `77777777-7777-7777-7777-000000000001`
 
 ## Cleanup
+### Single entry cleanup script
+```powershell
+Set-Location C:\Users\CMN-091\projects\SCM_RFT
+powershell -ExecutionPolicy Bypass -File .\scripts\stop-local-prodlike-demo.ps1
+```
+
+### Manual cleanup
 ```powershell
 Set-Location C:\Users\CMN-091\projects\SCM_RFT
 docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.actual-topology.yml down
