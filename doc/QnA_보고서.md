@@ -4380,3 +4380,20 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 단순 `ONLINE` 상태가 아니라 실제 클라이언트 연결 가능 시점까지 기다리도록 보강됐다.
   - 검증용 DB 기준으로 `seed-demo-data.ps1`가 PASS했다.
   - 증적: `runbooks/evidence/DEMO-SEED-20260318-104413/demo-seed-summary.md`
+
+## Q227. routed Mate-SCM 주요 화면 실제 API 연결 착수 (2026-03-18)
+- 요청:
+  - 주문 관리/상세, 거래처 관리, 품질문서 ACK/상세, 게시판/보고서 화면을 실제 API에 연결
+- 수행:
+  1. routed page와 기존 feature panel, `@scm-rft/api-client`를 대조해 실제로 사용 가능한 엔드포인트 범위를 재확인했다.
+  2. `frontend/apps/web-portal/src/lib/scmApi.ts`를 추가해 routed page에서 동일한 gateway base URL과 인증 토큰을 재사용하도록 공통 API 접근 헬퍼를 만들었다.
+  3. 주문 화면은 `searchOrders`, `getOrder`, `getLot`, `changeOrderStatus`로 전환하고, 백엔드가 아직 제공하지 않는 주문 등록/엑셀/주문 수정/LOT 추가는 dead button 대신 보류 안내로 바꿨다.
+  4. 거래처 화면은 `searchMembers`, `getMember`를 연결해 목록/상세가 실제 member 응답을 사용하도록 바꿨다.
+  5. 품질문서 화면은 `searchQualityDocuments`, `getQualityDocument`, `acknowledgeQualityDocument`를 연결해 상세/ACK를 실제 요청으로 바꿨다.
+  6. 게시판 화면은 `searchBoardPosts`, `getBoardPost`, `createBoardPost`, 보고서 화면은 `createReportJob`, `getReportJob`으로 연결했다.
+  7. 새로 사용한 `alert-banner success/danger` 상태를 위해 스타일을 보강하고, 보고서 상태 표현용 `REQUESTED`/`FAILED` 배지를 추가했다.
+  8. `pnpm -C frontend --filter @scm-rft/web-portal build`와 `test`를 다시 실행해 회귀를 확인했다.
+- 결과:
+  - 좌측 메뉴만 되던 routed Mate-SCM 화면 중 주문/거래처/품질문서/게시판/보고서가 실제 API 기반으로 동작하게 정리됐다.
+  - 프론트 검증 결과는 build PASS, test PASS(5 files, 16 tests)다.
+  - 이번 요청 범위 밖인 재고 화면은 아직 기존 정적 routed UI 상태다.

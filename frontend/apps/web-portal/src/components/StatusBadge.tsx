@@ -13,6 +13,8 @@ const STATUS_MAP: Record<string, string> = {
   NOTICE: 'notice',
   GENERAL: 'general',
   QUALITY: 'quality',
+  REQUESTED: 'confirmed',
+  FAILED: 'canceled',
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -28,6 +30,8 @@ const STATUS_LABEL: Record<string, string> = {
   NOTICE: '공지',
   GENERAL: '일반',
   QUALITY: '품질',
+  REQUESTED: '요청됨',
+  FAILED: '실패',
 };
 
 interface Props {

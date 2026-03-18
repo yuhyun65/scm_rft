@@ -1,32 +1,85 @@
-﻿import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Pagination from '../components/Pagination';
-import StatusBadge from '../components/StatusBadge';
+import { useEffect, useState } from "react";
+import type { OrderSearchResponse } from "@scm-rft/api-client";
+import { useNavigate } from "react-router-dom";
+import Pagination from "../components/Pagination";
+import StatusBadge from "../components/StatusBadge";
+import { formatDateTime, formatErrorText, useScmApiClient } from "../lib/scmApi";
 
-const MOCK_ORDERS = [
-  { id: 'ORD-2026-0317-042', supplier: '공급부품(주)', item: '부품 A (A-001)', qty: 500, amount: '12,500,000', dueDate: '2026-03-25', status: 'IN_PROGRESS', manager: '김민수' },
-  { id: 'ORD-2026-0316-038', supplier: '대성산업(주)', item: '원자재 B (B-022)', qty: 1200, amount: '8,400,000', dueDate: '2026-03-30', status: 'CONFIRMED', manager: '이재훈' },
-  { id: 'ORD-2026-0315-031', supplier: '글로벌자재(주)', item: '모듈 D (D-012)', qty: 300, amount: '3,150,000', dueDate: '2026-03-20', status: 'PENDING', manager: '박수진' },
-  { id: 'ORD-2026-0314-027', supplier: '공급부품(주)', item: '부품 C (C-045)', qty: 800, amount: '16,000,000', dueDate: '2026-03-18', status: 'COMPLETED', manager: '김민수' },
-  { id: 'ORD-2026-0313-019', supplier: '미래물산(주)', item: '원자재 A (A-005)', qty: 2000, amount: '22,000,000', dueDate: '2026-03-15', status: 'CANCELED', manager: '최영희' },
-];
+const PAGE_SIZE = 10;
 
 export default function OrderListPage() {
   const navigate = useNavigate();
+  const client = useScmApiClient();
   const [page, setPage] = useState(0);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [keyword, setKeyword] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("");
+  const [appliedKeyword, setAppliedKeyword] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [errorText, setErrorText] = useState("");
+  const [searchResult, setSearchResult] = useState<OrderSearchResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOrders() {
+      setLoading(true);
+      setErrorText("");
+      try {
+        const result = await client.searchOrders({
+          status: appliedStatus,
+          keyword: appliedKeyword,
+          page,
+          size: PAGE_SIZE,
+        });
+
+        if (!cancelled) {
+          setSearchResult(result);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setErrorText(formatErrorText(error));
+          setSearchResult(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadOrders();
+    return () => {
+      cancelled = true;
+    };
+  }, [appliedKeyword, appliedStatus, client, page, reloadKey]);
+
+  function handleSearch() {
+    setAppliedStatus(statusFilter);
+    setAppliedKeyword(keyword.trim());
+    setPage(0);
+    setReloadKey((current) => current + 1);
+  }
+
+  const items = searchResult?.items ?? [];
+  const totalPages = Math.max(searchResult?.page.totalPages ?? 1, 1);
+  const totalElements = searchResult?.page.totalElements ?? items.length;
 
   return (
     <div className="page-body">
       <div className="page-title">주문 관리</div>
 
       <div className="card mb-12">
-        <div className="card-body" style={{ padding: '14px 16px' }}>
+        <div className="card-body" style={{ padding: "14px 16px" }}>
           <div className="form-row">
             <div className="form-group">
               <label>주문 상태</label>
-              <select style={{ width: 140 }} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <select
+                style={{ width: 140 }}
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
                 <option value="">전체</option>
                 <option value="PENDING">대기</option>
                 <option value="CONFIRMED">확정</option>
@@ -39,74 +92,96 @@ export default function OrderListPage() {
               <label>키워드</label>
               <input
                 type="text"
-                placeholder="주문번호 / 거래처명"
+                placeholder="주문번호 / 거래처 ID"
                 style={{ width: 180 }}
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
               />
             </div>
             <div className="form-group">
-              <label style={{ visibility: 'hidden' }}>조회</label>
-              <button className="btn btn-primary">조회</button>
+              <label style={{ visibility: "hidden" }}>조회</label>
+              <button className="btn btn-primary" onClick={handleSearch} disabled={loading}>
+                {loading ? "조회 중..." : "조회"}
+              </button>
             </div>
-            <div className="form-group" style={{ marginLeft: 'auto' }}>
-              <label style={{ visibility: 'hidden' }}>등록</label>
+            <div className="form-group" style={{ marginLeft: "auto" }}>
+              <label style={{ visibility: "hidden" }}>등록</label>
               <div className="flex gap-8">
-                <button className="btn btn-success">+ 주문 등록</button>
-                <button className="btn btn-gray">엑셀 다운로드</button>
+                <button className="btn btn-success" disabled title="주문 등록 API는 아직 routed page에 연결하지 않았습니다.">
+                  + 주문 등록 예정
+                </button>
+                <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 현재 제공되지 않습니다.">
+                  엑셀 다운로드 예정
+                </button>
               </div>
             </div>
+          </div>
+          <div className="text-muted fs-12 mt-8">
+            실제 API 기준으로 주문 목록/상세/상태 변경까지 연결했습니다. 주문 등록과 엑셀 다운로드는 백엔드
+            지원 범위가 정리되기 전까지 노출만 보류합니다.
           </div>
         </div>
       </div>
 
+      {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+
       <div className="card">
         <div className="card-header">
-          <span className="card-title">주문 목록 <span className="text-muted fw-600 fs-12">총 {MOCK_ORDERS.length}건</span></span>
+          <span className="card-title">
+            주문 목록 <span className="text-muted fw-600 fs-12">총 {totalElements.toLocaleString("ko-KR")}건</span>
+          </span>
         </div>
         <div className="tbl-wrap">
           <table>
             <thead>
               <tr>
-                <th><input type="checkbox" /></th>
                 <th>주문번호</th>
-                <th>거래처명</th>
-                <th>품목</th>
-                <th>주문수량</th>
-                <th>주문금액</th>
-                <th>납기일</th>
+                <th>거래처 ID</th>
+                <th>주문일시</th>
                 <th>상태</th>
-                <th>담당자</th>
                 <th>액션</th>
               </tr>
             </thead>
             <tbody>
-              {MOCK_ORDERS.map((order) => (
-                <tr key={order.id}>
-                  <td><input type="checkbox" /></td>
-                  <td>
-                    <span className="text-primary fw-600 cursor-pointer" onClick={() => navigate(`/orders/${order.id}`)}>
-                      {order.id}
-                    </span>
-                  </td>
-                  <td>{order.supplier}</td>
-                  <td>{order.item}</td>
-                  <td className="text-right">{order.qty.toLocaleString()}</td>
-                  <td className="text-right">{order.amount}</td>
-                  <td>{order.dueDate}</td>
-                  <td><StatusBadge status={order.status} /></td>
-                  <td>{order.manager}</td>
-                  <td>
-                    <button className="btn btn-sm btn-outline" onClick={() => navigate(`/orders/${order.id}`)}>
-                      상세
-                    </button>
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center text-muted" style={{ padding: 24 }}>
+                    조회 결과가 없습니다.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                items.map((order) => (
+                  <tr key={order.orderId}>
+                    <td>
+                      <span
+                        className="text-primary fw-600 cursor-pointer"
+                        onClick={() => navigate(`/orders/${order.orderId}`)}
+                      >
+                        {order.orderId}
+                      </span>
+                    </td>
+                    <td>{order.supplierId || "-"}</td>
+                    <td>{formatDateTime(order.orderedAt)}</td>
+                    <td>
+                      <StatusBadge status={order.status} />
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-outline" onClick={() => navigate(`/orders/${order.orderId}`)}>
+                        상세
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-        <Pagination page={page} totalPages={8} onChange={setPage} />
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
       </div>
     </div>
   );

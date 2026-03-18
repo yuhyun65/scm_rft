@@ -1,85 +1,206 @@
-﻿import { useState } from 'react';
-import Pagination from '../components/Pagination';
-import StatusBadge from '../components/StatusBadge';
+import { useEffect, useState } from "react";
+import type { Member, MemberSearchResponse } from "@scm-rft/api-client";
+import Pagination from "../components/Pagination";
+import StatusBadge from "../components/StatusBadge";
+import { formatErrorText, useScmApiClient } from "../lib/scmApi";
 
-const MOCK = [
-  { id: 'SUP-0012', name: '공급부품(주)', bizNo: '123-45-67890', ceo: '홍길동', tel: '02-1234-5678', since: '2020-01-05', status: 'ACTIVE', lastOrder: '2026-03-17' },
-  { id: 'SUP-0031', name: '대성산업(주)', bizNo: '234-56-78901', ceo: '김천수', tel: '031-234-5678', since: '2021-06-15', status: 'ACTIVE', lastOrder: '2026-03-16' },
-  { id: 'SUP-0044', name: '글로벌자재(주)', bizNo: '345-67-89012', ceo: '이영미', tel: '032-345-6789', since: '2022-03-20', status: 'ACTIVE', lastOrder: '2026-03-15' },
-  { id: 'SUP-0018', name: '미래물산(주)', bizNo: '456-78-90123', ceo: '박현우', tel: '051-456-7890', since: '2019-11-01', status: 'INACTIVE', lastOrder: '2025-12-10' },
-];
+const PAGE_SIZE = 10;
 
 export default function MemberPage() {
+  const client = useScmApiClient();
   const [page, setPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("");
+  const [appliedKeyword, setAppliedKeyword] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [errorText, setErrorText] = useState("");
+  const [searchResult, setSearchResult] = useState<MemberSearchResponse | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMembers() {
+      setLoading(true);
+      setErrorText("");
+      try {
+        const result = await client.searchMembers({
+          keyword: appliedKeyword,
+          status: appliedStatus,
+          page,
+          size: PAGE_SIZE,
+        });
+
+        if (!cancelled) {
+          setSearchResult(result);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setErrorText(formatErrorText(error));
+          setSearchResult(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadMembers();
+    return () => {
+      cancelled = true;
+    };
+  }, [appliedKeyword, appliedStatus, client, page, reloadKey]);
+
+  async function handleLoadMember(memberId: string) {
+    setDetailLoading(true);
+    setErrorText("");
+    try {
+      const result = await client.getMember(memberId);
+      setSelectedMember(result);
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+      setSelectedMember(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
+  function handleSearch() {
+    setAppliedStatus(statusFilter);
+    setAppliedKeyword(keyword.trim());
+    setPage(0);
+    setReloadKey((current) => current + 1);
+  }
+
+  const items = searchResult?.items ?? [];
+  const totalPages = Math.max(Math.ceil((searchResult?.total ?? 0) / PAGE_SIZE), 1);
 
   return (
     <div className="page-body">
       <div className="page-title">거래처 관리</div>
       <div className="card mb-12">
-        <div className="card-body" style={{ padding: '14px 16px' }}>
+        <div className="card-body" style={{ padding: "14px 16px" }}>
           <div className="form-row">
             <div className="form-group">
               <label>상태</label>
-              <select style={{ width: 100 }}>
-                <option>전체</option>
-                <option>활성</option>
-                <option>비활성</option>
+              <select style={{ width: 100 }} value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="">전체</option>
+                <option value="ACTIVE">활성</option>
+                <option value="INACTIVE">비활성</option>
               </select>
             </div>
             <div className="form-group">
               <label>검색어</label>
-              <input type="text" placeholder="거래처명 / 사업자번호" style={{ width: 200 }} />
+              <input
+                type="text"
+                placeholder="거래처명 / 거래처 ID"
+                style={{ width: 200 }}
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
             </div>
             <div className="form-group">
-              <label style={{ visibility: 'hidden' }}>조회</label>
-              <button className="btn btn-primary">조회</button>
+              <label style={{ visibility: "hidden" }}>조회</label>
+              <button className="btn btn-primary" onClick={handleSearch} disabled={loading}>
+                {loading ? "조회 중..." : "조회"}
+              </button>
             </div>
-            <div className="form-group" style={{ marginLeft: 'auto' }}>
-              <label style={{ visibility: 'hidden' }}>등록</label>
-              <button className="btn btn-success">+ 거래처 등록</button>
+            <div className="form-group" style={{ marginLeft: "auto" }}>
+              <label style={{ visibility: "hidden" }}>등록</label>
+              <button className="btn btn-success" disabled title="거래처 등록 API는 아직 routed page에 연결하지 않았습니다.">
+                + 거래처 등록 예정
+              </button>
             </div>
+          </div>
+          <div className="text-muted fs-12 mt-8">
+            거래처 화면은 실제 member 조회/상세만 연결했습니다. 사업자번호, 대표자, 연락처 같은 부가 정보는 현재 member API payload에 없습니다.
           </div>
         </div>
       </div>
-      <div className="card">
-        <div className="card-header">
-          <span className="card-title">거래처 목록 <span className="text-muted fw-600 fs-12">총 48건</span></span>
-        </div>
-        <div className="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th><input type="checkbox" /></th>
-                <th>거래처 ID</th>
-                <th>거래처명</th>
-                <th>사업자번호</th>
-                <th>대표자</th>
-                <th>연락처</th>
-                <th>거래 시작일</th>
-                <th>상태</th>
-                <th>최근 주문</th>
-                <th>액션</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK.map((member) => (
-                <tr key={member.id}>
-                  <td><input type="checkbox" /></td>
-                  <td>{member.id}</td>
-                  <td className="fw-600">{member.name}</td>
-                  <td>{member.bizNo}</td>
-                  <td>{member.ceo}</td>
-                  <td>{member.tel}</td>
-                  <td>{member.since}</td>
-                  <td><StatusBadge status={member.status} /></td>
-                  <td>{member.lastOrder}</td>
-                  <td><button className="btn btn-sm btn-outline">상세</button></td>
+
+      {errorText ? <div className="alert-banner danger mb-12">{errorText}</div> : null}
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">
+              거래처 목록 <span className="text-muted fw-600 fs-12">총 {(searchResult?.total ?? 0).toLocaleString("ko-KR")}건</span>
+            </span>
+          </div>
+          <div className="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>거래처 ID</th>
+                  <th>거래처명</th>
+                  <th>상태</th>
+                  <th>액션</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center text-muted" style={{ padding: 24 }}>
+                      조회 결과가 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((member) => (
+                    <tr key={member.memberId}>
+                      <td>{member.memberId}</td>
+                      <td className="fw-600">{member.memberName || "-"}</td>
+                      <td>{member.status ? <StatusBadge status={member.status} /> : "-"}</td>
+                      <td>
+                        <button className="btn btn-sm btn-outline" onClick={() => void handleLoadMember(member.memberId)}>
+                          상세
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
-        <Pagination page={page} totalPages={3} onChange={setPage} />
+
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">거래처 상세</span>
+          </div>
+          <div className="card-body">
+            {detailLoading ? (
+              <div className="text-muted">거래처 상세를 불러오는 중입니다.</div>
+            ) : selectedMember ? (
+              <>
+                {[
+                  ["거래처 ID", selectedMember.memberId],
+                  ["거래처명", selectedMember.memberName || "-"],
+                  [
+                    "상태",
+                    selectedMember.status ? <StatusBadge key="member-status" status={selectedMember.status} /> : "-",
+                  ],
+                ].map(([label, value]) => (
+                  <div key={String(label)} className="detail-row">
+                    <div className="detail-label">{label}</div>
+                    <div className="detail-value">{value}</div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="text-muted fs-12">목록에서 거래처를 선택하면 실제 member 상세 응답이 표시됩니다.</div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
