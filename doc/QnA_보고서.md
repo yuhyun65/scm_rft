@@ -4292,3 +4292,25 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
   - 프론트 dev server listener는 정리된 상태다.
   - 데모 후 로컬 gateway 정책은 조회 기본값으로 복귀했다.
   - 다음 작업은 실제 운영 입력값 확보 후 production cutover entry check를 다시 진행하는 것이다.
+
+## Q221. 2026-03-18 다음 단계 진행을 위한 환경 준비 (2026-03-18)
+- 요청:
+  - 다음 진행을 위한 환경 준비
+    1. `production-secret-access-confirmation.md`에 실제 운영값 입력
+    2. deploy host 기준 `.env.production` 렌더 후 cutover entry check 재실행
+    3. 필요 시 `Mate-SCM` 기준 최신 화면으로 사용자 데모 재실행
+- 수행:
+  1. 기준 브랜치가 `feature/to-be-dev-env-bootstrap`인지 확인했다.
+  2. `scripts/use-toolchain.ps1`를 실행해 Java/Node/pnpm/Gradle 정책을 현재 세션에 적용했다.
+  3. `scripts/check-prod-secrets.ps1 -EnvFile .env.production`를 실행해 로컬 `.env.production`이 유효한지 검증했다.
+  4. `production-secret-access-confirmation.md`의 남은 `<fill>` placeholder 수를 확인했다.
+  5. Docker Desktop을 기동하고 `docker info` 연속 2회 성공을 확인했다.
+  6. `docker ps`와 `5173` 포트 점검으로 런타임이 비어 있고 데모 포트가 비어 있는지 확인했다.
+  7. `.env.production`의 `GATEWAY_POLICY_PATH`가 조회 기본값 `infra/gateway/policies/cutover-isolation.yaml`인지 재확인했다.
+- 결과:
+  - 기준 브랜치와 로컬 toolchain은 다음 단계 실행 가능한 상태다.
+  - `.env.production` 로컬 precheck는 PASS 상태다.
+  - Docker daemon은 UP 상태이며, 현재 컨테이너는 0건이다.
+  - `5173` listener가 없어 사용자 데모 재실행 시 포트 충돌이 없다.
+  - 실제 production cutover entry를 막는 남은 항목은 `production-secret-access-confirmation.md`의 `<fill>` 33건이다.
+  - 실제 운영값만 확보되면 deploy host 기준 `.env.production` 렌더와 cutover entry check를 바로 재개할 수 있다.
