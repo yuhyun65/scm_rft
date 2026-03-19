@@ -8,7 +8,7 @@ param(
   [string]$SqlContainerName = 'scm-sqlserver',
   [string]$EnvFile = '.env.production',
   [int]$HealthWaitTimeoutSec = 300,
-  [int]$GatewayHealthTimeoutSec = 300,
+  [int]$GatewayHealthTimeoutSec = 600,
   [int]$GatewayHealthPollIntervalSec = 5
 )
 

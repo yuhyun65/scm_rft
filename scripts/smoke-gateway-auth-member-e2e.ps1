@@ -99,10 +99,54 @@ function Invoke-Login {
     [Parameter(Mandatory = $true)][string]$PasswordValue
   )
 
-  return Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json" -Body (@{
+  return Invoke-GatewayRequest -Method "Post" -Uri $Uri -ContentType "application/json" -Body (@{
     loginId = $LoginIdValue
     password = $PasswordValue
-  } | ConvertTo-Json)
+  } | ConvertTo-Json) -MaxAttempts 3 -RetryDelaySec 2
+}
+
+function Invoke-GatewayRequest {
+  param(
+    [Parameter(Mandatory = $true)][string]$Method,
+    [Parameter(Mandatory = $true)][string]$Uri,
+    [hashtable]$Headers,
+    [string]$ContentType,
+    [string]$Body,
+    [int]$MaxAttempts = 3,
+    [int]$RetryDelaySec = 2,
+    [int[]]$RetryStatusCodes = @(504)
+  )
+
+  for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+    try {
+      $invokeArgs = @{
+        Method = $Method
+        Uri = $Uri
+      }
+      if ($Headers) {
+        $invokeArgs.Headers = $Headers
+      }
+      if ($PSBoundParameters.ContainsKey('ContentType') -and -not [string]::IsNullOrWhiteSpace($ContentType)) {
+        $invokeArgs.ContentType = $ContentType
+      }
+      if ($PSBoundParameters.ContainsKey('Body')) {
+        $invokeArgs.Body = $Body
+      }
+      return Invoke-RestMethod @invokeArgs
+    }
+    catch {
+      $statusCode = $null
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+        $statusCode = [int]$_.Exception.Response.StatusCode
+      }
+      if (($RetryStatusCodes -contains $statusCode) -and $attempt -lt $MaxAttempts) {
+        Write-Host ("[WARN] gateway request returned HTTP {0}. retrying {1}/{2}..." -f $statusCode, $attempt, $MaxAttempts)
+        Start-Sleep -Seconds $RetryDelaySec
+        continue
+      }
+      throw
+    }
+  }
 }
 
 function Seed-SmokeData {
@@ -268,25 +312,15 @@ try {
     Write-Host "[WARN] login pre-warm request failed. continue to formal login."
   }
 
-  $loginResponse = $null
-  $maxLoginAttempts = 2
-  for ($attempt = 1; $attempt -le $maxLoginAttempts; $attempt++) {
-    try {
-      $loginResponse = Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password
-      break
+  try {
+    $loginResponse = Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password
+  }
+  catch {
+    $statusCode = "unknown"
+    if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+      $statusCode = [int]$_.Exception.Response.StatusCode
     }
-    catch {
-      $statusCode = "unknown"
-      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
-        $statusCode = [int]$_.Exception.Response.StatusCode
-      }
-      if ($statusCode -eq 504 -and $attempt -lt $maxLoginAttempts) {
-        Write-Host "[WARN] login via gateway returned 504. retrying once..."
-        Start-Sleep -Milliseconds 400
-        continue
-      }
-      throw "[FAIL] login via gateway failed (HTTP $statusCode). Ensure auth/member are running with shared SQL configuration and credentials are seeded."
-    }
+    throw "[FAIL] login via gateway failed (HTTP $statusCode). Ensure auth/member are running with shared SQL configuration and credentials are seeded."
   }
 
   try {
@@ -303,7 +337,7 @@ try {
   }
   Write-Host "[OK] login via gateway succeeded."
 
-  $verifyResponse = Invoke-RestMethod -Method Post -Uri $verifyUri -ContentType "application/json" -Body (@{
+  $verifyResponse = Invoke-GatewayRequest -Method "Post" -Uri $verifyUri -ContentType "application/json" -Body (@{
     accessToken = "$($loginResponse.accessToken)"
   } | ConvertTo-Json)
   if (-not $verifyResponse.active) {
@@ -313,13 +347,13 @@ try {
 
   $authHeaders = @{ Authorization = "Bearer $($loginResponse.accessToken)" }
 
-  $memberSearchResponse = Invoke-RestMethod -Method Get -Uri $memberSearchUri -Headers $authHeaders
+  $memberSearchResponse = Invoke-GatewayRequest -Method "Get" -Uri $memberSearchUri -Headers $authHeaders
   if ($memberSearchResponse.total -lt 1 -or @($memberSearchResponse.items).Count -lt 1) {
     throw "[FAIL] member search returned empty result."
   }
   Write-Host ("[OK] member search via gateway succeeded. total={0}" -f $memberSearchResponse.total)
 
-  $memberByIdResponse = Invoke-RestMethod -Method Get -Uri $memberByIdUri -Headers $authHeaders
+  $memberByIdResponse = Invoke-GatewayRequest -Method "Get" -Uri $memberByIdUri -Headers $authHeaders
   if ("$($memberByIdResponse.memberId)" -ne $LoginId) {
     throw "[FAIL] member by id returned unexpected memberId."
   }

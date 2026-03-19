@@ -4512,3 +4512,17 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - local prod-like demo에서 gateway 정책 전환 직후에도 P0 smoke가 안정적으로 이어질 수 있는 기준을 확보했다.
   - 검증 중 실제로 여러 gateway 요청이 `504` 후 재시도로 회복되는 것을 확인했다.
+
+## Q236. local production-like launcher hang/timeout 복구와 데모 재가동 (2026-03-19)
+- 요청:
+  - `run-local-prodlike-demo.ps1 -Mode FullFeature -LaunchFrontend`가 infra 단계에서 hang되거나, write-open 전환 뒤 gateway health timeout으로 끝나지 않던 문제를 정리
+- 수행:
+  1. hung launcher PowerShell과 child `docker compose`를 종료하고, compose stack을 `down --remove-orphans`로 정리해 clean state를 복구했다.
+  2. clean state에서 launcher를 다시 실행해, 이전 hang 원인이 dirty compose/orphan state였음을 확인했다.
+  3. `scripts/smoke-gateway-auth-member-e2e.ps1`에도 `Invoke-GatewayRequest` 공통 helper를 추가해 login/verify/member 호출의 `504` 재시도를 공통 적용했다.
+  4. `scripts/run-local-prodlike-demo.ps1`의 `GatewayHealthTimeoutSec` 기본값을 `600`으로 상향해, write-open 전환 뒤 gateway bootstrap이 긴 PC에서도 false timeout이 나지 않도록 보강했다.
+  5. `scripts/smoke-gateway-p0-e2e.ps1`의 주문 흐름을 seeded order 우선 선택 + status change `409` idempotent 처리로 보강했다.
+  6. 현재 런타임에서 `smoke-gateway-p0-e2e.ps1`를 다시 실행해 `P0-F01~F07` PASS를 확인했고, frontend `5173` listener와 `HTTP 200` 응답도 확인했다.
+- 결과:
+  - local production-like demo 환경은 현재 발주자 시연 가능한 상태로 재정렬됐다.
+  - 남아 있는 이슈는 launcher false timeout/hang이 아니라, 긴 bootstrap/간헐적 `504`/반복 실행 시 `409`를 흡수하도록 launcher와 smoke 스크립트를 hardening해야 했던 문제였다.

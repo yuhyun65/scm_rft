@@ -445,9 +445,15 @@ try {
   if (@($orderList.items).Count -lt 1) {
     throw "[FAIL] P0-F02 order list returned empty."
   }
-  $orderId = "$($orderList.items[0].orderId)"
-  if ([string]::IsNullOrWhiteSpace($orderId)) {
+  $seedOrderMatch = @($orderList.items | Where-Object { "$($_.orderId)" -eq $seedOrderId } | Select-Object -First 1)
+  if ($seedOrderMatch.Count -ge 1) {
     $orderId = $seedOrderId
+  }
+  else {
+    $orderId = "$($orderList.items[0].orderId)"
+    if ([string]::IsNullOrWhiteSpace($orderId)) {
+      $orderId = $seedOrderId
+    }
   }
   $orderDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId" -Headers $authHeaders
   if ("$($orderDetail.orderId)" -ne $orderId) {
@@ -457,13 +463,35 @@ try {
   if ("$($lotDetail.lotId)" -ne $seedLotId) {
     throw "[FAIL] P0-F02 lot detail mismatch."
   }
-  $statusChange = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId/status" -Headers $authHeaders -ContentType "application/json" -Body (@{
-    targetStatus = "CONFIRMED"
-    changedBy = "smoke-admin"
-    reason = "P0 smoke transition"
-  } | ConvertTo-Json)
-  if ("$($statusChange.afterStatus)" -ne "CONFIRMED") {
-    throw "[FAIL] P0-F02 status change mismatch."
+  $statusChange = $null
+  try {
+    $statusChange = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId/status" -Headers $authHeaders -ContentType "application/json" -Body (@{
+      targetStatus = "CONFIRMED"
+      changedBy = "smoke-admin"
+      reason = "P0 smoke transition"
+    } | ConvertTo-Json)
+  }
+  catch {
+    $statusCode = $null
+    if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+      $statusCode = [int]$_.Exception.Response.StatusCode
+    }
+    if ($statusCode -ne 409) {
+      throw
+    }
+  }
+
+  if ($statusChange) {
+    if ("$($statusChange.afterStatus)" -ne "CONFIRMED") {
+      throw "[FAIL] P0-F02 status change mismatch."
+    }
+  }
+  else {
+    $postChangeOrderDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId" -Headers $authHeaders
+    if ("$($postChangeOrderDetail.status)" -ne "CONFIRMED") {
+      throw "[FAIL] P0-F02 status change returned 409 and order status is not CONFIRMED."
+    }
+    Write-Host "[INFO] P0-F02 order already in CONFIRMED state. treating 409 as idempotent success."
   }
   Write-Host "[OK] P0-F02 order/lot flow passed."
 
