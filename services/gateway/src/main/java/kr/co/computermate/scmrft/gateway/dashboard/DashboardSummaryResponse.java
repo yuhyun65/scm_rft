@@ -32,7 +32,8 @@ public record DashboardSummaryResponse(
       String day,
       String date,
       long count,
-      boolean accent
+      boolean accent,
+      List<OrderItem> items
   ) {
   }
 

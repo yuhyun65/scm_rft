@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import type {
   DashboardActivity,
+  DashboardDailyCount,
   DashboardOrderItem,
   DashboardStockAlert,
   DashboardSummaryResponse,
 } from "@scm-rft/api-client";
 import KpiCard from "../components/KpiCard";
+import StatusBadge from "../components/StatusBadge";
 import { formatCount, formatDateTime, formatErrorText, useScmApiClient } from "../lib/scmApi";
 
-type KpiModalState =
+type ListModalState =
   | {
       title: string;
       description: string;
@@ -42,13 +44,34 @@ function getToneClass(tone: string) {
   return tone;
 }
 
+function normalizeSummary(result: DashboardSummaryResponse): DashboardSummaryResponse {
+  return {
+    ...result,
+    recentActivities: result.recentActivities ?? [],
+    stockAlerts: result.stockAlerts ?? [],
+    weeklyOrders: {
+      ...result.weeklyOrders,
+      items: (result.weeklyOrders?.items ?? []).map((item) => ({
+        ...item,
+        items: item.items ?? [],
+      })),
+    },
+    drillDowns: {
+      activeOrders: result.drillDowns?.activeOrders ?? [],
+      pendingLots: result.drillDowns?.pendingLots ?? [],
+      completedOrders: result.drillDowns?.completedOrders ?? [],
+      stockAlerts: result.drillDowns?.stockAlerts ?? [],
+    },
+  };
+}
+
 export default function DashboardPage() {
   const client = useScmApiClient();
   const [loading, setLoading] = useState(true);
   const [errorText, setErrorText] = useState("");
   const [summary, setSummary] = useState<DashboardSummaryResponse | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<DashboardActivity | null>(null);
-  const [selectedKpi, setSelectedKpi] = useState<KpiModalState | null>(null);
+  const [selectedList, setSelectedList] = useState<ListModalState | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +82,7 @@ export default function DashboardPage() {
       try {
         const result = await client.getDashboardSummary();
         if (!cancelled) {
-          setSummary(result);
+          setSummary(normalizeSummary(result));
         }
       } catch (error) {
         if (!cancelled) {
@@ -96,6 +119,31 @@ export default function DashboardPage() {
     }
   }
 
+  function handleWeeklyItemKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, item: DashboardDailyCount) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openWeeklyOrdersModal(item);
+    }
+  }
+
+  function openOrdersModal(title: string, description: string, orderItems: DashboardOrderItem[]) {
+    setSelectedList({
+      title,
+      description,
+      type: "orders",
+      orderItems,
+    });
+  }
+
+  function openStocksModal(title: string, description: string, stockItems: DashboardStockAlert[]) {
+    setSelectedList({
+      title,
+      description,
+      type: "stocks",
+      stockItems,
+    });
+  }
+
   function openKpiModal(kind: "active" | "pending" | "completed" | "stock") {
     if (!summary) {
       return;
@@ -103,37 +151,41 @@ export default function DashboardPage() {
 
     switch (kind) {
       case "active":
-        setSelectedKpi({
-          title: "진행 중 주문 목록",
-          description: "PENDING / CONFIRMED / IN_PROGRESS 상태 주문 목록입니다.",
-          type: "orders",
-          orderItems: summary.drillDowns.activeOrders,
-        });
+        openOrdersModal(
+          "진행 중 주문 목록",
+          "PENDING / CONFIRMED / IN_PROGRESS 상태 주문 목록입니다.",
+          summary.drillDowns.activeOrders
+        );
         return;
       case "pending":
-        setSelectedKpi({
-          title: "검토 대기 LOT 연결 주문 목록",
-          description: "연결된 LOT 건수가 있는 진행 중 주문 목록입니다.",
-          type: "orders",
-          orderItems: summary.drillDowns.pendingLots,
-        });
+        openOrdersModal(
+          "검토 대기 LOT 연결 주문 목록",
+          "연결된 LOT 건수가 있는 진행 중 주문 목록입니다.",
+          summary.drillDowns.pendingLots
+        );
         return;
       case "completed":
-        setSelectedKpi({
-          title: "이번 주 완료 주문 목록",
-          description: "이번 주에 COMPLETED 상태인 주문 목록입니다.",
-          type: "orders",
-          orderItems: summary.drillDowns.completedOrders,
-        });
+        openOrdersModal(
+          "이번 주 완료 주문 목록",
+          "이번 주에 COMPLETED 상태인 주문 목록입니다.",
+          summary.drillDowns.completedOrders
+        );
         return;
       case "stock":
-        setSelectedKpi({
-          title: "재고 경고 품목 목록",
-          description: "안전재고 미달 품목 전체 목록입니다.",
-          type: "stocks",
-          stockItems: summary.drillDowns.stockAlerts,
-        });
+        openStocksModal(
+          "재고 경고 품목 목록",
+          "안전재고 미달 품목 전체 목록입니다.",
+          summary.drillDowns.stockAlerts
+        );
     }
+  }
+
+  function openWeeklyOrdersModal(item: DashboardDailyCount) {
+    openOrdersModal(
+      `${item.day}요일 주문 목록`,
+      `${formatBusinessDate(item.date)} 기준 주문 목록입니다.`,
+      item.items
+    );
   }
 
   return (
@@ -250,20 +302,15 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 weeklyItems.map((item) => (
-                  <div
+                  <button
                     key={item.date}
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "flex-end",
-                      alignItems: "stretch",
-                      gap: 8,
-                    }}
+                    type="button"
+                    className="weekly-bar-button"
+                    onClick={() => openWeeklyOrdersModal(item)}
+                    onKeyDown={(event) => handleWeeklyItemKeyDown(event, item)}
                   >
                     <div className="text-center fs-11 text-muted">{formatCount(item.count)}건</div>
-                    <div style={{ flex: 1, display: "flex", alignItems: "flex-end" }}>
+                    <div style={{ flex: 1, display: "flex", alignItems: "flex-end", width: "100%" }}>
                       <div
                         style={{
                           width: "100%",
@@ -276,7 +323,7 @@ export default function DashboardPage() {
                       />
                     </div>
                     <span className="text-center fs-11 text-muted">{item.day}</span>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -426,30 +473,30 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {selectedKpi && (
-        <div className="modal-backdrop" onClick={() => setSelectedKpi(null)}>
+      {selectedList && (
+        <div className="modal-backdrop" onClick={() => setSelectedList(null)}>
           <div
             className="modal-card"
             style={{ width: "min(760px, 100%)" }}
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="dashboard-kpi-title"
+            aria-labelledby="dashboard-list-title"
           >
             <div className="card-header">
               <div>
-                <div className="card-title" id="dashboard-kpi-title">
-                  {selectedKpi.title}
+                <div className="card-title" id="dashboard-list-title">
+                  {selectedList.title}
                 </div>
-                <div className="fs-11 text-muted mt-4">{selectedKpi.description}</div>
+                <div className="fs-11 text-muted mt-4">{selectedList.description}</div>
               </div>
-              <button type="button" className="btn btn-gray btn-sm" onClick={() => setSelectedKpi(null)}>
+              <button type="button" className="btn btn-gray btn-sm" onClick={() => setSelectedList(null)}>
                 닫기
               </button>
             </div>
             <div className="card-body">
-              {selectedKpi.type === "orders" ? (
-                selectedKpi.orderItems.length ? (
+              {selectedList.type === "orders" ? (
+                selectedList.orderItems.length ? (
                   <div className="tbl-wrap">
                     <table>
                       <thead>
@@ -462,8 +509,8 @@ export default function DashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedKpi.orderItems.map((item) => (
-                          <tr key={`${selectedKpi.title}-${item.orderId}`}>
+                        {selectedList.orderItems.map((item) => (
+                          <tr key={`${selectedList.title}-${item.orderId}`}>
                             <td>{item.orderId}</td>
                             <td>{item.supplierId}</td>
                             <td>
@@ -488,7 +535,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 )
-              ) : selectedKpi.stockItems.length ? (
+              ) : selectedList.stockItems.length ? (
                 <div className="tbl-wrap">
                   <table>
                     <thead>
@@ -502,7 +549,7 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedKpi.stockItems.map((item) => (
+                      {selectedList.stockItems.map((item) => (
                         <tr key={`${item.code}-${item.warehouseCode}`}>
                           <td>{item.code}</td>
                           <td>{item.name}</td>

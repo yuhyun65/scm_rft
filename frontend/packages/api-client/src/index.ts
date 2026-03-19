@@ -8,6 +8,7 @@ export type ApiClientOptions = {
   baseUrl?: string;
   accessToken?: string;
   fetcher?: typeof fetch;
+  onUnauthorized?: () => void;
 };
 
 type ApiErrorPayload = {
@@ -231,6 +232,7 @@ export type DashboardDailyCount = {
   date: string;
   count: number;
   accent: boolean;
+  items: DashboardOrderItem[];
 };
 
 export type DashboardWeeklyOrders = {
@@ -392,12 +394,14 @@ export class ScmApiClient {
   private readonly baseUrl: string;
   private accessToken?: string;
   private readonly fetcher: typeof fetch;
+  private readonly onUnauthorized?: () => void;
 
   constructor(options: ApiClientOptions = {}) {
     this.baseUrl = normalizeBaseUrl(options.baseUrl ?? "");
     this.accessToken = options.accessToken;
     const rawFetcher = options.fetcher ?? globalThis.fetch;
     this.fetcher = rawFetcher.bind(globalThis);
+    this.onUnauthorized = options.onUnauthorized;
   }
 
   setAccessToken(token?: string) {
@@ -424,6 +428,9 @@ export class ScmApiClient {
 
     const payload = (await parsePayload(response)) as ApiErrorPayload | TResponse;
     if (!response.ok) {
+      if (response.status === 401) {
+        this.onUnauthorized?.();
+      }
       throw new ApiError(response.status, payload as ApiErrorPayload);
     }
 

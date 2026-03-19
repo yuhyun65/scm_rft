@@ -171,14 +171,17 @@ public class DashboardSummaryService {
     List<DashboardSummaryResponse.DailyCount> dailyCounts = WEEK_DAYS.stream()
         .map(day -> {
           LocalDate date = weekStart.with(TemporalAdjusters.nextOrSame(day));
-          long count = weeklyOrders.stream()
+          List<DashboardSummaryResponse.OrderItem> items = weeklyOrders.stream()
               .filter(order -> toLocalDate(order.orderedAt()).equals(date))
-              .count();
+              .sorted(Comparator.comparing(OrderSummaryPayload::orderedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+              .map(order -> toOrderItem(order, detailByOrderId.get(order.orderId())))
+              .toList();
           return new DashboardSummaryResponse.DailyCount(
               day.getDisplayName(TextStyle.SHORT, Locale.KOREAN),
               date.toString(),
-              count,
-              date.equals(businessDate)
+              items.size(),
+              date.equals(businessDate),
+              items
           );
         })
         .toList();

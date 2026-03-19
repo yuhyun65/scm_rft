@@ -6,14 +6,21 @@ const apiBaseUrl = (import.meta as { env?: Record<string, string> }).env?.VITE_A
 
 export function useScmApiClient() {
   const accessToken = useAuthStore((state) => state.accessToken);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   return useMemo(
     () =>
       createScmApiClient({
         baseUrl: apiBaseUrl,
         accessToken,
+        onUnauthorized: () => {
+          clearAuth();
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+            window.location.replace("/login");
+          }
+        },
       }),
-    [accessToken]
+    [accessToken, clearAuth]
   );
 }
 

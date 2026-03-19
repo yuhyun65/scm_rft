@@ -4604,3 +4604,56 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - KPI 숫자는 이제 단순 집계 표시가 아니라 목록 drill-down 진입점이 된다.
   - 재고 경고 수는 상단 카드 미리보기 3건과 별개로 전체 경고 목록을 팝업에서 확인할 수 있다.
+
+## Q244. 리로드 후 dashboard 401 발생 시 세션 자동 정리 (2026-03-19)
+- 요청:
+  - 화면 리로드 후 대시보드에 `대시보드 집계 조회 실패 HTTP 401`이 보이는 문제를 해결
+- 원인:
+  1. 프론트는 브라우저에 남아 있는 access token 문자열만 보고 로그인 상태로 판단했다.
+  2. 반면 backend는 재기동, 토큰 만료, auth in-memory 상태 초기화 등으로 해당 토큰을 더 이상 유효하지 않다고 판단할 수 있었다.
+  3. 그 경우 routed 화면은 401 응답을 받아도 세션을 정리하지 않고 오류 배너만 띄웠다.
+- 수행:
+  1. `frontend/packages/api-client/src/index.ts`에 `onUnauthorized` 훅을 추가했다.
+  2. 공통 API client가 `401` 응답을 받으면 이 훅을 호출하도록 바꿨다.
+  3. `frontend/apps/web-portal/src/lib/scmApi.ts`에서 `onUnauthorized`에 `clearAuth()`와 `/login` redirect를 연결했다.
+- 결과:
+  - 리로드 후 저장된 토큰이 backend에서 더 이상 유효하지 않으면, dashboard에 401 배너를 남기지 않고 세션을 정리한 뒤 로그인 화면으로 이동한다.
+  - 같은 공통 client를 쓰는 routed 화면 전체에 동일한 보호 동작이 적용된다.
+
+## Q245. dashboard KPI 팝업의 `StatusBadge is not defined` 런타임 오류 수정 (2026-03-19)
+- 요청:
+  - 집계 숫자를 클릭했을 때 `Unexpected Application Error! StatusBadge is not defined`가 발생하는 문제를 해결
+- 원인:
+  1. `frontend/apps/web-portal/src/pages/DashboardPage.tsx`의 KPI drill-down 팝업은 주문 상태 표시를 위해 `StatusBadge` 컴포넌트를 렌더링한다.
+  2. 하지만 파일 상단 import가 누락돼 브라우저 런타임에서 `ReferenceError`가 발생했다.
+- 수행:
+  1. `DashboardPage.tsx`에 `../components/StatusBadge` import를 추가했다.
+- 결과:
+  - KPI 숫자 클릭 시 주문 목록 팝업이 더 이상 `StatusBadge is not defined` 오류로 중단되지 않는다.
+
+## Q246. 이번 주 주문 현황 요일별 그래프 drill-down 팝업 추가 (2026-03-19)
+- 요청:
+  - `이번 주 주문 현황` 차트에서 각 요일 막대를 누르면 해당 날짜 주문 목록을 팝업으로 확인할 수 있게 수정
+- 수행:
+  1. `services/gateway/.../dashboard/DashboardSummaryResponse.java`의 `WeeklyOrders.DailyCount`에 일자별 주문 목록 필드를 추가했다.
+  2. `services/gateway/.../dashboard/DashboardSummaryService.java`에서 주간 주문 집계 시 날짜별 주문 목록을 함께 채우도록 확장했다.
+  3. `frontend/packages/api-client/src/index.ts`에 `DashboardDailyCount.items` 타입을 추가했다.
+  4. `frontend/apps/web-portal/src/pages/DashboardPage.tsx`에서 요일 막대를 클릭 가능한 버튼으로 바꾸고, 선택한 날짜 주문 목록을 기존 목록 모달로 재사용해 보여주도록 구현했다.
+  5. `frontend/apps/web-portal/src/styles.css`에 요일 막대 버튼의 hover/focus 스타일을 추가했다.
+- 결과:
+  - 사용자는 KPI 숫자뿐 아니라 주간 차트의 요일 막대도 drill-down 진입점으로 사용할 수 있다.
+  - 대시보드에서 곧바로 날짜별 주문 목록까지 확인 가능해졌다.
+
+## Q247. 요일별 그래프 클릭 시 `undefined.length` 런타임 오류 방어 처리 (2026-03-19)
+- 요청:
+  - 요일별 그래프를 눌렀을 때 `Cannot read properties of undefined (reading 'length')`가 발생하는 문제를 수정
+- 원인:
+  1. 프론트는 `DailyCount.items`가 항상 존재한다고 가정하고 목록 모달을 열었다.
+  2. 하지만 브라우저가 새 frontend 코드를 먼저 읽고, gateway가 아직 구버전 응답을 주는 순간에는 `items`가 빠질 수 있었다.
+  3. 이 상태에서 목록 모달이 `selectedList.orderItems.length`를 읽으면서 런타임 오류가 발생했다.
+- 수행:
+  1. `frontend/apps/web-portal/src/pages/DashboardPage.tsx`에 `normalizeSummary()`를 추가했다.
+  2. dashboard 응답을 state에 넣기 전에 `recentActivities`, `stockAlerts`, `drillDowns`, `weeklyOrders.items[].items`를 모두 빈 배열 기본값으로 정규화하도록 바꿨다.
+- 결과:
+  - frontend와 gateway 반영 시점이 잠시 어긋나도 요일별 그래프 클릭이 런타임 오류로 중단되지 않는다.
+  - 구버전 응답이 오면 빈 목록 팝업으로 안전하게 처리된다.

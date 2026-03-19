@@ -68,6 +68,9 @@ a{text-decoration:none;color:inherit}
 .kpi-value-button:hover:not(:disabled){color:var(--color-primary)}
 .kpi-value-button:focus{outline:2px solid #bfdbfe;outline-offset:2px;border-radius:4px}
 .kpi-value-button:disabled{cursor:default;color:var(--color-gray-900)}
+.weekly-bar-button{appearance:none;background:none;border:none;padding:0;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;gap:8px;cursor:pointer;border-radius:8px}
+.weekly-bar-button:hover{background:rgba(59,130,246,.06)}
+.weekly-bar-button:focus{outline:2px solid #bfdbfe;outline-offset:2px}
 .kpi-sub{font-size:11px;color:var(--color-gray-400);margin-top:5px}
 .kpi-change{font-size:11px;font-weight:600}
 .kpi-change.up{color:var(--color-success)}
