@@ -4657,3 +4657,39 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - frontend와 gateway 반영 시점이 잠시 어긋나도 요일별 그래프 클릭이 런타임 오류로 중단되지 않는다.
   - 구버전 응답이 오면 빈 목록 팝업으로 안전하게 처리된다.
+
+## Q248. 주문관리/재고현황 엑셀 다운로드 기능 추가 (2026-03-19)
+- 요청:
+  - 주문관리와 재고현황 화면에서 현재 조회 조건 기준 목록을 엑셀로 내려받을 수 있게 수정
+- 수행:
+  1. `frontend/apps/web-portal/src/lib/export.ts`에 UTF-8 BOM이 포함된 CSV 다운로드 유틸을 추가했다.
+  2. `frontend/apps/web-portal/src/pages/OrderListPage.tsx`에서 현재 필터 조건으로 전체 페이지를 재조회해 주문 목록을 `mate-scm-orders-YYYYMMDD-HHMM.csv` 파일로 내보내도록 구현했다.
+  3. `frontend/apps/web-portal/src/pages/InventoryPage.tsx`에서 현재 필터 조건으로 전체 페이지를 재조회해 재고 목록을 `mate-scm-inventory-YYYYMMDD-HHMM.csv` 파일로 내보내도록 구현했다.
+  4. 두 화면의 비활성 placeholder 버튼을 실제 다운로드 버튼으로 교체하고, 다운로드 중 상태 문구를 추가했다.
+- 결과:
+  - 주문관리와 재고현황에서 현재 검색 조건에 맞는 전체 목록을 엑셀에서 바로 열 수 있는 CSV 파일로 저장할 수 있다.
+  - 조회 결과가 없으면 빈 파일 대신 안내 메시지를 보여준다.
+
+## Q249. 주문관리/재고현황 상단 문구 깨짐 복구 (2026-03-19)
+- 요청:
+  - 주문관리와 재고현황 화면 상단의 깨진 폰트/문구를 정상 한국어로 복구
+- 원인:
+  1. 두 routed page의 사용자 노출 문자열이 이전 수정 과정에서 손상돼 page title, 필터 라벨, 버튼 문구까지 함께 깨져 있었다.
+  2. 상단 제목만 고치면 하단 필터와 액션 영역은 계속 깨진 상태로 남는 구조였다.
+- 수행:
+  1. `frontend/apps/web-portal/src/pages/OrderListPage.tsx`의 사용자 노출 문구를 전체적으로 정상 한국어로 재작성했다.
+  2. `frontend/apps/web-portal/src/pages/InventoryPage.tsx`의 사용자 노출 문구도 전체적으로 정상 한국어로 재작성했다.
+  3. 엑셀 다운로드/재고 조정/주문 등록 기능 로직은 유지하고 문자열만 정상화했다.
+- 결과:
+  - 주문관리와 재고현황의 상단 제목, 필터 라벨, 버튼, 표 제목/헤더가 정상 한국어로 표시된다.
+
+## Q250. 좌측 품질문서 메뉴의 정적 배지 제거 (2026-03-19)
+- 요청:
+  - 좌측 메뉴의 `품질문서` 옆에 표시되는 원형 숫자 `3` 제거
+- 원인:
+  1. `frontend/apps/web-portal/src/components/Sidebar.tsx`에서 `품질문서` 메뉴 항목에 `badge: 3`이 하드코딩돼 있었다.
+  2. 이 숫자는 API나 실제 ACK 대기 건수와 연결되지 않은 placeholder 값이었다.
+- 수행:
+  1. `Sidebar.tsx`에서 `품질문서` 항목의 `badge` 속성을 제거했다.
+- 결과:
+  - 좌측 메뉴에서 `품질문서` 옆 정적 숫자 배지가 더 이상 표시되지 않는다.

@@ -6,6 +6,7 @@ import type {
 import { useNavigate } from "react-router-dom";
 import KpiCard from "../components/KpiCard";
 import Pagination from "../components/Pagination";
+import { buildExportFileName, downloadCsv } from "../lib/export";
 import { formatDateTime, formatErrorText, useScmApiClient } from "../lib/scmApi";
 
 const PAGE_SIZE = 10;
@@ -29,6 +30,7 @@ export default function InventoryPage() {
   const [adjustQuantityDelta, setAdjustQuantityDelta] = useState("0");
   const [adjustReferenceNo, setAdjustReferenceNo] = useState("");
   const [adjusting, setAdjusting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [adjustmentResult, setAdjustmentResult] = useState<InventoryAdjustmentResponse | null>(null);
 
   useEffect(() => {
@@ -104,6 +106,58 @@ export default function InventoryPage() {
     }
   }
 
+  async function loadAllBalancesForExport() {
+    const firstPage =
+      searchResult ??
+      (await client.searchInventoryBalances({
+        itemCode: appliedItemCode,
+        warehouseCode: appliedWarehouseCode,
+        page: 0,
+        size: PAGE_SIZE,
+      }));
+    const allItems = [...firstPage.items];
+    const totalPages = Math.max(Math.ceil((firstPage.total ?? allItems.length) / PAGE_SIZE), 1);
+
+    for (let currentPage = 1; currentPage < totalPages; currentPage += 1) {
+      const nextPage = await client.searchInventoryBalances({
+        itemCode: appliedItemCode,
+        warehouseCode: appliedWarehouseCode,
+        page: currentPage,
+        size: PAGE_SIZE,
+      });
+      allItems.push(...nextPage.items);
+    }
+
+    return allItems;
+  }
+
+  async function handleExportBalances() {
+    setExporting(true);
+    setErrorText("");
+    try {
+      const balances = await loadAllBalancesForExport();
+      if (balances.length === 0) {
+        setErrorText("엑셀로 내보낼 재고 목록이 없습니다.");
+        return;
+      }
+
+      downloadCsv(
+        buildExportFileName("mate-scm-inventory"),
+        [
+          { header: "품목 코드", render: (item) => item.itemCode },
+          { header: "창고 코드", render: (item) => item.warehouseCode },
+          { header: "현재고", render: (item) => item.quantity },
+          { header: "최종 반영 시각", render: (item) => formatDateTime(item.updatedAt) },
+        ],
+        balances
+      );
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const items = searchResult?.items ?? [];
   const total = searchResult?.total ?? 0;
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
@@ -156,14 +210,18 @@ export default function InventoryPage() {
             <div className="form-group">
               <label style={{ visibility: "hidden" }}>조회</label>
               <button className="btn btn-primary" onClick={handleSearch} disabled={loading}>
-                {loading ? "조회 중..." : "조회"}
+                {loading ? "조회 중.." : "조회"}
               </button>
             </div>
             <div className="form-group" style={{ marginLeft: "auto" }}>
               <label style={{ visibility: "hidden" }}>액션</label>
               <div className="flex gap-8">
-                <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 아직 없습니다.">
-                  엑셀 다운로드 예정
+                <button
+                  className="btn btn-gray"
+                  onClick={() => void handleExportBalances()}
+                  disabled={loading || exporting}
+                >
+                  {exporting ? "엑셀 다운로드 중.." : "엑셀 다운로드"}
                 </button>
                 <button
                   className="btn btn-outline"
@@ -179,7 +237,7 @@ export default function InventoryPage() {
             </div>
           </div>
           <div className="text-muted fs-12 mt-8">
-            조회는 balance API, 상세는 movement API, 재고 조정은 adjustment API에 연결되어 있습니다.
+            조회는 balance API, 상세는 movement API, 재고 조정은 adjustment API와 연결되어 있습니다.
           </div>
         </div>
       </div>
@@ -222,7 +280,7 @@ export default function InventoryPage() {
             </div>
             <div className="flex gap-8">
               <button className="btn btn-primary" onClick={handleAdjustInventory} disabled={adjusting}>
-                {adjusting ? "조정 중..." : "조정 실행"}
+                {adjusting ? "조정 중.." : "조정 실행"}
               </button>
               <button className="btn btn-gray" onClick={() => setShowAdjustForm(false)} disabled={adjusting}>
                 닫기
@@ -236,7 +294,7 @@ export default function InventoryPage() {
       {adjustmentResult ? (
         <div className="alert-banner success mb-12">
           {adjustmentResult.itemCode} / {adjustmentResult.warehouseCode} 조정 완료
-          ({adjustmentResult.quantityDelta.toLocaleString("ko-KR")} → 현재 {adjustmentResult.resultingQuantity.toLocaleString("ko-KR")})
+          ({adjustmentResult.quantityDelta.toLocaleString("ko-KR")} / 현재 {adjustmentResult.resultingQuantity.toLocaleString("ko-KR")})
         </div>
       ) : null}
 

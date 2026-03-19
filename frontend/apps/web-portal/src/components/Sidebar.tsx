@@ -28,7 +28,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
   {
     section: '품질/문서',
     items: [
-      { label: '품질문서', path: '/quality-docs', badge: 3 },
+      { label: '품질문서', path: '/quality-docs' },
       { label: '게시판', path: '/board' },
     ],
   },

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import type { OrderDetail, OrderSearchResponse } from "@scm-rft/api-client";
+import type { OrderDetail, OrderSearchResponse, OrderSummary } from "@scm-rft/api-client";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import StatusBadge from "../components/StatusBadge";
+import { buildExportFileName, downloadCsv } from "../lib/export";
 import { formatDateTime, formatErrorText, useScmApiClient } from "../lib/scmApi";
 
 const PAGE_SIZE = 10;
@@ -26,6 +27,7 @@ export default function OrderListPage() {
   const [createOrderDate, setCreateOrderDate] = useState(new Date().toISOString().slice(0, 10));
   const [createOrderStatus, setCreateOrderStatus] = useState("PENDING");
   const [creating, setCreating] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<OrderDetail | null>(null);
 
   useEffect(() => {
@@ -94,6 +96,58 @@ export default function OrderListPage() {
     }
   }
 
+  async function loadAllOrdersForExport() {
+    const firstPage =
+      searchResult ??
+      (await client.searchOrders({
+        status: appliedStatus,
+        keyword: appliedKeyword,
+        page: 0,
+        size: PAGE_SIZE,
+      }));
+    const allItems: OrderSummary[] = [...firstPage.items];
+    const totalPages = Math.max(firstPage.page.totalPages ?? 1, 1);
+
+    for (let currentPage = 1; currentPage < totalPages; currentPage += 1) {
+      const nextPage = await client.searchOrders({
+        status: appliedStatus,
+        keyword: appliedKeyword,
+        page: currentPage,
+        size: PAGE_SIZE,
+      });
+      allItems.push(...nextPage.items);
+    }
+
+    return allItems;
+  }
+
+  async function handleExportOrders() {
+    setExporting(true);
+    setErrorText("");
+    try {
+      const orders = await loadAllOrdersForExport();
+      if (orders.length === 0) {
+        setErrorText("엑셀로 내보낼 주문 목록이 없습니다.");
+        return;
+      }
+
+      downloadCsv(
+        buildExportFileName("mate-scm-orders"),
+        [
+          { header: "주문번호", render: (order) => order.orderId },
+          { header: "거래처 ID", render: (order) => order.supplierId || "-" },
+          { header: "주문일시", render: (order) => formatDateTime(order.orderedAt) },
+          { header: "상태", render: (order) => order.status },
+        ],
+        orders
+      );
+    } catch (error) {
+      setErrorText(formatErrorText(error));
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const items = searchResult?.items ?? [];
   const totalPages = Math.max(searchResult?.page.totalPages ?? 1, 1);
   const totalElements = searchResult?.page.totalElements ?? items.length;
@@ -138,23 +192,27 @@ export default function OrderListPage() {
             <div className="form-group">
               <label style={{ visibility: "hidden" }}>조회</label>
               <button className="btn btn-primary" onClick={handleSearch} disabled={loading}>
-                {loading ? "조회 중..." : "조회"}
+                {loading ? "조회 중.." : "조회"}
               </button>
             </div>
             <div className="form-group" style={{ marginLeft: "auto" }}>
-              <label style={{ visibility: "hidden" }}>등록</label>
+              <label style={{ visibility: "hidden" }}>액션</label>
               <div className="flex gap-8">
                 <button className="btn btn-success" onClick={() => setShowCreateForm((current) => !current)}>
                   + 주문 등록
                 </button>
-                <button className="btn btn-gray" disabled title="엑셀 다운로드 API는 아직 없습니다.">
-                  엑셀 다운로드 예정
+                <button
+                  className="btn btn-gray"
+                  onClick={() => void handleExportOrders()}
+                  disabled={loading || exporting}
+                >
+                  {exporting ? "엑셀 다운로드 중.." : "엑셀 다운로드"}
                 </button>
               </div>
             </div>
           </div>
           <div className="text-muted fs-12 mt-8">
-            주문 목록/상세/상태 변경뿐 아니라 주문 등록도 routed 페이지에서 실제 API로 처리합니다.
+            주문 목록, 상세, 상태 변경뿐 아니라 주문 등록도 routed 페이지에서 실제 API로 처리됩니다.
           </div>
         </div>
       </div>
@@ -191,7 +249,7 @@ export default function OrderListPage() {
             </div>
             <div className="flex gap-8">
               <button className="btn btn-primary" onClick={handleCreateOrder} disabled={creating}>
-                {creating ? "등록 중..." : "등록"}
+                {creating ? "등록 중.." : "등록"}
               </button>
               <button className="btn btn-gray" onClick={() => setShowCreateForm(false)} disabled={creating}>
                 닫기
