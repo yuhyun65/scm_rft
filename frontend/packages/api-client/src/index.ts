@@ -219,6 +219,53 @@ export type ReportJob = {
   errorMessage?: string | null;
 };
 
+export type DashboardKpis = {
+  activeOrders: number;
+  pendingLots: number;
+  completedThisWeek: number;
+  stockAlertCount: number;
+};
+
+export type DashboardDailyCount = {
+  day: string;
+  date: string;
+  count: number;
+  accent: boolean;
+};
+
+export type DashboardWeeklyOrders = {
+  items: DashboardDailyCount[];
+  completed: number;
+  inProgress: number;
+  canceled: number;
+};
+
+export type DashboardActivity = {
+  icon: string;
+  tone: string;
+  title: string;
+  detail: string;
+  occurredAt: string;
+};
+
+export type DashboardStockAlert = {
+  code: string;
+  name: string;
+  warehouseCode: string;
+  current: number;
+  safety: number;
+  level: string;
+};
+
+export type DashboardSummaryResponse = {
+  businessDate: string;
+  generatedAt: string;
+  kpis: DashboardKpis;
+  weeklyOrders: DashboardWeeklyOrders;
+  recentActivities: DashboardActivity[];
+  stockAlerts: DashboardStockAlert[];
+};
+
 export type OrderSummary = {
   orderId: string;
   supplierId: string;
@@ -560,6 +607,10 @@ export class ScmApiClient {
 
   getReportJob(jobId: string): Promise<ReportJob> {
     return this.request<ReportJob>("GET", `/api/report/v1/jobs/${encodeURIComponent(jobId)}`);
+  }
+
+  getDashboardSummary(): Promise<DashboardSummaryResponse> {
+    return this.request<DashboardSummaryResponse>("GET", "/api/dashboard/v1/summary");
   }
 }
 

@@ -47,12 +47,10 @@ export default function Sidebar() {
       <div className="sidebar-logo">
         <div>
           <div className="logo-text">Mate-SCM</div>
-          <div className="logo-sub">공급망 운영 포털</div>
         </div>
       </div>
       {NAV.map(({ section, items }) => (
         <div key={section}>
-          <div className="sidebar-section">{section}</div>
           {items.map((item) => (
             <div
               key={item.path}
