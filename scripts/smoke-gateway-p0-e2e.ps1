@@ -6,7 +6,9 @@ param(
   [string]$EnvFile = ".env.staging",
   [string]$LoginId = "smoke-user",
   [string]$Password = "password",
-  [bool]$SeedData = $true
+  [bool]$SeedData = $true,
+  [int]$HealthWaitTimeoutSec = 300,
+  [int]$HealthPollIntervalSec = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,19 +39,34 @@ function Get-EnvValue {
 function Assert-Health {
   param(
     [Parameter(Mandatory = $true)][string]$Name,
-    [Parameter(Mandatory = $true)][string]$Uri
+    [Parameter(Mandatory = $true)][string]$Uri,
+    [Parameter(Mandatory = $true)][int]$TimeoutSec,
+    [Parameter(Mandatory = $true)][int]$PollIntervalSec
   )
 
-  try {
-    $response = Invoke-RestMethod -Method Get -Uri $Uri -TimeoutSec 10
-    if ($response.status -and "$($response.status)".ToUpperInvariant() -ne "UP") {
-      throw "health status is not UP."
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  $lastError = $null
+
+  while ((Get-Date) -lt $deadline) {
+    try {
+      $response = Invoke-RestMethod -Method Get -Uri $Uri -TimeoutSec 10
+      if ($response.status -and "$($response.status)".ToUpperInvariant() -ne "UP") {
+        throw "health status is not UP."
+      }
+      Write-Host ("[OK] {0} health check passed: {1}" -f $Name, $Uri)
+      return
     }
-    Write-Host ("[OK] {0} health check passed: {1}" -f $Name, $Uri)
+    catch {
+      $lastError = $_
+      Start-Sleep -Seconds $PollIntervalSec
+    }
   }
-  catch {
-    throw "[FAIL] $Name health check failed at $Uri."
+
+  $detail = ""
+  if ($lastError) {
+    $detail = " Last error: $($lastError.Exception.Message)"
   }
+  throw "[FAIL] $Name health check failed at $Uri within ${TimeoutSec}s.$detail"
 }
 
 function Invoke-Login {
@@ -59,10 +76,54 @@ function Invoke-Login {
     [Parameter(Mandatory = $true)][string]$PasswordValue
   )
 
-  return Invoke-RestMethod -Method Post -Uri $Uri -ContentType "application/json" -Body (@{
+  return Invoke-GatewayRequest -Method "Post" -Uri $Uri -ContentType "application/json" -Body (@{
     loginId = $LoginIdValue
     password = $PasswordValue
-  } | ConvertTo-Json)
+  } | ConvertTo-Json) -MaxAttempts 2 -RetryDelaySec 2
+}
+
+function Invoke-GatewayRequest {
+  param(
+    [Parameter(Mandatory = $true)][string]$Method,
+    [Parameter(Mandatory = $true)][string]$Uri,
+    [hashtable]$Headers,
+    [string]$ContentType,
+    [string]$Body,
+    [int]$MaxAttempts = 3,
+    [int]$RetryDelaySec = 2,
+    [int[]]$RetryStatusCodes = @(504)
+  )
+
+  for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+    try {
+      $invokeArgs = @{
+        Method = $Method
+        Uri = $Uri
+      }
+      if ($Headers) {
+        $invokeArgs.Headers = $Headers
+      }
+      if ($PSBoundParameters.ContainsKey('ContentType') -and -not [string]::IsNullOrWhiteSpace($ContentType)) {
+        $invokeArgs.ContentType = $ContentType
+      }
+      if ($PSBoundParameters.ContainsKey('Body')) {
+        $invokeArgs.Body = $Body
+      }
+      return Invoke-RestMethod @invokeArgs
+    }
+    catch {
+      $statusCode = $null
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+        $statusCode = [int]$_.Exception.Response.StatusCode
+      }
+      if (($RetryStatusCodes -contains $statusCode) -and $attempt -lt $MaxAttempts) {
+        Write-Host ("[WARN] gateway request returned HTTP {0}. retrying {1}/{2}..." -f $statusCode, $attempt, $MaxAttempts)
+        Start-Sleep -Seconds $RetryDelaySec
+        continue
+      }
+      throw
+    }
+  }
 }
 
 function Seed-P0Data {
@@ -318,15 +379,15 @@ function Assert-NotEmpty {
 
 Push-Location $repoRoot
 try {
-  Assert-Health -Name "auth" -Uri "http://localhost:8081/actuator/health"
-  Assert-Health -Name "member" -Uri "http://localhost:8082/actuator/health"
-  Assert-Health -Name "board" -Uri "http://localhost:8083/actuator/health"
-  Assert-Health -Name "quality-doc" -Uri "http://localhost:8084/actuator/health"
-  Assert-Health -Name "order-lot" -Uri "http://localhost:8085/actuator/health"
-  Assert-Health -Name "inventory" -Uri "http://localhost:8086/actuator/health"
-  Assert-Health -Name "file" -Uri "http://localhost:8087/actuator/health"
-  Assert-Health -Name "report" -Uri "http://localhost:8088/actuator/health"
-  Assert-Health -Name "gateway" -Uri "http://localhost:18080/actuator/health"
+  Assert-Health -Name "auth" -Uri "http://localhost:8081/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "member" -Uri "http://localhost:8082/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "board" -Uri "http://localhost:8083/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "quality-doc" -Uri "http://localhost:8084/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "order-lot" -Uri "http://localhost:8085/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "inventory" -Uri "http://localhost:8086/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "file" -Uri "http://localhost:8087/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "report" -Uri "http://localhost:8088/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
+  Assert-Health -Name "gateway" -Uri "http://localhost:18080/actuator/health" -TimeoutSec $HealthWaitTimeoutSec -PollIntervalSec $HealthPollIntervalSec
 
   if ($SeedData) {
     Seed-P0Data -RepoRoot $repoRoot -ContainerName $SqlContainerName -TargetDatabase $Database -TargetEnvFile $EnvFile -PasswordHash $seedPasswordHash -OrderId $seedOrderId -LotId $seedLotId -DocId $seedDocId
@@ -346,30 +407,21 @@ try {
     Write-Host "[WARN] login pre-warm request failed. continue to formal login."
   }
 
-  $loginResponse = $null
-  for ($attempt = 1; $attempt -le 2; $attempt++) {
-    try {
-      $loginResponse = Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password
-      break
+  try {
+    $loginResponse = Invoke-Login -Uri $loginUri -LoginIdValue $LoginId -PasswordValue $Password
+  }
+  catch {
+    $statusCode = "unknown"
+    if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+      $statusCode = [int]$_.Exception.Response.StatusCode
     }
-    catch {
-      $statusCode = "unknown"
-      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
-        $statusCode = [int]$_.Exception.Response.StatusCode
-      }
-      if ($statusCode -eq 504 -and $attempt -lt 2) {
-        Write-Host "[WARN] login via gateway returned 504. retrying once..."
-        Start-Sleep -Milliseconds 400
-        continue
-      }
-      throw "[FAIL] login via gateway failed (HTTP $statusCode)."
-    }
+    throw "[FAIL] login via gateway failed (HTTP $statusCode)."
   }
 
   Assert-NotEmpty -Name "accessToken" -Value $loginResponse.accessToken
   Write-Host "[OK] P0-F01 login succeeded."
 
-  $verifyResponse = Invoke-RestMethod -Method Post -Uri $verifyUri -ContentType "application/json" -Body (@{
+  $verifyResponse = Invoke-GatewayRequest -Method "Post" -Uri $verifyUri -ContentType "application/json" -Body (@{
     accessToken = "$($loginResponse.accessToken)"
   } | ConvertTo-Json)
   if (-not $verifyResponse.active) {
@@ -379,35 +431,17 @@ try {
 
   $authHeaders = @{ Authorization = "Bearer $($loginResponse.accessToken)" }
 
-  $memberSearch = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/member/v1/members?status=ACTIVE&keyword=smoke&page=0&size=10" -Headers $authHeaders
+  $memberSearch = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/member/v1/members?status=ACTIVE&keyword=smoke&page=0&size=10" -Headers $authHeaders
   if (@($memberSearch.items).Count -lt 1) {
     throw "[FAIL] P0-F01 member search returned empty."
   }
-  $memberDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/member/v1/members/$LoginId" -Headers $authHeaders
+  $memberDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/member/v1/members/$LoginId" -Headers $authHeaders
   if ("$($memberDetail.memberId)" -ne $LoginId) {
     throw "[FAIL] P0-F01 member detail mismatch."
   }
   Write-Host "[OK] P0-F01 member search/detail passed."
 
-  $orderList = $null
-  for ($attempt = 1; $attempt -le 3; $attempt++) {
-    try {
-      $orderList = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/order-lot/v1/orders?keyword=P0-ORDER&page=0&size=10" -Headers $authHeaders
-      break
-    }
-    catch {
-      $statusCode = "unknown"
-      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
-        $statusCode = [int]$_.Exception.Response.StatusCode
-      }
-      if ($statusCode -eq 504 -and $attempt -lt 3) {
-        Write-Host "[WARN] order list via gateway returned 504. retrying..."
-        Start-Sleep -Seconds 2
-        continue
-      }
-      throw
-    }
-  }
+  $orderList = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders?keyword=P0-ORDER&page=0&size=10" -Headers $authHeaders
   if (@($orderList.items).Count -lt 1) {
     throw "[FAIL] P0-F02 order list returned empty."
   }
@@ -415,15 +449,15 @@ try {
   if ([string]::IsNullOrWhiteSpace($orderId)) {
     $orderId = $seedOrderId
   }
-  $orderDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId" -Headers $authHeaders
+  $orderDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId" -Headers $authHeaders
   if ("$($orderDetail.orderId)" -ne $orderId) {
     throw "[FAIL] P0-F02 order detail mismatch."
   }
-  $lotDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/order-lot/v1/lots/$seedLotId" -Headers $authHeaders
+  $lotDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/order-lot/v1/lots/$seedLotId" -Headers $authHeaders
   if ("$($lotDetail.lotId)" -ne $seedLotId) {
     throw "[FAIL] P0-F02 lot detail mismatch."
   }
-  $statusChange = Invoke-RestMethod -Method Post -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId/status" -Headers $authHeaders -ContentType "application/json" -Body (@{
+  $statusChange = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/order-lot/v1/orders/$orderId/status" -Headers $authHeaders -ContentType "application/json" -Body (@{
     targetStatus = "CONFIRMED"
     changedBy = "smoke-admin"
     reason = "P0 smoke transition"
@@ -433,26 +467,26 @@ try {
   }
   Write-Host "[OK] P0-F02 order/lot flow passed."
 
-  $fileCreate = Invoke-RestMethod -Method Post -Uri "$GatewayBaseUrl/api/file/v1/files" -Headers $authHeaders -ContentType "application/json" -Body (@{
+  $fileCreate = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/file/v1/files" -Headers $authHeaders -ContentType "application/json" -Body (@{
     domainKey = "P0:BOARD"
     originalName = "p0-note.txt"
     storagePath = "p0/p0-note.txt"
   } | ConvertTo-Json)
   $fileId = "$($fileCreate.fileId)"
   Assert-NotEmpty -Name "fileId" -Value $fileId
-  $fileDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/file/v1/files/$fileId" -Headers $authHeaders
+  $fileDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/file/v1/files/$fileId" -Headers $authHeaders
   if ("$($fileDetail.fileId)" -ne $fileId) {
     throw "[FAIL] P0-F03 file detail mismatch."
   }
   Write-Host "[OK] P0-F03 file register/get passed."
 
-  $boardList = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/board/v1/posts?page=0&size=10" -Headers $authHeaders
+  $boardList = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/board/v1/posts?page=0&size=10" -Headers $authHeaders
   $postId = ""
   if (@($boardList.items).Count -ge 1) {
     $postId = "$($boardList.items[0].postId)"
   }
   if ([string]::IsNullOrWhiteSpace($postId)) {
-    $boardCreate = Invoke-RestMethod -Method Post -Uri "$GatewayBaseUrl/api/board/v1/posts" -Headers $authHeaders -ContentType "application/json" -Body (@{
+    $boardCreate = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/board/v1/posts" -Headers $authHeaders -ContentType "application/json" -Body (@{
       boardType = "GENERAL"
       title = "P0 Smoke Post"
       content = "P0 smoke content"
@@ -462,13 +496,13 @@ try {
     $postId = "$($boardCreate.postId)"
   }
   Assert-NotEmpty -Name "postId" -Value $postId
-  $boardDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/board/v1/posts/$postId" -Headers $authHeaders
+  $boardDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/board/v1/posts/$postId" -Headers $authHeaders
   if ("$($boardDetail.postId)" -ne $postId) {
     throw "[FAIL] P0-F04 board detail mismatch."
   }
   Write-Host "[OK] P0-F04 board list/detail passed."
 
-  $docList = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents?page=0&size=10" -Headers $authHeaders
+  $docList = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents?page=0&size=10" -Headers $authHeaders
   if (@($docList.items).Count -lt 1) {
     throw "[FAIL] P0-F05 quality-doc list returned empty."
   }
@@ -476,11 +510,11 @@ try {
   if ([string]::IsNullOrWhiteSpace($docId)) {
     $docId = $seedDocId
   }
-  $docDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents/$docId" -Headers $authHeaders
+  $docDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents/$docId" -Headers $authHeaders
   if ("$($docDetail.documentId)" -ne $docId) {
     throw "[FAIL] P0-F05 quality-doc detail mismatch."
   }
-  $ack = Invoke-RestMethod -Method Put -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents/$docId/ack" -Headers $authHeaders -ContentType "application/json" -Body (@{
+  $ack = Invoke-GatewayRequest -Method "Put" -Uri "$GatewayBaseUrl/api/quality-doc/v1/documents/$docId/ack" -Headers $authHeaders -ContentType "application/json" -Body (@{
     memberId = "smoke-user"
     ackType = "READ"
     comment = "P0 smoke ack"
@@ -490,23 +524,23 @@ try {
   }
   Write-Host "[OK] P0-F05 quality-doc list/detail/ack passed."
 
-  $balances = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/inventory/v1/balances?itemCode=ITEM-001&page=0&size=10" -Headers $authHeaders
+  $balances = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/inventory/v1/balances?itemCode=ITEM-001&page=0&size=10" -Headers $authHeaders
   if (@($balances.items).Count -lt 1) {
     throw "[FAIL] P0-F06 inventory balances returned empty."
   }
-  $movements = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/inventory/v1/movements?itemCode=ITEM-001&page=0&size=10" -Headers $authHeaders
+  $movements = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/inventory/v1/movements?itemCode=ITEM-001&page=0&size=10" -Headers $authHeaders
   if (@($movements.items).Count -lt 1) {
     throw "[FAIL] P0-F06 inventory movements returned empty."
   }
   Write-Host "[OK] P0-F06 inventory balances/movements passed."
 
-  $reportCreate = Invoke-RestMethod -Method Post -Uri "$GatewayBaseUrl/api/report/v1/jobs" -Headers $authHeaders -ContentType "application/json" -Body (@{
+  $reportCreate = Invoke-GatewayRequest -Method "Post" -Uri "$GatewayBaseUrl/api/report/v1/jobs" -Headers $authHeaders -ContentType "application/json" -Body (@{
     reportType = "P0_DAILY"
     requestedByMemberId = "smoke-user"
   } | ConvertTo-Json)
   $jobId = "$($reportCreate.jobId)"
   Assert-NotEmpty -Name "jobId" -Value $jobId
-  $reportDetail = Invoke-RestMethod -Method Get -Uri "$GatewayBaseUrl/api/report/v1/jobs/$jobId" -Headers $authHeaders
+  $reportDetail = Invoke-GatewayRequest -Method "Get" -Uri "$GatewayBaseUrl/api/report/v1/jobs/$jobId" -Headers $authHeaders
   if ("$($reportDetail.jobId)" -ne $jobId) {
     throw "[FAIL] P0-F07 report detail mismatch."
   }

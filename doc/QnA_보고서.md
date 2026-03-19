@@ -4500,3 +4500,15 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - 세션 종료 시점 기준 local SCM_RFT runtime은 정리 완료 상태다.
   - 다음 작업은 실제 운영값 확보 후 cutover entry check 재시작 또는 routed Mate-SCM 수동 브라우저 시연 재개로 이어가면 된다.
+
+## Q235. gateway 재기동 직후 P0 smoke 안정화 (2026-03-19)
+- 요청:
+  - `post-cutover-write-open` 전환 뒤 `smoke-gateway-p0-e2e.ps1`가 gateway health 또는 첫 업무 호출에서 조기 실패하던 문제를 수정
+- 수행:
+  1. `scripts/smoke-gateway-p0-e2e.ps1`에 `HealthWaitTimeoutSec`, `HealthPollIntervalSec` 파라미터를 추가하고, 모든 서비스 health check가 `UP`가 될 때까지 wait/retry 하도록 바꿨다.
+  2. gateway가 `UP` 직후 첫 업무 호출에서 간헐적으로 `504 Gateway Timeout`을 반환하던 구간을 흡수하기 위해 `Invoke-GatewayRequest` 공통 helper를 추가했다.
+  3. login, token verify, member/order/file/board/quality-doc/inventory/report 경로를 공통 helper로 통일해 `504` 재시도를 공통 적용했다.
+  4. `gateway --force-recreate` 직후 같은 조건으로 P0 smoke를 다시 실행해 `P0-F01~F07` 전체 PASS를 확인했다.
+- 결과:
+  - local prod-like demo에서 gateway 정책 전환 직후에도 P0 smoke가 안정적으로 이어질 수 있는 기준을 확보했다.
+  - 검증 중 실제로 여러 gateway 요청이 `504` 후 재시도로 회복되는 것을 확인했다.
