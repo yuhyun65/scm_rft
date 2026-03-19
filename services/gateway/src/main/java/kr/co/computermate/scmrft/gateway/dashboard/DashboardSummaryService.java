@@ -17,6 +17,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import kr.co.computermate.scmrft.gateway.policy.GatewayPolicyDocument;
 import kr.co.computermate.scmrft.gateway.policy.GatewayRoutePolicyResolver;
 import kr.co.computermate.scmrft.gateway.policy.GatewayRoutePolicyResolver.ResolvedRoutePolicy;
@@ -127,27 +129,43 @@ public class DashboardSummaryService {
     LocalDate weekStart = businessDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     LocalDate weekEnd = weekStart.plusDays(4);
 
+    List<OrderSummaryPayload> activeOrders = orders.stream()
+        .filter(order -> ACTIVE_ORDER_STATUSES.contains(normalizeStatus(order.status())))
+        .sorted(Comparator.comparing(OrderSummaryPayload::orderedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+        .toList();
     List<OrderSummaryPayload> weeklyOrders = orders.stream()
         .filter(order -> isWithinBusinessWeek(order.orderedAt(), weekStart, weekEnd))
         .toList();
+    List<OrderSummaryPayload> completedWeeklyOrders = weeklyOrders.stream()
+        .filter(order -> COMPLETED_ORDER_STATUSES.contains(normalizeStatus(order.status())))
+        .sorted(Comparator.comparing(OrderSummaryPayload::orderedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+        .toList();
 
-    long activeOrders = orders.stream()
-        .filter(order -> ACTIVE_ORDER_STATUSES.contains(normalizeStatus(order.status())))
-        .count();
-    long pendingLots = activeOrderDetails.stream()
-        .filter(detail -> ACTIVE_ORDER_STATUSES.contains(normalizeStatus(detail.status())))
-        .map(OrderDetailPayload::totalLotCount)
+    Map<String, OrderDetailPayload> detailByOrderId = safeList(activeOrderDetails).stream()
+        .collect(Collectors.toMap(OrderDetailPayload::orderId, Function.identity(), (left, right) -> left));
+
+    List<DashboardSummaryResponse.OrderItem> activeOrderItems = activeOrders.stream()
+        .map(order -> toOrderItem(order, detailByOrderId.get(order.orderId())))
+        .toList();
+    List<DashboardSummaryResponse.OrderItem> pendingLotItems = activeOrders.stream()
+        .map(order -> toOrderItem(order, detailByOrderId.get(order.orderId())))
+        .filter(order -> order.totalLotCount() != null && order.totalLotCount() > 0)
+        .toList();
+    List<DashboardSummaryResponse.OrderItem> completedOrderItems = completedWeeklyOrders.stream()
+        .map(order -> toOrderItem(order, null))
+        .toList();
+
+    long pendingLots = pendingLotItems.stream()
+        .map(DashboardSummaryResponse.OrderItem::totalLotCount)
         .filter(Objects::nonNull)
         .mapToLong(Integer::longValue)
         .sum();
-    long completedThisWeek = weeklyOrders.stream()
-        .filter(order -> COMPLETED_ORDER_STATUSES.contains(normalizeStatus(order.status())))
+    long completedThisWeek = completedOrderItems.size();
+    long inProgressThisWeek = weeklyOrders.stream()
+        .filter(order -> ACTIVE_ORDER_STATUSES.contains(normalizeStatus(order.status())))
         .count();
     long canceledThisWeek = weeklyOrders.stream()
         .filter(order -> CANCELED_ORDER_STATUSES.contains(normalizeStatus(order.status())))
-        .count();
-    long inProgressThisWeek = weeklyOrders.stream()
-        .filter(order -> ACTIVE_ORDER_STATUSES.contains(normalizeStatus(order.status())))
         .count();
 
     List<DashboardSummaryResponse.DailyCount> dailyCounts = WEEK_DAYS.stream()
@@ -165,10 +183,12 @@ public class DashboardSummaryService {
         })
         .toList();
 
-    List<DashboardSummaryResponse.StockAlert> stockAlerts = balances.stream()
+    List<DashboardSummaryResponse.StockAlert> allStockAlerts = balances.stream()
         .map(this::toStockAlert)
         .filter(Objects::nonNull)
         .sorted(Comparator.comparingLong((DashboardSummaryResponse.StockAlert alert) -> alert.current() - alert.safety()))
+        .toList();
+    List<DashboardSummaryResponse.StockAlert> stockAlertPreview = allStockAlerts.stream()
         .limit(3)
         .toList();
 
@@ -178,10 +198,10 @@ public class DashboardSummaryService {
         businessDate.toString(),
         Instant.now(),
         new DashboardSummaryResponse.Kpis(
-            activeOrders,
+            activeOrderItems.size(),
             pendingLots,
             completedThisWeek,
-            stockAlerts.size()
+            allStockAlerts.size()
         ),
         new DashboardSummaryResponse.WeeklyOrders(
             dailyCounts,
@@ -190,7 +210,13 @@ public class DashboardSummaryService {
             canceledThisWeek
         ),
         recentActivities,
-        stockAlerts
+        stockAlertPreview,
+        new DashboardSummaryResponse.DrillDowns(
+            activeOrderItems,
+            pendingLotItems,
+            completedOrderItems,
+            allStockAlerts
+        )
     );
   }
 
@@ -275,6 +301,16 @@ public class DashboardSummaryService {
             event.occurredAt()
         ))
         .toList();
+  }
+
+  private DashboardSummaryResponse.OrderItem toOrderItem(OrderSummaryPayload order, OrderDetailPayload detail) {
+    return new DashboardSummaryResponse.OrderItem(
+        order.orderId(),
+        order.supplierId(),
+        order.status(),
+        order.orderedAt(),
+        detail == null ? null : detail.totalLotCount()
+    );
   }
 
   private DashboardSummaryResponse.StockAlert toStockAlert(InventoryBalancePayload balance) {

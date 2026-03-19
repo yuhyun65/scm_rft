@@ -4561,3 +4561,46 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - 좌측 영역은 `Mate-SCM` 단일 브랜드와 메뉴 링크만 남는 간결한 구조로 정리됐다.
   - 발주자 시연 화면에서 메뉴 가독성이 이전보다 높아졌다.
+
+## Q240. 사이드바 상단 문구 제거와 메뉴 글자 크기 축소 (2026-03-19)
+- 요청:
+  - 좌측 사이드바 상단 문구를 삭제하고, 남은 링크 메뉴의 글자 크기를 `13pt`로 축소
+- 수행:
+  1. `frontend/apps/web-portal/src/components/Sidebar.tsx`에서 상단 `Mate-SCM` 로고 블록을 제거했다.
+  2. `frontend/apps/web-portal/src/styles.css`에서 사이드바 상단 여백을 다시 맞추고, `.sidebar-item` 글자 크기를 `13pt`로 조정했다.
+- 결과:
+  - 좌측 영역에는 메뉴 링크만 남고, 상단 텍스트 문구는 표시되지 않는다.
+  - 메뉴 링크는 이전 `15pt`보다 작은 `13pt`로 다시 정렬됐다.
+
+## Q241. 사이드바 상단 브랜딩 재복원 (2026-03-19)
+- 요청:
+  - 좌측 상단 브랜딩 `Mate-SCM`은 다시 표시하고, 메뉴 글자 크기 `13pt` 조정은 유지
+- 수행:
+  1. `frontend/apps/web-portal/src/components/Sidebar.tsx`에 상단 `Mate-SCM` 로고 블록을 다시 추가했다.
+  2. 메뉴 링크 글자 크기와 여백 조정은 그대로 유지했다.
+- 결과:
+  - 좌측 상단에는 `Mate-SCM` 브랜딩이 다시 보이고, 메뉴 링크는 `13pt` 기준을 유지한다.
+
+## Q242. 대시보드 최근 활동 상세 팝업 추가 (2026-03-19)
+- 요청:
+  - 대시보드 오른쪽 `최근 활동` 목록 항목을 클릭하면 상세 내용을 팝업으로 볼 수 있게 수정
+- 수행:
+  1. `frontend/apps/web-portal/src/pages/DashboardPage.tsx`에서 최근 활동 항목을 클릭/키보드 선택 가능한 요소로 바꾸고, 선택한 활동을 상태로 관리하도록 수정했다.
+  2. 같은 파일에 `최근 활동 상세` 모달을 추가해 제목, 발생 시각, 상태 톤, 상세 내용을 카드 형태로 노출하도록 구현했다.
+  3. `frontend/apps/web-portal/src/styles.css`에 클릭 가능한 타임라인 행 스타일과 모달 백드롭/카드 스타일을 추가했다.
+- 결과:
+  - 최근 활동 목록은 읽기 전용 텍스트가 아니라 상세 확인이 가능한 인터랙션으로 바뀌었다.
+  - 사용자는 대시보드 화면을 벗어나지 않고 활동 상세를 즉시 확인할 수 있다.
+
+## Q243. 대시보드 KPI 숫자 클릭 drill-down 팝업 추가 (2026-03-19)
+- 요청:
+  - 대시보드 KPI 숫자(`진행 중 주문`, `검토 대기 LOT`, `이번 주 완료`, `재고 경고 품목`)를 클릭하면 해당 건의 목록을 팝업으로 볼 수 있게 수정
+- 수행:
+  1. `services/gateway/.../dashboard/DashboardSummaryResponse.java`에 drill-down 목록 구조를 추가했다.
+  2. `services/gateway/.../dashboard/DashboardSummaryService.java`에서 진행 중 주문, LOT 연결 주문, 금주 완료 주문, 재고 경고 품목 전체 목록을 함께 집계하도록 확장했다.
+  3. `frontend/packages/api-client/src/index.ts`에 drill-down 응답 타입을 추가했다.
+  4. `frontend/apps/web-portal/src/pages/DashboardPage.tsx`에서 KPI 숫자를 클릭 가능한 버튼으로 바꾸고, 항목별 목록을 보여주는 모달을 추가했다.
+  5. `frontend/apps/web-portal/src/styles.css`에 KPI 클릭 버튼 스타일을 추가했다.
+- 결과:
+  - KPI 숫자는 이제 단순 집계 표시가 아니라 목록 drill-down 진입점이 된다.
+  - 재고 경고 수는 상단 카드 미리보기 3건과 별개로 전체 경고 목록을 팝업에서 확인할 수 있다.

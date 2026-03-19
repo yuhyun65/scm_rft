@@ -9,7 +9,8 @@ public record DashboardSummaryResponse(
     Kpis kpis,
     WeeklyOrders weeklyOrders,
     List<Activity> recentActivities,
-    List<StockAlert> stockAlerts
+    List<StockAlert> stockAlerts,
+    DrillDowns drillDowns
 ) {
   public record Kpis(
       long activeOrders,
@@ -51,6 +52,23 @@ public record DashboardSummaryResponse(
       long current,
       long safety,
       String level
+  ) {
+  }
+
+  public record DrillDowns(
+      List<OrderItem> activeOrders,
+      List<OrderItem> pendingLots,
+      List<OrderItem> completedOrders,
+      List<StockAlert> stockAlerts
+  ) {
+  }
+
+  public record OrderItem(
+      String orderId,
+      String supplierId,
+      String status,
+      Instant orderedAt,
+      Integer totalLotCount
   ) {
   }
 }

@@ -35,12 +35,12 @@ a{text-decoration:none;color:inherit}
 .header-spacer{flex:1}
 .user-info{display:flex;align-items:center;gap:8px;font-size:12px}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--color-primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-.sidebar{width:var(--sidebar-width);height:100vh;flex-shrink:0;background:#fff;border-right:1px solid var(--color-gray-200);overflow-y:auto;padding-top:12px;position:fixed;top:0;left:0;z-index:200}
+.sidebar{width:var(--sidebar-width);height:100vh;flex-shrink:0;background:#fff;border-right:1px solid var(--color-gray-200);overflow-y:auto;padding-top:16px;position:fixed;top:0;left:0;z-index:200}
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding:14px 16px 16px;border-bottom:1px solid var(--color-gray-100);margin-bottom:8px}
 .sidebar-logo .logo-text{font-size:20pt;font-weight:700;color:var(--color-primary);line-height:1.1}
 .sidebar-logo .logo-sub{font-size:10px;color:var(--color-gray-400)}
 .sidebar-section{padding:8px 16px 3px;font-size:10px;font-weight:700;color:var(--color-gray-400);letter-spacing:.6px;text-transform:uppercase}
-.sidebar-item{display:flex;align-items:center;gap:9px;padding:10px 16px;cursor:pointer;color:var(--color-gray-700);font-size:15pt;border-left:3px solid transparent;transition:background .12s,color .12s;user-select:none}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;color:var(--color-gray-700);font-size:13pt;border-left:3px solid transparent;transition:background .12s,color .12s;user-select:none}
 .sidebar-item:hover{background:var(--color-gray-50)}
 .sidebar-item.active{background:#eff6ff;color:var(--color-primary);border-left-color:var(--color-primary);font-weight:600}
 .sidebar-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
@@ -64,6 +64,10 @@ a{text-decoration:none;color:inherit}
 .kpi-card.danger{border-left-color:var(--color-danger)}
 .kpi-label{font-size:11px;color:var(--color-gray-500);margin-bottom:6px}
 .kpi-value{font-size:26px;font-weight:700;color:var(--color-gray-900);line-height:1}
+.kpi-value-button{appearance:none;background:none;border:none;padding:0;font:inherit;font-size:26px;font-weight:700;line-height:1;color:var(--color-gray-900);cursor:pointer}
+.kpi-value-button:hover:not(:disabled){color:var(--color-primary)}
+.kpi-value-button:focus{outline:2px solid #bfdbfe;outline-offset:2px;border-radius:4px}
+.kpi-value-button:disabled{cursor:default;color:var(--color-gray-900)}
 .kpi-sub{font-size:11px;color:var(--color-gray-400);margin-top:5px}
 .kpi-change{font-size:11px;font-weight:600}
 .kpi-change.up{color:var(--color-success)}
@@ -123,12 +127,17 @@ textarea{resize:vertical;min-height:80px}
 .tl-item{display:flex;gap:12px;padding:8px 0;position:relative}
 .tl-item::before{content:'';position:absolute;left:13px;top:28px;bottom:-8px;width:2px;background:var(--color-gray-200)}
 .tl-item:last-child::before{display:none}
+.tl-item-clickable{cursor:pointer;border-radius:6px;padding-left:4px;padding-right:4px}
+.tl-item-clickable:hover{background:var(--color-gray-50)}
+.tl-item-clickable:focus{outline:2px solid #bfdbfe;outline-offset:2px}
 .tl-dot{width:28px;height:28px;border-radius:50%;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0}
 .tl-dot.warn{background:var(--color-warning)}
 .tl-dot.success{background:var(--color-success)}
 .tl-dot.gray{background:var(--color-gray-300)}
 .tl-title{font-size:12.5px;font-weight:600;color:var(--color-gray-800)}
 .tl-time{font-size:11px;color:var(--color-gray-400);margin-top:2px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:400;padding:20px}
+.modal-card{width:min(560px,100%);background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden}
 .detail-row{display:flex;padding:8px 0;border-bottom:1px solid var(--color-gray-100);font-size:12.5px}
 .detail-row:last-child{border-bottom:none}
 .detail-label{width:120px;font-weight:600;color:var(--color-gray-500);flex-shrink:0}

@@ -257,6 +257,21 @@ export type DashboardStockAlert = {
   level: string;
 };
 
+export type DashboardOrderItem = {
+  orderId: string;
+  supplierId: string;
+  status: string;
+  orderedAt: string;
+  totalLotCount?: number | null;
+};
+
+export type DashboardDrillDowns = {
+  activeOrders: DashboardOrderItem[];
+  pendingLots: DashboardOrderItem[];
+  completedOrders: DashboardOrderItem[];
+  stockAlerts: DashboardStockAlert[];
+};
+
 export type DashboardSummaryResponse = {
   businessDate: string;
   generatedAt: string;
@@ -264,6 +279,7 @@ export type DashboardSummaryResponse = {
   weeklyOrders: DashboardWeeklyOrders;
   recentActivities: DashboardActivity[];
   stockAlerts: DashboardStockAlert[];
+  drillDowns: DashboardDrillDowns;
 };
 
 export type OrderSummary = {
