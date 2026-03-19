@@ -4526,3 +4526,13 @@ unbooks/evidence/CUTOVER-ENTRY-CHECK-20260316-161601/production-cutover-entry-ch
 - 결과:
   - local production-like demo 환경은 현재 발주자 시연 가능한 상태로 재정렬됐다.
   - 남아 있는 이슈는 launcher false timeout/hang이 아니라, 긴 bootstrap/간헐적 `504`/반복 실행 시 `409`를 흡수하도록 launcher와 smoke 스크립트를 hardening해야 했던 문제였다.
+
+## Q237. 좌측 메뉴 라벨 단순화 (2026-03-19)
+- 요청:
+  - 좌측 메뉴가 `홈 대시보드`, `재고 재고현황`, `거래처 거래관리`처럼 중복되어 보이므로 메뉴명을 단일 라벨로 정리
+- 수행:
+  1. `frontend/apps/web-portal/src/components/Sidebar.tsx`에서 텍스트 아이콘을 제거했다.
+  2. 요청한 항목 라벨을 `대시보드`, `재고현황`, `거래관리`, `품질문서`, `게시판`, `보고서 생성`으로 정리했다.
+  3. 주문 메뉴는 동일한 방식으로 아이콘만 제거하고 `주문 관리` 라벨만 남겼다.
+- 결과:
+  - 좌측 메뉴는 이제 아이콘 텍스트 없이 단일 메뉴명만 표시된다.

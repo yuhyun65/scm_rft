@@ -2,7 +2,7 @@
 import clsx from 'clsx';
 
 interface NavItem {
-  icon: string;
+  icon?: string;
   label: string;
   path: string;
   badge?: number;
@@ -11,30 +11,30 @@ interface NavItem {
 const NAV: { section: string; items: NavItem[] }[] = [
   {
     section: '메인',
-    items: [{ icon: '홈', label: '대시보드', path: '/dashboard' }],
+    items: [{ label: '대시보드', path: '/dashboard' }],
   },
   {
     section: '주문/생산',
-    items: [{ icon: '주문', label: '주문 관리', path: '/orders' }],
+    items: [{ label: '주문 관리', path: '/orders' }],
   },
   {
     section: '재고/물류',
-    items: [{ icon: '재고', label: '재고 현황', path: '/inventory' }],
+    items: [{ label: '재고현황', path: '/inventory' }],
   },
   {
     section: '거래처/인원',
-    items: [{ icon: '거래처', label: '거래처 관리', path: '/members' }],
+    items: [{ label: '거래관리', path: '/members' }],
   },
   {
     section: '품질/문서',
     items: [
-      { icon: '품질', label: '품질 문서', path: '/quality-docs', badge: 3 },
-      { icon: '게시', label: '게시판', path: '/board' },
+      { label: '품질문서', path: '/quality-docs', badge: 3 },
+      { label: '게시판', path: '/board' },
     ],
   },
   {
     section: '보고서',
-    items: [{ icon: '보고', label: '보고서 생성', path: '/reports' }],
+    items: [{ label: '보고서 생성', path: '/reports' }],
   },
 ];
 
@@ -59,7 +59,7 @@ export default function Sidebar() {
               className={clsx('sidebar-item', { active: pathname.startsWith(item.path) })}
               onClick={() => navigate(item.path)}
             >
-              <span className="sidebar-icon">{item.icon}</span>
+              {item.icon && <span className="sidebar-icon">{item.icon}</span>}
               {item.label}
               {item.badge !== undefined && <span className="sidebar-badge">{item.badge}</span>}
             </div>
