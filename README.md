@@ -1,4 +1,4 @@
-# 한일정밀-legacy
+# SCM-legacy
 
 
 
