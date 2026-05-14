@@ -39,7 +39,7 @@ jobs:
       - name: Configure Gradle distribution mirror
         shell: pwsh
         run: |
-          $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
+          $fallback = "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
           $content = Get-Content $wrapperFile -Raw
@@ -68,7 +68,7 @@ jobs:
       - name: Configure Gradle distribution mirror
         shell: pwsh
         run: |
-          $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
+          $fallback = "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
           $content = Get-Content $wrapperFile -Raw
@@ -104,7 +104,7 @@ jobs:
       - name: Configure Gradle distribution mirror
         shell: pwsh
         run: |
-          $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
+          $fallback = "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
           $content = Get-Content $wrapperFile -Raw
@@ -152,7 +152,7 @@ jobs:
         if: ${{ hashFiles('services/**/*.java', 'services/**/*.js', 'services/**/*.ts') != '' }}
         shell: pwsh
         run: |
-          $fallback = "https://github.com/gradle/gradle-distributions/releases/download/v8.10.2/gradle-8.10.2-bin.zip"
+          $fallback = "https://services.gradle.org/distributions/gradle-8.10.2-bin.zip"
           $target = if ([string]::IsNullOrWhiteSpace("${env:SCM_GRADLE_DIST_URL}")) { $fallback } else { "${env:SCM_GRADLE_DIST_URL}" }
           $wrapperFile = "gradle/wrapper/gradle-wrapper.properties"
           $content = Get-Content $wrapperFile -Raw
